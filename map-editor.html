@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>R-32 地图编辑器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:#0d1219;display:flex;flex-direction:column;font-family:'Segoe UI',sans-serif;padding:6px;user-select:none}
+h2{color:#7ec8e3;margin:2px 0;font-size:15px;font-weight:400;text-align:center;flex-shrink:0}
+.toolbar{display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap;align-items:center;justify-content:center;flex-shrink:0}
+.toolbar button{padding:5px 12px;border:1px solid #0f3460;border-radius:4px;background:#16213e;color:#ccc;cursor:pointer;font-size:11px;transition:all 0.15s}
+.toolbar button:hover{background:#1a3050;color:#fff}
+.toolbar button.active{background:#0f3460;color:#7ec8e3;border-color:#7ec8e3}
+.toolbar button.danger{background:#4a1525;border-color:#8b2040;color:#e84a60}
+.toolbar span{color:#888;font-size:10px;margin-left:4px}
+.main{flex:1;display:flex;gap:8px;min-height:0;align-items:stretch}
+.canvas-wrap{flex:1;display:flex;justify-content:center;align-items:center;min-width:0;overflow:hidden}
+canvas{display:block;border:2px solid #0f3460;border-radius:8px;cursor:crosshair;flex-shrink:0}
+.inspector{background:#16213e;border:1px solid #0f3460;border-radius:8px;padding:10px;width:200px;font-size:11px;color:#ccc;flex-shrink:0;overflow-y:auto}
+.inspector h3{color:#7ec8e3;margin-bottom:8px;font-size:13px;font-weight:400}
+.inspector label{display:block;color:#888;margin-top:6px;margin-bottom:2px}
+.inspector input{width:100%;padding:4px 6px;background:#0d1b2a;border:1px solid #2a3a4a;border-radius:3px;color:#0f8;font-size:11px;font-family:monospace;outline:none}
+.inspector input:focus{border-color:#7ec8e3}
+.inspector .coords{color:#888;font-size:10px;margin-top:8px;line-height:1.5}
+.inspector .coords span{color:#7ec8e3}
+.inspector .dim{color:#888;font-size:10px;margin-top:4px}
+.inspector .dim b{color:#0f8}
+.inspector .none{color:#555;font-size:10px;text-align:center;padding:12px 0}
+.legend{display:flex;gap:12px;margin-top:3px;color:#888;font-size:10px;flex-wrap:wrap;align-items:center;justify-content:center;flex-shrink:0}
+.legend span{display:flex;align-items:center;gap:3px}
+.legend .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+#exportPanel{display:none;position:fixed;bottom:10px;left:50%;transform:translateX(-50%);z-index:100}
+#exportPanel textarea{width:800px;height:200px;background:#0d1b2a;color:#0f8;border:1px solid #0f3460;border-radius:5px;font-size:10px;font-family:monospace;padding:6px;resize:none}
+</style>
+</head>
+<body>
+<h2>R-32 地图编辑器</h2>
+
+<div class="toolbar">
+  <button id="btnWall" class="active">■ 墙体</button>
+  <button id="btnSelect">☝ 选择</button>
+  <button id="btnSpawn">◆ 出生点</button>
+  <button id="btnReactor">◉ 反应炉</button>
+  <button id="btnErase">✕ 擦除</button>
+  <span>|</span>
+  <button id="btnClear" class="danger">清空</button>
+  <button id="btnExport">导出</button>
+  <button id="btnLoad">预设</button>
+  <button id="btnUndo">撤销</button>
+  <span id="status">墙:0 | 出生点:0</span>
+</div>
+
+<div class="main">
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="map"></canvas>
+  </div>
+
+  <div class="inspector" id="inspector">
+    <h3 id="inspTitle">墙体属性</h3>
+    <div id="inspNone" class="none">点击"选择"模式<br>再点墙体查看</div>
+    <div id="inspEdit" style="display:none">
+      <label>X (左)</label>
+      <input id="inpX" type="number" step="1">
+      <label>Y (上)</label>
+      <input id="inpY" type="number" step="1">
+      <label>宽度</label>
+      <input id="inpW" type="number" step="1" min="20">
+      <label>高度</label>
+      <input id="inpH" type="number" step="1" min="20">
+      <div class="coords">
+        四角坐标:<br>
+        ↖ <span id="cTL"></span><br>
+        ↗ <span id="cTR"></span><br>
+        ↙ <span id="cBL"></span><br>
+        ↘ <span id="cBR"></span>
+      </div>
+      <div class="dim">面积: <b id="cArea"></b></div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <span><span class="dot" style="background:#e94560"></span> 出生点</span>
+  <span><span class="dot" style="background:#00d2ff"></span> 反应炉</span>
+  <span style="color:#3a4a5a">■ 墙体</span>
+  <span style="color:#7ec8e3">▣ 选中</span>
+</div>
+
+<div id="exportPanel"><textarea id="jsonOut" readonly></textarea></div>
+
+<script>
+const canvas=document.getElementById('map'),ctx=canvas.getContext('2d');
+const W=7356,H=4144;
+canvas.width=W; canvas.height=H;
+let walls=[],spawns=[],undoStack=[];
+let reactor={x:3600,y:2600};
+let mode='wall';
+
+// ─── Scale canvas CSS to fit viewport ───
+function fitCanvas(){
+  const wrap=document.getElementById('canvasWrap');
+  const mw=wrap.clientWidth, mh=wrap.clientHeight;
+  const s=Math.min(mw/W, mh/H);
+  canvas.style.width=Math.floor(W*s)+'px';
+  canvas.style.height=Math.floor(H*s)+'px';
+}
+window.addEventListener('resize',fitCanvas);
+
+let selectedWall=-1;
+let drawing=false,drawStart=null,drawCurrent=null;
+let dragging=null,dragIdx=-1;
+let mx=0,my=0;
+
+const presets={
+  rings:{
+    walls:[
+      [0,0,7200,80],[0,0,80,5200],[7120,0,80,5200],[0,5120,7200,80],
+      [1200,1200,4800,80],[1200,1200,80,2800],[5880,1200,80,2800],
+      [1200,3920,1800,80],[3800,3920,2200,80],
+      [2000,1600,80,1200],[3000,1400,80,1400],
+      [4100,1600,80,1200],[5100,1600,80,1200],
+      [3400,2200,600,80],[3400,2200,80,700],[3400,2920,600,80],
+    ],
+    spawns:[[400,200],[3600,200],[6800,200],[400,5000],[3600,5000],[6800,5000]],
+    reactor:{x:3600,y:2600}
+  },
+  empty:{walls:[],spawns:[],reactor:{x:3600,y:2600}},
+  map:{
+    walls:[
+      [0,0,W,80],[0,0,80,H],[W-80,0,80,H],[0,H-80,W,80],
+      [6296,96,288,648],[4528,100,548,492],
+      [80,284,1492,208],[2304,492,342,220],
+      [3484,592,1592,496],[5380,604,592,644],
+      [1184,712,1462,276],[80,752,472,476],
+      [2304,988,342,1964],[3484,1088,592,820],
+      [6338,1176,938,608],[80,1228,1560,260],
+      [80,1488,472,504],[5442,1784,1834,336],
+      [1358,2044,500,1228],[5442,2120,192,1156],
+      [4242,2164,1200,364],[3206,2192,712,312],
+      [4990,2800,200,1264],[3684,2916,844,812],
+      [2304,2952,868,340],[1360,3272,496,792],
+      [1904,80,748,412],[524,3305,832,168],
+      [412,2237,672,248],[412,2773,672,248],
+      [5952,2437,804,188],[5634,3005,920,270]
+    ],
+    spawns:[[168,176],[2200,596],[180,3972],[6316,2277],[1240,3729]],
+    reactor:{x:6984,y:304}
+  }
+};
+
+// Helpers
+// Mouse→world: canvas is 1:1, just need to account for CSS scaling
+function canvasPos(e){
+  const r=canvas.getBoundingClientRect();
+  return[Math.round((e.clientX-r.left)*W/r.width),Math.round((e.clientY-r.top)*H/r.height)];
+}
+const s2w=canvasPos;
+function inRect(px,py,rx,ry,rw,rh){return px>=rx&&px<=rx+rw&&py>=ry&&py<=ry+rh}
+
+function saveState(){
+  undoStack.push(JSON.parse(JSON.stringify({walls,spawns,reactor})));
+  if(undoStack.length>50)undoStack.shift();
+}
+
+// Inspector update
+function showInspector(idx){
+  selectedWall=idx;
+  document.getElementById('inspNone').style.display='none';
+  document.getElementById('inspEdit').style.display='block';
+  document.getElementById('inspTitle').textContent=`墙体 #${idx+1}`;
+  const w=walls[idx];
+  document.getElementById('inpX').value=w[0];
+  document.getElementById('inpY').value=w[1];
+  document.getElementById('inpW').value=w[2];
+  document.getElementById('inpH').value=w[3];
+  updateCoords();
+}
+
+function hideInspector(){
+  selectedWall=-1;
+  document.getElementById('inspNone').style.display='block';
+  document.getElementById('inspEdit').style.display='none';
+  document.getElementById('inspTitle').textContent='墙体属性';
+}
+
+function updateCoords(){
+  if(selectedWall<0)return;
+  const w=walls[selectedWall];
+  const x=parseInt(document.getElementById('inpX').value)||w[0];
+  const y=parseInt(document.getElementById('inpY').value)||w[1];
+  const ww=parseInt(document.getElementById('inpW').value)||w[2];
+  const wh=parseInt(document.getElementById('inpH').value)||w[3];
+  document.getElementById('cTL').textContent=`(${x}, ${y})`;
+  document.getElementById('cTR').textContent=`(${x+ww}, ${y})`;
+  document.getElementById('cBL').textContent=`(${x}, ${y+wh})`;
+  document.getElementById('cBR').textContent=`(${x+ww}, ${y+wh})`;
+  document.getElementById('cArea').textContent=`${ww*wh} 单位²`;
+}
+
+function applyInspector(){
+  if(selectedWall<0)return;
+  const x=parseInt(document.getElementById('inpX').value);
+  const y=parseInt(document.getElementById('inpY').value);
+  const w=parseInt(document.getElementById('inpW').value);
+  const h=parseInt(document.getElementById('inpH').value);
+  if(isNaN(x)||isNaN(y)||isNaN(w)||isNaN(h)||w<20||h<20)return;
+  walls[selectedWall]=[x,y,w,h];
+  updateCoords();draw();
+}
+
+['inpX','inpY','inpW','inpH'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{updateCoords();applyInspector()});
+});
+
+// Rendering (1:1, no scale)
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#1a2536';ctx.fillRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle='#ffffff06';ctx.lineWidth=0.5;
+  for(let x=0;x<=W;x+=200){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  for(let y=0;y<=H;y+=200){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+
+  // Walls
+  walls.forEach(([x,y,w,h],i)=>{
+    const sel=i===selectedWall;
+    ctx.fillStyle=sel?'#5a6a7a':'#3a4a5a';
+    ctx.fillRect(x,y,w,h);
+    ctx.strokeStyle=sel?'#7ec8e3':'#2a3a4a';
+    ctx.lineWidth=sel?2:1;
+    ctx.strokeRect(x,y,w,h);
+    if(sel){
+      [[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(([px,py])=>{
+        ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);
+        ctx.fillStyle='#7ec8e3';ctx.fill();
+      });
+    }
+  });
+
+  // Drawing preview
+  if(drawing&&drawStart&&drawCurrent&&mode==='wall'){
+    const[sx,sy]=drawStart,[cx,cy]=drawCurrent;
+    const x=Math.min(sx,cx),y=Math.min(sy,cy),w=Math.abs(cx-sx),h=Math.abs(cy-sy);
+    ctx.fillStyle='#4a6fa566';ctx.fillRect(x,y,w,h);
+    ctx.strokeStyle='#7ec8e3';ctx.lineWidth=2;ctx.setLineDash([6,4]);
+    ctx.strokeRect(x,y,w,h);ctx.setLineDash([]);
+  }
+
+  // Spawns
+  spawns.forEach(([sx,sy],i)=>{
+    ctx.beginPath();ctx.arc(sx,sy,20,0,Math.PI*2);
+    ctx.fillStyle=i===dragIdx&&dragging==='spawn'?'#ff6b6b':'#e94560';ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 10px "Segoe UI"';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(i+1,sx,sy);
+  });
+
+  // Reactor
+  const rx=reactor.x,ry=reactor.y;
+  ctx.beginPath();ctx.arc(rx,ry,26,0,Math.PI*2);
+  ctx.fillStyle=dragging==='reactor'?'#4df0ff':'#00d2ff';ctx.fill();
+  ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.font='14px "Segoe UI"';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('⚡',rx,ry);
+
+  updateStatus();
+}
+
+function updateStatus(){
+  document.getElementById('status').textContent=
+    `墙:${walls.length} | 出生点:${spawns.length} | 模式:${modeLabels[mode]}${selectedWall>=0?' | 选中:#'+(selectedWall+1):''} | ${W}x${H}`;
+}
+const modeLabels={wall:'墙体',select:'选择',spawn:'出生点',reactor:'反应炉',erase:'擦除'};
+
+// Mouse events
+canvas.addEventListener('mousemove',e=>{
+  const[wx,wy]=canvasPos(e);
+  mx=wx;my=wy;
+  if(dragging){
+    if(dragging==='reactor'){reactor.x=wx;reactor.y=wy}
+    if(dragging==='spawn'&&dragIdx>=0){spawns[dragIdx]=[wx,wy]}
+    draw();return;
+  }
+  if(drawing){drawCurrent=[wx,wy];draw();}
+});
+
+canvas.addEventListener('mousedown',e=>{
+  if(e.button!==0)return;
+  const[wx,wy]=canvasPos(e);
+
+  if(mode==='reactor'){
+    if(Math.hypot(wx-reactor.x,wy-reactor.y)<120){saveState();dragging='reactor';draw();}
+    return;
+  }
+  if(mode==='spawn'){
+    for(let i=0;i<spawns.length;i++){
+      if(Math.hypot(wx-spawns[i][0],wy-spawns[i][1])<60){saveState();dragIdx=i;dragging='spawn';draw();return;}
+    }
+    saveState();spawns.push([wx,wy]);draw();return;
+  }
+  if(mode==='erase'){
+    for(let i=spawns.length-1;i>=0;i--){
+      if(Math.hypot(wx-spawns[i][0],wy-spawns[i][1])<40){saveState();spawns.splice(i,1);if(selectedWall>=i)hideInspector();draw();return;}
+    }
+    const wi=walls.findIndex(([x,y,w,h])=>inRect(wx,wy,x,y,w,h));
+    if(wi>=0){saveState();walls.splice(wi,1);if(selectedWall===wi)hideInspector();else if(selectedWall>wi)selectedWall--;draw();}
+    return;
+  }
+  if(mode==='select'){
+    const wi=walls.findIndex(([x,y,w,h])=>inRect(wx,wy,x,y,w,h));
+    if(wi>=0){showInspector(wi);draw();}
+    else{hideInspector();draw();}
+    return;
+  }
+  if(mode==='wall'){
+    drawing=true;drawStart=[wx,wy];drawCurrent=[wx,wy];draw();
+  }
+});
+
+canvas.addEventListener('mouseup',e=>{
+  if(dragging){dragging=null;dragIdx=-1;draw();return;}
+  if(!drawing||!drawStart||!drawCurrent)return;
+  const[sx,sy]=drawStart,[cx,cy]=drawCurrent;
+  const x=Math.min(sx,cx),y=Math.min(sy,cy);
+  const w=Math.abs(cx-sx),h=Math.abs(cy-sy);
+  if(w>20&&h>20){saveState();walls.push([x,y,w,h]);showInspector(walls.length-1)}
+  drawing=false;drawStart=null;drawCurrent=null;draw();
+});
+
+canvas.addEventListener('contextmenu',e=>{
+  e.preventDefault();
+  const[wx,wy]=canvasPos(e);
+  for(let i=spawns.length-1;i>=0;i--){
+    if(Math.hypot(wx-spawns[i][0],wy-spawns[i][1])<40){saveState();spawns.splice(i,1);draw();return;}
+  }
+  const wi=walls.findIndex(([x,y,w,h])=>inRect(wx,wy,x,y,w,h));
+  if(wi>=0){saveState();walls.splice(wi,1);if(selectedWall===wi)hideInspector();else if(selectedWall>wi)selectedWall--;draw();}
+});
+
+// Buttons
+function setActive(id){
+  ['btnWall','btnSelect','btnSpawn','btnReactor','btnErase'].forEach(b=>document.getElementById(b).classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+document.getElementById('btnWall').onclick=()=>{mode='wall';setActive('btnWall');drawing=false;drawStart=null;drawCurrent=null};
+document.getElementById('btnSelect').onclick=()=>{mode='select';setActive('btnSelect');drawing=false;drawStart=null;drawCurrent=null};
+document.getElementById('btnSpawn').onclick=()=>{mode='spawn';setActive('btnSpawn');drawing=false;drawStart=null;drawCurrent=null};
+document.getElementById('btnReactor').onclick=()=>{mode='reactor';setActive('btnReactor');drawing=false;drawStart=null;drawCurrent=null};
+document.getElementById('btnErase').onclick=()=>{mode='erase';setActive('btnErase');drawing=false;drawStart=null;drawCurrent=null};
+
+document.getElementById('btnClear').onclick=()=>{
+  if(!confirm('确定清空整个地图？'))return;
+  saveState();walls=[];spawns=[];reactor={x:3600,y:2600};hideInspector();draw();
+};
+
+document.getElementById('btnUndo').onclick=()=>{
+  const snap=undoStack.pop();if(!snap)return;
+  walls=snap.walls;spawns=snap.spawns;reactor=snap.reactor;hideInspector();draw();
+};
+
+document.getElementById('btnExport').onclick=()=>{
+  const data={walls,spawns,reactor,worldSize:{w:W,h:H}};
+  localStorage.setItem('r32-map',JSON.stringify(data));
+  const p=document.getElementById('exportPanel');p.style.display='block';
+  document.getElementById('jsonOut').value=JSON.stringify(data,null,2);
+};
+
+document.getElementById('btnLoad').onclick=()=>{
+  const key=prompt('预设: rings / empty / map');
+  if(!key||!presets[key])return;
+  saveState();hideInspector();
+  walls=JSON.parse(JSON.stringify(presets[key].walls));
+  spawns=JSON.parse(JSON.stringify(presets[key].spawns));
+  reactor={...presets[key].reactor};
+  draw();
+};
+
+// Init
+saveState();
+walls=JSON.parse(JSON.stringify(presets['map'].walls));
+spawns=JSON.parse(JSON.stringify(presets['map'].spawns));
+reactor={...presets['map'].reactor};
+fitCanvas();
+draw();
+</script>
+</body>
+</html>
