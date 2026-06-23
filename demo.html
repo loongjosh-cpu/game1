@@ -27,10 +27,10 @@ canvas{display:block}
 #btnStart:hover{background:#1a4a7a}
 #btnStart:disabled{border-color:#2a3a4a;color:#555;cursor:not-allowed}
 #gamePage{display:none}
-#hud{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:8px;pointer-events:none}
-.hud-item{background:#16213edd;color:#7ec8e3;padding:4px 10px;border-radius:4px;font-size:11px;border:1px solid #0f3460;white-space:nowrap}
+#hud{position:fixed;top:10px;left:12px;right:282px;z-index:10;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}
+.hud-item{background:#101c2ae8;color:#7ec8e3;padding:5px 10px;border-radius:6px;font-size:11px;border:1px solid #214057;white-space:nowrap;box-shadow:0 0 10px #07111c55}
 .hud-item span{color:#fff}
-#buildPanel{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:20;display:none;gap:6px;overflow-x:auto;max-width:90vw;padding:0 8px;scrollbar-width:none}
+#buildPanel{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:20;display:none;gap:6px;overflow-x:auto;max-width:min(920px,92vw);padding:8px;border:1px solid #214057;border-radius:10px;background:#07111ccc;box-shadow:0 0 16px #07111c99;scrollbar-width:none}
 #buildPanel::-webkit-scrollbar{display:none}
 .build-btn{
   padding:6px 12px;
@@ -47,7 +47,7 @@ canvas{display:block}
   text-align:center;
 }
 .build-btn:hover{background:#1a3050;color:#fff}
-.build-btn.active{border-color:#7ec8e3;color:#7ec8e3;background:#0f3460}
+.build-btn.active{border-color:#7ec8e3;color:#dff7ff;background:#0f3460;box-shadow:0 0 10px #7ec8e344}
 .build-btn.cant{border-color:#4a1525;color:#884;opacity:0.6}
 #twPanel{
   position:fixed;
@@ -60,12 +60,16 @@ canvas{display:block}
   border:1px solid #0f3460;
   border-radius:8px;
   padding:11px;
-  width:235px;
+  width:260px;
   color:#ccc;
   font-size:10px;
   line-height:1.5;
+  box-shadow:0 0 16px #07111c88;
 }
-#twPanel h3{color:#7ec8e3;font-size:13px;margin-bottom:6px;font-weight:400}
+.twPanelHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+#twPanel h3{color:#7ec8e3;font-size:13px;font-weight:400}
+.panelClose{width:24px;height:24px;border:1px solid #29435a;border-radius:5px;background:#0d1826;color:#8196a8;cursor:pointer;font-family:monospace}
+.panelClose:hover{border-color:#7ec8e3;color:#dff7ff}
 .tw-section{border-top:1px solid #29435a;padding-top:5px;margin-top:5px}
 .tw-row{display:flex;justify-content:space-between;gap:8px}
 .tw-row .v{color:#fff;text-align:right}
@@ -124,6 +128,8 @@ canvas{display:block}
 #miniMapWrap{position:fixed;right:14px;top:54px;z-index:19;width:238px;padding:7px;border:1px solid #315878;border-radius:8px;background:#07111dcc;box-shadow:0 0 14px #17364a88;pointer-events:none}
 #miniMap{display:block;width:220px;height:140px;border:1px solid #1e4057;border-radius:4px;background:#07101a}
 .miniMapLabel{margin-top:4px;text-align:center;color:#7ec8e3;font-size:9px;letter-spacing:1px}
+#controlHints{position:fixed;left:12px;bottom:14px;z-index:18;max-width:min(460px,50vw);padding:7px 10px;border:1px solid #214057;border-radius:8px;background:#07111ccc;color:#8fa5b5;font-size:10px;line-height:1.5;pointer-events:none;box-shadow:0 0 12px #07111c88}
+#controlHints span{color:#dff7ff}
 #metaPage{display:none;z-index:130;background:#0d1219;padding:20px}
 .metaHeader{width:min(1050px,100%);display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 .metaHeader h2{color:#7ec8e3;font-weight:400}
@@ -160,6 +166,10 @@ canvas{display:block}
 .modeGrid{grid-template-columns:1fr}
 .metaHeader{align-items:flex-start}
 .homeTop{align-items:flex-start}
+#hud{right:12px}
+#miniMapWrap{width:178px;top:86px}
+#miniMap{width:160px;height:102px}
+#controlHints{display:none}
 }
 </style>
 </head>
@@ -254,9 +264,15 @@ canvas{display:block}
   <canvas id="miniMap" width="220" height="140"></canvas>
   <div class="miniMapLabel">TACTICAL MAP</div>
 </div>
+<div id="controlHints">
+  <span>右键</span>移动 · <span>B</span>建造 · <span>1-0</span>选塔 · <span>R</span>小反应炉 · <span>滚轮</span>切换 · <span>V/U</span>升级 · <span>X</span>出售 · <span>Esc/空格</span>暂停
+</div>
 <div id="buildPanel"></div>
 <div id="twPanel">
-  <h3 id="twName">-</h3>
+  <div class="twPanelHead">
+    <h3 id="twName">-</h3>
+    <button type="button" class="panelClose" id="btnCloseTw" title="关闭面板">×</button>
+  </div>
   <div id="twStats"></div>
   <div id="twUpgradePreview"></div>
   <button type="button" class="drone-energy on" id="btnDroneEnergy">自动补员耗能：允许</button>
@@ -1954,6 +1970,7 @@ function launch(sel,mode='endless1'){
       });
       document.getElementById('btnDroneEnergy').onclick=()=>this.toggleDroneEnergy();
       document.getElementById('btnSell').onclick=()=>this.sellTower();
+      document.getElementById('btnCloseTw').onclick=()=>this.clearSelectionAndBuildMode();
     }
 
     buildChoices(){return[...this.selTowers,SMALL_REACTOR]}
