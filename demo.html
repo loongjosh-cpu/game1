@@ -318,13 +318,13 @@ canvas{display:block}
           <div class="viewSettingRow">
             <span>操作模式</span>
             <div class="settingGroup">
-              <button type="button" class="settingBtn" id="btnViewLocal">局部指挥</button>
-              <button type="button" class="settingBtn" id="btnViewGlobal">全局战术</button>
+              <button type="button" class="settingBtn" id="btnViewLocal" data-view-camera="local">局部指挥</button>
+              <button type="button" class="settingBtn" id="btnViewGlobal" data-view-camera="global">全局战术</button>
             </div>
           </div>
           <div class="viewSettingRow">
             <span>小地图</span>
-            <button type="button" class="settingBtn" id="btnMiniMap">开启</button>
+            <button type="button" class="settingBtn" id="btnMiniMap" data-view-minimap="toggle">开启</button>
           </div>
         </div>
       </div>
@@ -413,13 +413,13 @@ canvas{display:block}
         <div class="viewSettingRow">
           <span>操作模式</span>
           <div class="settingGroup">
-            <button type="button" class="settingBtn" id="btnPauseViewLocal">局部指挥</button>
-            <button type="button" class="settingBtn" id="btnPauseViewGlobal">全局战术</button>
+            <button type="button" class="settingBtn" id="btnPauseViewLocal" data-view-camera="local">局部指挥</button>
+            <button type="button" class="settingBtn" id="btnPauseViewGlobal" data-view-camera="global">全局战术</button>
           </div>
         </div>
         <div class="viewSettingRow">
           <span>小地图</span>
-          <button type="button" class="settingBtn" id="btnPauseMiniMap">开启</button>
+          <button type="button" class="settingBtn" id="btnPauseMiniMap" data-view-minimap="toggle">开启</button>
         </div>
       </div>
     </div>
@@ -653,6 +653,7 @@ function setViewSettings(patch){
   metaSave.settings={...viewSettings(),...patch};
   saveMeta();
   syncViewSettingsUI();
+  syncHomeViewSummary();
   activeGameScene()?.applyViewSettings?.();
 }
 function activeGameScene(){
@@ -671,20 +672,21 @@ function setGameChromeVisible(visible){
   }
 }
 function bindViewSettingsUI(){
-  const bind=(id,patch)=>{
-    const el=document.getElementById(id);
-    if(!el)return;
-    el.addEventListener('click',e=>{
+  if(bindViewSettingsUI._bound)return;
+  bindViewSettingsUI._bound=true;
+  document.addEventListener('click',e=>{
+    const cameraBtn=e.target.closest('[data-view-camera]');
+    if(cameraBtn){
       e.preventDefault();
-      setViewSettings(patch());
-    });
-  };
-  bind('btnViewLocal',()=>({cameraMode:'local'}));
-  bind('btnViewGlobal',()=>({cameraMode:'global'}));
-  bind('btnPauseViewLocal',()=>({cameraMode:'local'}));
-  bind('btnPauseViewGlobal',()=>({cameraMode:'global'}));
-  bind('btnMiniMap',()=>({miniMap:!viewSettings().miniMap}));
-  bind('btnPauseMiniMap',()=>({miniMap:!viewSettings().miniMap}));
+      setViewSettings({cameraMode:cameraBtn.dataset.viewCamera});
+      return;
+    }
+    const miniMapBtn=e.target.closest('[data-view-minimap]');
+    if(miniMapBtn){
+      e.preventDefault();
+      setViewSettings({miniMap:!viewSettings().miniMap});
+    }
+  });
   syncViewSettingsUI();
 }
 function syncViewSettingsUI(){
@@ -706,6 +708,10 @@ function syncViewSettingsUI(){
     el.setAttribute('aria-pressed',s.miniMap?'true':'false');
     el.textContent=s.miniMap?'开启':'关闭';
   });
+}
+function syncHomeViewSummary(){
+  const s=viewSettings();
+  setText('homeViewMode',s.cameraMode==='local'?'局部指挥':'全局战术');
 }
 function hasMeta(id){return !!metaSave.nodes[id]}
 function metaEffects(){
@@ -901,7 +907,12 @@ function showHomePane(paneId='homeMainPane'){
   renderHome();
   refreshStartButton();
 }
-document.querySelectorAll('[data-home-pane]').forEach(btn=>btn.addEventListener('click',()=>showHomePane(btn.dataset.homePane)));
+document.addEventListener('click',e=>{
+  const paneBtn=e.target.closest('[data-home-pane]');
+  if(!paneBtn)return;
+  e.preventDefault();
+  showHomePane(paneBtn.dataset.homePane);
+});
 document.getElementById('btnMeta').onclick=showMetaPage;
 document.getElementById('btnMetaBack').onclick=showSelectPage;
 document.getElementById('btnStart').addEventListener('click',startSelectedMode);
