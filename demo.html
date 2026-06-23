@@ -106,13 +106,29 @@ canvas{display:block}
 .channelTrack{height:9px;border:1px solid #34566e;background:#08121c;border-radius:5px;overflow:hidden}
 .channelFill{height:100%;width:0;background:linear-gradient(90deg,#238ab1,#75e6ff)}
 .channelHint{margin-top:4px;color:#8299aa;text-align:center}
-.homeShell{width:min(1120px,100%);display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.85fr);gap:14px;align-items:start}
+.homeShell{width:min(980px,100%);display:block}
+.homePane{display:none;width:100%}
+.homePane.active{display:block}
 .homeHero,.homeSection{border:1px solid #214057;border-radius:12px;background:linear-gradient(180deg,#101c2ad8,#09121ed8);box-shadow:0 0 18px #07111c77}
-.homeHero{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px}
+.homeHero{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 20px;margin-bottom:14px}
+.homeHero.main{min-height:160px;align-items:flex-end;background:radial-gradient(circle at 15% 10%,#1c6b8870,transparent 34%),linear-gradient(180deg,#101c2ae6,#09121ee8)}
 .homeHero h1{margin:0 0 4px!important}
 .homeKicker{color:#75e6ff;font-size:10px;letter-spacing:2px;margin-bottom:4px}
 .homeIntro{max-width:680px;color:#8fa5b5;font-size:11px;line-height:1.55}
 .homeSection{padding:13px}
+.homeNavBar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.homeNavTitle h2{color:#dff7ff;font-size:17px;font-weight:400;margin-bottom:3px}
+.homeNavTitle p{color:#8196a8;font-size:10px;line-height:1.5}
+.homeSummaryGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px}
+.summaryCard{border:1px solid #214057;border-radius:9px;background:#0d1826cc;padding:10px 12px;min-height:64px}
+.summaryCard span{display:block;color:#70889b;font-size:9px;margin-bottom:6px}
+.summaryCard strong{display:block;color:#dff7ff;font-size:14px;font-weight:400}
+.mainMenuActions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.mainMenuBtn{border:1px solid #28506d;border-radius:12px;background:linear-gradient(180deg,#10243a,#0b1827);color:#a9bdc9;cursor:pointer;text-align:left;padding:15px 16px;font-family:monospace;min-height:86px;transition:border-color .15s,background .15s,transform .15s,box-shadow .15s}
+.mainMenuBtn:hover{border-color:#7ec8e3;background:linear-gradient(180deg,#15314b,#10243a);transform:translateY(-1px);box-shadow:0 0 16px #7ec8e329}
+.mainMenuBtn.primary{border-color:#7ec8e3;background:linear-gradient(180deg,#143e61,#10243a)}
+.mainMenuBtn strong{display:block;color:#7ec8e3;font-size:17px;font-weight:400;margin-bottom:7px}
+.mainMenuBtn span{display:block;font-size:10px;line-height:1.45;color:#8fa5b5}
 .sectionHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
 .sectionHead h2{color:#dff7ff;font-size:14px;font-weight:400}
 .sectionHead p{color:#8196a8;font-size:10px;line-height:1.5;margin-top:3px}
@@ -143,6 +159,7 @@ canvas{display:block}
 .loadoutHeader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
 .loadoutHeader .sub{margin-bottom:0!important}
 .loadoutCounter{color:#7ec8e3;border:1px solid #315878;background:#0d1826;border-radius:999px;padding:4px 10px;font-size:11px;white-space:nowrap}
+.homeStack{display:flex;flex-direction:column;gap:12px}
 .startDock{border-color:#315878;background:linear-gradient(180deg,#10243add,#081521dd)}
 .startDock .sub{margin:0 0 8px!important;line-height:1.5}
 #miniMapWrap{position:fixed;right:14px;top:54px;z-index:19;width:238px;padding:7px;border:1px solid #315878;border-radius:8px;background:#07111dcc;box-shadow:0 0 14px #17364a88;pointer-events:none;display:none}
@@ -182,8 +199,9 @@ canvas{display:block}
 .pauseSettings .viewSettingsRows{gap:7px}
 .pauseActions{display:flex;flex-direction:column;gap:9px}
 .pauseActions .danger{border-color:#9c3d50;color:#ff8ca1}
-@media(max-width:700px){.homeShell{grid-template-columns:1fr}
+@media(max-width:700px){.homeShell{width:100%}
 .homeHero{flex-direction:column;align-items:flex-start}
+.homeSummaryGrid,.mainMenuActions{grid-template-columns:1fr}
 .homeSide,.modeSection,.loadoutSection{grid-column:1;position:static}
 .sectionHead,.loadoutHeader{flex-direction:column;align-items:flex-start}
 .towerGrid{grid-template-columns:repeat(2,1fr)}
@@ -199,60 +217,101 @@ canvas{display:block}
 <body>
 <div class="page" id="selectPage">
 <div class="homeShell">
-  <div class="homeHero">
-    <div>
-      <div class="homeKicker">R-32 DEFENSE TERMINAL</div>
-      <h1>R-32 星际殖民塔防</h1>
-      <div class="homeIntro">先选择地图，再确认视角与出击塔组。局部指挥适合大地图奔波作战，全局战术适合快速总览。</div>
-    </div>
-    <div class="coreCount">星核 ◈ <span id="homeCoreCount">0</span></div>
-  </div>
-  <section class="homeSection modeSection">
-    <div class="sectionHead">
+  <section class="homePane active" id="homeMainPane">
+    <div class="homeHero main">
       <div>
-        <h2>1. 选择作战地图</h2>
-        <p>关卡模式固定奖励 1 星核；无尽模式每完整撑过 5 波结算 1 星核。</p>
+        <div class="homeKicker">R-32 DEFENSE TERMINAL</div>
+        <h1>R-32 星际殖民塔防</h1>
+        <div class="homeIntro">主界面只保留作战入口。地图、塔组、局外养成和视角设置都进入独立页面，避免把所有操作堆在同一屏。</div>
       </div>
+      <div class="coreCount">星核 ◈ <span id="homeCoreCount">0</span></div>
     </div>
-    <div class="modeGrid">
-      <div class="modeCard active" data-mode="endless1">
-        <strong>无尽模式一</strong>
-        大物理地图，8 入口长廊压向中央主反应炉；每完整撑过 5 波结算 1 星核。
-      </div>
-      <div class="modeCard" data-mode="level1">
-        <strong>关卡 01 · 边境蛇道</strong>
-        单入口长蛇形路线，适合验证基础塔位和反应炉距离规则。
-      </div>
-      <div class="modeCard" data-mode="level2">
-        <strong>关卡 02 · 双门汇流</strong>
-        上下双入口在中段汇流，考验减速、AOE 与汇流点防守。
-      </div>
-      <div class="modeCard" data-mode="level3">
-        <strong>关卡 03 · 环形矿区</strong>
-        双入口绕行中央封闭区，拉扯内外圈战线与经济扩张。
-      </div>
-      <div class="modeCard" data-mode="level4">
-        <strong>关卡 04 · 裂谷三线</strong>
-        三入口多线压迫，避免单一路线通吃全局。
-      </div>
-      <div class="modeCard" data-mode="level5">
-        <strong>关卡 05 · 远征试验</strong>
-        四入口大地图关卡，10 波固定强度，约等于无尽 30 波。
-      </div>
+    <div class="homeSummaryGrid">
+      <div class="summaryCard"><span>当前地图</span><strong id="homeCurrentMode">无尽模式一</strong></div>
+      <div class="summaryCard"><span>出击塔组</span><strong><span id="homeTowerCount">0</span>/10</strong></div>
+      <div class="summaryCard"><span>无尽最高</span><strong><span id="homeBestWave">0</span> 波</strong></div>
+      <div class="summaryCard"><span>视角模式</span><strong id="homeViewMode">局部指挥</strong></div>
+    </div>
+    <div class="mainMenuActions">
+      <button type="button" class="mainMenuBtn primary" data-home-pane="homeMapPane"><strong>开始作战</strong><span>选择关卡或无尽地图，并确认出击。</span></button>
+      <button type="button" class="mainMenuBtn" data-home-pane="homeLoadoutPane"><strong>塔组配置</strong><span>选择最多 10 种进入战斗的防御塔。</span></button>
+      <button type="button" class="mainMenuBtn" id="btnMeta"><strong>星核整备舱</strong><span>局外养成、永久升级与塔型档案。</span></button>
+      <button type="button" class="mainMenuBtn" data-home-pane="homeSettingsPane"><strong>设置</strong><span>切换局部/全局视角与小地图显示。</span></button>
     </div>
   </section>
-  <aside class="homeSide">
-    <section class="homeSection">
-      <div class="sectionHead">
-        <div>
-          <h2>2. 出击设置</h2>
-          <p>这些设置也可以在暂停菜单中修改。</p>
+
+  <section class="homePane" id="homeMapPane">
+    <div class="homeNavBar">
+      <div class="homeNavTitle">
+        <h2>选择作战地图</h2>
+        <p>关卡模式固定奖励 1 星核；无尽模式每完整撑过 5 波结算 1 星核。</p>
+      </div>
+      <button type="button" class="menuBtn" data-home-pane="homeMainPane">返回主界面</button>
+    </div>
+    <div class="homeStack">
+      <section class="homeSection">
+        <div class="modeGrid">
+          <div class="modeCard active" data-mode="endless1">
+            <strong>无尽模式一</strong>
+            大物理地图，8 入口长廊压向中央主反应炉；每完整撑过 5 波结算 1 星核。
+          </div>
+          <div class="modeCard" data-mode="level1">
+            <strong>关卡 01 · 边境蛇道</strong>
+            单入口长蛇形路线，适合验证基础塔位和反应炉距离规则。
+          </div>
+          <div class="modeCard" data-mode="level2">
+            <strong>关卡 02 · 双门汇流</strong>
+            上下双入口在中段汇流，考验减速、AOE 与汇流点防守。
+          </div>
+          <div class="modeCard" data-mode="level3">
+            <strong>关卡 03 · 环形矿区</strong>
+            双入口绕行中央封闭区，拉扯内外圈战线与经济扩张。
+          </div>
+          <div class="modeCard" data-mode="level4">
+            <strong>关卡 04 · 裂谷三线</strong>
+            三入口多线压迫，避免单一路线通吃全局。
+          </div>
+          <div class="modeCard" data-mode="level5">
+            <strong>关卡 05 · 远征试验</strong>
+            四入口大地图关卡，10 波固定强度，约等于无尽 30 波。
+          </div>
         </div>
+      </section>
+      <section class="homeSection startDock">
+        <div class="sectionHead">
+          <div>
+            <h2>确认出击</h2>
+            <p id="modeHint">选择无尽模式一出击塔（最多10个）</p>
+          </div>
+          <div class="loadoutCounter"><span id="selCount">0</span>/10</div>
+        </div>
+        <button type="button" id="btnStart" disabled>开始无尽模式一</button>
+      </section>
+    </div>
+  </section>
+
+  <section class="homePane" id="homeLoadoutPane">
+    <div class="homeNavBar">
+      <div class="homeNavTitle">
+        <h2>塔组配置</h2>
+        <p>最多携带 10 种塔，进入战斗后从下方建造栏部署。</p>
       </div>
-      <div class="menuRow">
-        <button type="button" class="menuBtn" id="btnMeta">进入星核整备舱</button>
-        <span class="sub">最高撑过 <span id="homeBestWave">0</span> 波</span>
+      <button type="button" class="menuBtn" data-home-pane="homeMainPane">返回主界面</button>
+    </div>
+    <section class="homeSection">
+      <div class="towerGrid" id="towerGrid"></div>
+    </section>
+  </section>
+
+  <section class="homePane" id="homeSettingsPane">
+    <div class="homeNavBar">
+      <div class="homeNavTitle">
+        <h2>设置</h2>
+        <p>这些设置也可以在暂停菜单中修改。</p>
       </div>
+      <button type="button" class="menuBtn" data-home-pane="homeMainPane">返回主界面</button>
+    </div>
+    <section class="homeSection">
       <div class="viewSettings">
         <div class="viewSettingsTitle">视角设置</div>
         <div class="viewSettingsRows">
@@ -270,25 +329,6 @@ canvas{display:block}
         </div>
       </div>
     </section>
-    <section class="homeSection startDock">
-      <div class="sectionHead">
-        <div>
-          <h2>确认出击</h2>
-          <p id="modeHint">选择无尽模式出击塔（最多10个）</p>
-        </div>
-      </div>
-      <button type="button" id="btnStart" disabled>开始无尽模式</button>
-    </section>
-  </aside>
-  <section class="homeSection loadoutSection">
-    <div class="loadoutHeader">
-      <div>
-        <h2>3. 选择出击塔组</h2>
-        <div class="sub">最多携带 10 种塔，进入战斗后从下方建造栏部署。</div>
-      </div>
-      <div class="loadoutCounter"><span id="selCount">0</span>/10</div>
-    </div>
-    <div class="towerGrid" id="towerGrid"></div>
   </section>
 </div>
 </div>
@@ -695,12 +735,17 @@ function metaEffects(){
 function renderHome(){
   setGameChromeVisible(false);
   syncViewSettingsUI();
+  const s=viewSettings();
   setText('homeCoreCount',metaSave.cores);
   setText('homeBestWave',metaSave.bestWave);
   setText('metaCoreCount',metaSave.cores);
+  setText('homeCurrentMode',modeLabel());
+  setText('homeTowerCount',selectedTowers.length);
+  setText('homeViewMode',s.cameraMode==='local'?'局部指挥':'全局战术');
 }
 function setText(id,value){
-  document.getElementById(id).textContent=value;
+  const el=document.getElementById(id);
+  if(el)el.textContent=value;
 }
 function nodeState(node){
   const owned=hasMeta(node.id);
@@ -798,14 +843,17 @@ function modeLabel(){return document.querySelector(`[data-mode="${selectedMode}"
 function refreshStartButton(){
   const label=modeLabel();
   setText('selCount',selectedTowers.length);
-  document.getElementById('btnStart').disabled=selectedTowers.length===0;
+  setText('homeCurrentMode',label);
+  setText('homeTowerCount',selectedTowers.length);
+  const startBtn=document.getElementById('btnStart');
+  if(startBtn)startBtn.disabled=selectedTowers.length===0;
   setText('modeHint','选择'+label+'出击塔（最多10个）');
   setText('btnStart',startButtonText(label));
 }
 function startButtonText(label){
   return selectedTowers.length
-    ?'开始'+label+'（已选'+selectedTowers.length+'个）'
-    :'开始'+label;
+    ?'开始 '+label+'（已选 '+selectedTowers.length+' 个）'
+    :'开始 '+label;
 }
 const grid=document.getElementById('towerGrid');
 ALL_TOWERS.forEach((t,i)=>{
@@ -846,6 +894,14 @@ function selectModeCard(card){
   document.querySelectorAll('[data-mode]').forEach(c=>c.classList.toggle('active',c===card));
   refreshStartButton();
 }
+function showHomePane(paneId='homeMainPane'){
+  document.querySelectorAll('.homePane').forEach(p=>p.classList.toggle('active',p.id===paneId));
+  const selectPage=document.getElementById('selectPage');
+  if(selectPage)selectPage.scrollTop=0;
+  renderHome();
+  refreshStartButton();
+}
+document.querySelectorAll('[data-home-pane]').forEach(btn=>btn.addEventListener('click',()=>showHomePane(btn.dataset.homePane)));
 document.getElementById('btnMeta').onclick=showMetaPage;
 document.getElementById('btnMetaBack').onclick=showSelectPage;
 document.getElementById('btnStart').addEventListener('click',startSelectedMode);
@@ -857,7 +913,7 @@ function showMetaPage(){
 function showSelectPage(){
   hidePage('metaPage');
   document.getElementById('selectPage').style.display='flex';
-  renderHome();
+  showHomePane('homeMainPane');
 }
 function startSelectedMode(){
   if(!selectedTowers.length)return;
@@ -874,7 +930,7 @@ function returnToHome(){
   hidePage('metaPage');
   destroyGameInstance();
   document.getElementById('selectPage').style.display='flex';
-  renderHome();
+  showHomePane('homeMainPane');
 }
 function hidePage(id){
   document.getElementById(id).style.display='none';
@@ -888,7 +944,7 @@ document.getElementById('btnReturnHome').onclick=returnToHome;
 document.getElementById('btnPauseContinue').onclick=()=>gameInstance?.scene?.scenes?.[0]?.togglePause(false);
 document.getElementById('btnPauseHome').onclick=()=>{const scene=gameInstance?.scene?.scenes?.[0];if(scene)scene.gameOver('主动撤离');else returnToHome()};
 bindViewSettingsUI();
-renderHome();
+showHomePane('homeMainPane');
 
 // ═══════ GAME ═══════
 const W=7356,H=4144,CELL=80,NAV_CLEARANCE=20;
