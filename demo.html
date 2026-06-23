@@ -675,19 +675,31 @@ function bindViewSettingsUI(){
   if(bindViewSettingsUI._bound)return;
   bindViewSettingsUI._bound=true;
   document.addEventListener('click',e=>{
-    const cameraBtn=e.target.closest('[data-view-camera]');
+    const target=e.target instanceof Element?e.target:null;
+    const cameraBtn=target?.closest('[data-view-camera]');
     if(cameraBtn){
       e.preventDefault();
       setViewSettings({cameraMode:cameraBtn.dataset.viewCamera});
       return;
     }
-    const miniMapBtn=e.target.closest('[data-view-minimap]');
+    const miniMapBtn=target?.closest('[data-view-minimap]');
     if(miniMapBtn){
       e.preventDefault();
       setViewSettings({miniMap:!viewSettings().miniMap});
     }
   });
   syncViewSettingsUI();
+}
+function bindHomePaneNavigation(){
+  if(bindHomePaneNavigation._bound)return;
+  bindHomePaneNavigation._bound=true;
+  document.addEventListener('click',e=>{
+    const target=e.target instanceof Element?e.target:null;
+    const paneBtn=target?.closest('[data-home-pane]');
+    if(!paneBtn)return;
+    e.preventDefault();
+    showHomePane(paneBtn.dataset.homePane);
+  });
 }
 function syncViewSettingsUI(){
   const s=viewSettings();
@@ -861,6 +873,8 @@ function startButtonText(label){
     ?'开始 '+label+'（已选 '+selectedTowers.length+' 个）'
     :'开始 '+label;
 }
+bindHomePaneNavigation();
+bindViewSettingsUI();
 const grid=document.getElementById('towerGrid');
 ALL_TOWERS.forEach((t,i)=>{
   const card=createTowerSelectCard(t,i);
@@ -907,12 +921,7 @@ function showHomePane(paneId='homeMainPane'){
   renderHome();
   refreshStartButton();
 }
-document.addEventListener('click',e=>{
-  const paneBtn=e.target.closest('[data-home-pane]');
-  if(!paneBtn)return;
-  e.preventDefault();
-  showHomePane(paneBtn.dataset.homePane);
-});
+bindHomePaneNavigation();
 document.getElementById('btnMeta').onclick=showMetaPage;
 document.getElementById('btnMetaBack').onclick=showSelectPage;
 document.getElementById('btnStart').addEventListener('click',startSelectedMode);
@@ -954,7 +963,6 @@ function destroyGameInstance(){
 document.getElementById('btnReturnHome').onclick=returnToHome;
 document.getElementById('btnPauseContinue').onclick=()=>gameInstance?.scene?.scenes?.[0]?.togglePause(false);
 document.getElementById('btnPauseHome').onclick=()=>{const scene=gameInstance?.scene?.scenes?.[0];if(scene)scene.gameOver('主动撤离');else returnToHome()};
-bindViewSettingsUI();
 showHomePane('homeMainPane');
 
 // ═══════ GAME ═══════
