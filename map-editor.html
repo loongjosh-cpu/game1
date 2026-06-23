@@ -1,390 +1,724 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>R-32 地图编辑器</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow:hidden}
-body{background:#0d1219;display:flex;flex-direction:column;font-family:'Segoe UI',sans-serif;padding:6px;user-select:none}
-h2{color:#7ec8e3;margin:2px 0;font-size:15px;font-weight:400;text-align:center;flex-shrink:0}
-.toolbar{display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap;align-items:center;justify-content:center;flex-shrink:0}
-.toolbar button{padding:5px 12px;border:1px solid #0f3460;border-radius:4px;background:#16213e;color:#ccc;cursor:pointer;font-size:11px;transition:all 0.15s}
-.toolbar button:hover{background:#1a3050;color:#fff}
-.toolbar button.active{background:#0f3460;color:#7ec8e3;border-color:#7ec8e3}
-.toolbar button.danger{background:#4a1525;border-color:#8b2040;color:#e84a60}
-.toolbar span{color:#888;font-size:10px;margin-left:4px}
-.main{flex:1;display:flex;gap:8px;min-height:0;align-items:stretch}
-.canvas-wrap{flex:1;display:flex;justify-content:center;align-items:center;min-width:0;overflow:hidden}
-canvas{display:block;border:2px solid #0f3460;border-radius:8px;cursor:crosshair;flex-shrink:0}
-.inspector{background:#16213e;border:1px solid #0f3460;border-radius:8px;padding:10px;width:200px;font-size:11px;color:#ccc;flex-shrink:0;overflow-y:auto}
-.inspector h3{color:#7ec8e3;margin-bottom:8px;font-size:13px;font-weight:400}
-.inspector label{display:block;color:#888;margin-top:6px;margin-bottom:2px}
-.inspector input{width:100%;padding:4px 6px;background:#0d1b2a;border:1px solid #2a3a4a;border-radius:3px;color:#0f8;font-size:11px;font-family:monospace;outline:none}
-.inspector input:focus{border-color:#7ec8e3}
-.inspector .coords{color:#888;font-size:10px;margin-top:8px;line-height:1.5}
-.inspector .coords span{color:#7ec8e3}
-.inspector .dim{color:#888;font-size:10px;margin-top:4px}
-.inspector .dim b{color:#0f8}
-.inspector .none{color:#555;font-size:10px;text-align:center;padding:12px 0}
-.legend{display:flex;gap:12px;margin-top:3px;color:#888;font-size:10px;flex-wrap:wrap;align-items:center;justify-content:center;flex-shrink:0}
-.legend span{display:flex;align-items:center;gap:3px}
-.legend .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-#exportPanel{display:none;position:fixed;bottom:10px;left:50%;transform:translateX(-50%);z-index:100}
-#exportPanel textarea{width:800px;height:200px;background:#0d1b2a;color:#0f8;border:1px solid #0f3460;border-radius:5px;font-size:10px;font-family:monospace;padding:6px;resize:none}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>R32 地图编辑器</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a2c;
+      --panel2:#17223a;
+      --ink:#e8eefc;
+      --muted:#94a3b8;
+      --line:#25334f;
+      --accent:#60a5fa;
+      --accent2:#34d399;
+      --warn:#f59e0b;
+      --danger:#fb7185;
+      --wall:#475569;
+      --wallStroke:#94a3b8;
+      --spawn:#f97316;
+      --reactor:#38bdf8;
+      --pocket:#a78bfa;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{display:grid;grid-template-rows:auto 1fr;overflow:hidden}
+    header{height:58px;display:flex;align-items:center;gap:18px;padding:0 18px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,#111827,#0f172a)}
+    h1{font-size:18px;margin:0;letter-spacing:.08em}
+    header .hint{color:var(--muted);font-size:12px}
+    .wrap{min-height:0;display:grid;grid-template-columns:310px minmax(520px,1fr) 360px;gap:10px;padding:10px}
+    aside,.stage,.inspector{min-height:0;border:1px solid var(--line);background:rgba(18,26,44,.96);border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.24);overflow:hidden}
+    aside,.inspector{display:flex;flex-direction:column}
+    .section{padding:12px;border-bottom:1px solid var(--line)}
+    .section:last-child{border-bottom:0}
+    h2,h3{margin:0 0 8px;font-size:14px}
+    .small{font-size:12px;color:var(--muted)}
+    .levels{overflow:auto;padding:10px;display:flex;flex-direction:column;gap:10px}
+    .level-card{border:1px solid var(--line);border-radius:12px;background:#0f172a;padding:10px;cursor:pointer;transition:.16s border,.16s transform,.16s background}
+    .level-card:hover{transform:translateY(-1px);border-color:#3b82f6}
+    .level-card.active{border-color:var(--accent);background:linear-gradient(180deg,#172554,#0f172a)}
+    .level-title{display:flex;justify-content:space-between;gap:8px;font-weight:700}
+    .tag{display:inline-flex;align-items:center;border:1px solid #334155;border-radius:999px;padding:1px 7px;font-size:11px;color:#cbd5e1;background:#111827;white-space:nowrap}
+    .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .tools{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    button,select,input,textarea{font:inherit}
+    button{border:1px solid #334155;background:#1e293b;color:var(--ink);border-radius:10px;padding:8px 10px;cursor:pointer}
+    button:hover{border-color:#60a5fa;background:#263449}
+    button.active{background:#2563eb;border-color:#60a5fa}
+    button.good{background:#047857;border-color:#34d399}
+    button.warn{background:#92400e;border-color:#f59e0b}
+    button.danger{background:#7f1d1d;border-color:#fb7185}
+    .stage{display:grid;grid-template-rows:auto 1fr auto}
+    .toolbar{display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+    .toolbar .spacer{flex:1}
+    .canvas-wrap{min-height:0;overflow:auto;background:
+      radial-gradient(circle at 25% 25%,rgba(59,130,246,.09),transparent 30%),
+      radial-gradient(circle at 75% 55%,rgba(52,211,153,.07),transparent 30%),
+      #06101d;padding:14px}
+    canvas{display:block;background:#07111f;border:1px solid #233047;border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.35);image-rendering:auto}
+    .status{display:flex;gap:14px;align-items:center;padding:8px 12px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden}
+    .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .stat{border:1px solid var(--line);border-radius:10px;padding:8px;background:#0f172a}
+    .stat b{display:block;font-size:18px;color:#f8fafc}
+    .notes{overflow:auto;padding-bottom:10px}
+    .notes p{margin:8px 0;color:#cbd5e1}
+    .notes ul{margin:8px 0 0 18px;padding:0;color:#cbd5e1}
+    .notes li{margin:5px 0}
+    textarea{width:100%;min-height:170px;resize:vertical;border:1px solid var(--line);border-radius:10px;background:#0b1220;color:#dbeafe;padding:10px;font-family:Consolas,monospace;font-size:12px}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .pill{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:3px 8px;background:#0b1220;color:#cbd5e1;font-size:12px}
+    .legend{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+    .swatch{width:12px;height:12px;border-radius:50%;display:inline-block}
+    .kbd{border:1px solid #475569;border-bottom-width:2px;border-radius:5px;padding:0 5px;background:#0f172a;color:#e2e8f0}
+    @media(max-width:1200px){
+      .wrap{grid-template-columns:280px 1fr}
+      .inspector{grid-column:1/3;min-height:260px}
+      body{overflow:auto}
+    }
+  </style>
 </head>
 <body>
-<h2>R-32 地图编辑器</h2>
+  <header>
+    <h1>R32 地图编辑器</h1>
+    <div class="hint">关卡列表 / 白盒路线 / 闭口检查 / 反应炉战线规划</div>
+  </header>
 
-<div class="toolbar">
-  <button id="btnWall" class="active">■ 墙体</button>
-  <button id="btnSelect">☝ 选择</button>
-  <button id="btnSpawn">◆ 出生点</button>
-  <button id="btnReactor">◉ 反应炉</button>
-  <button id="btnErase">✕ 擦除</button>
-  <span>|</span>
-  <button id="btnClear" class="danger">清空</button>
-  <button id="btnExport">导出</button>
-  <button id="btnLoad">预设</button>
-  <button id="btnUndo">撤销</button>
-  <span id="status">墙:0 | 出生点:0</span>
-</div>
-
-<div class="main">
-  <div class="canvas-wrap" id="canvasWrap">
-    <canvas id="map"></canvas>
-  </div>
-
-  <div class="inspector" id="inspector">
-    <h3 id="inspTitle">墙体属性</h3>
-    <div id="inspNone" class="none">点击"选择"模式<br>再点墙体查看</div>
-    <div id="inspEdit" style="display:none">
-      <label>X (左)</label>
-      <input id="inpX" type="number" step="1">
-      <label>Y (上)</label>
-      <input id="inpY" type="number" step="1">
-      <label>宽度</label>
-      <input id="inpW" type="number" step="1" min="20">
-      <label>高度</label>
-      <input id="inpH" type="number" step="1" min="20">
-      <div class="coords">
-        四角坐标:<br>
-        ↖ <span id="cTL"></span><br>
-        ↗ <span id="cTR"></span><br>
-        ↙ <span id="cBL"></span><br>
-        ↘ <span id="cBR"></span>
+  <div class="wrap">
+    <aside>
+      <div class="section">
+        <h2>关卡列表</h2>
+        <div class="small">选择关卡后可直接在画布上继续编辑。五关只写入编辑器，不改 Demo 当前关卡。</div>
       </div>
-      <div class="dim">面积: <b id="cArea"></b></div>
-    </div>
+      <div id="levelList" class="levels"></div>
+      <div class="section">
+        <h3>编辑工具</h3>
+        <div class="tools">
+          <button data-mode="wall" class="active">墙体 W</button>
+          <button data-mode="select">选择 S</button>
+          <button data-mode="spawn">出生点</button>
+          <button data-mode="reactor">主反应炉</button>
+          <button data-mode="pocket">小反应炉点</button>
+          <button data-mode="erase" class="danger">擦除</button>
+        </div>
+        <p class="small">墙体：拖拽矩形。出生/反应炉/小反应炉点：点击放置。选择模式可点击墙体查看坐标。</p>
+      </div>
+      <div class="section">
+        <h3>图例</h3>
+        <div class="legend small">
+          <span><i class="swatch" style="background:var(--wall)"></i> 墙体/封闭障碍</span>
+          <span><i class="swatch" style="background:var(--spawn)"></i> 出生点</span>
+          <span><i class="swatch" style="background:var(--reactor)"></i> 主反应炉</span>
+          <span><i class="swatch" style="background:var(--pocket)"></i> 推荐小反应炉点</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="stage">
+      <div class="toolbar">
+        <button id="loadLevel" class="good">加载选中关卡</button>
+        <button id="undoBtn">撤销</button>
+        <button id="clearBtn" class="danger">清空</button>
+        <button id="fitBtn">适配视图</button>
+        <span class="spacer"></span>
+        <label class="pill"><input id="showRoutes" type="checkbox" checked> 路线预览</label>
+        <label class="pill"><input id="showGrid" type="checkbox" checked> 网格</label>
+        <label class="pill"><input id="snapGrid" type="checkbox" checked> 40码吸附</label>
+      </div>
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="map" width="7356" height="4144"></canvas>
+      </div>
+      <div class="status">
+        <span id="coord">坐标：-</span>
+        <span>快捷键：<span class="kbd">W</span>墙体 <span class="kbd">S</span>选择 <span class="kbd">Ctrl+Z</span>撤销</span>
+        <span id="saveState"></span>
+      </div>
+    </main>
+
+    <aside class="inspector">
+      <div class="section">
+        <h2 id="levelName">-</h2>
+        <div id="levelSummary" class="small"></div>
+      </div>
+      <div class="section">
+        <h3>地图检查</h3>
+        <div class="stats">
+          <div class="stat"><span class="small">墙体</span><b id="wallCount">0</b></div>
+          <div class="stat"><span class="small">开口端点</span><b id="openEnds">0</b></div>
+          <div class="stat"><span class="small">出生点</span><b id="spawnCount">0</b></div>
+          <div class="stat"><span class="small">小反应炉点</span><b id="pocketCount">0</b></div>
+        </div>
+        <p id="checkHint" class="small"></p>
+      </div>
+      <div class="section notes">
+        <h3>设计说明</h3>
+        <div id="designNotes"></div>
+      </div>
+      <div class="section">
+        <h3>导出 / 本地草稿</h3>
+        <div class="row" style="margin-bottom:8px">
+          <button id="exportBtn" class="good">导出 JSON</button>
+          <button id="copyBtn">复制</button>
+          <button id="saveDraftBtn">保存草稿</button>
+          <button id="loadDraftBtn">读取草稿</button>
+          <button id="sendDemoBtn" class="warn">导出到 Demo 无尽</button>
+        </div>
+        <textarea id="out" spellcheck="false" placeholder="导出的地图 JSON 会显示在这里"></textarea>
+        <p class="small">“导出到 Demo 无尽”会写入 localStorage 的 <code>r32-map</code>。Demo 目前读取墙体、出生点、主反应炉；路线和小反应炉点作为编辑器设计元数据保留。</p>
+      </div>
+    </aside>
   </div>
-</div>
 
-<div class="legend">
-  <span><span class="dot" style="background:#e94560"></span> 出生点</span>
-  <span><span class="dot" style="background:#00d2ff"></span> 反应炉</span>
-  <span style="color:#3a4a5a">■ 墙体</span>
-  <span style="color:#7ec8e3">▣ 选中</span>
-</div>
+  <script>
+    const W = 7356;
+    const H = 4144;
+    const canvas = document.getElementById('map');
+    const ctx = canvas.getContext('2d');
+    const wrap = document.getElementById('canvasWrap');
+    const $ = id => document.getElementById(id);
+    const clone = value => JSON.parse(JSON.stringify(value));
+    const outerWalls = () => [[0,0,W,80],[0,0,80,H],[W-80,0,80,H],[0,H-80,W,80]];
+    const box = (x,y,w,h) => [x,y,w,h];
+    const route = points => points.map(([x,y]) => ({x,y}));
 
-<div id="exportPanel"><textarea id="jsonOut" readonly></textarea></div>
+    const LEVELS = [
+      {
+        id:'border-snake',
+        name:'01 边境蛇道',
+        difficulty:'教学 / 单线',
+        unitScale:0.82,
+        summary:'单入口长蛇形路线，用大块封闭障碍制造回头路，验证基础塔位和反应炉距离规则。',
+        walls:[
+          ...outerWalls(),
+          box(960,520,5200,520), box(1280,1460,5000,520), box(960,2380,5200,520),
+          box(620,3360,720,520), box(2140,3360,900,520), box(3920,3360,980,520), box(5860,3360,620,520)
+        ],
+        spawns:[[260,420]],
+        reactor:{x:6900,y:3720},
+        pockets:[
+          {x:1720,y:3830,r:420,label:'前线经济点'},
+          {x:3350,y:1120,r:420,label:'中段诱导点'},
+          {x:5670,y:3050,r:420,label:'终段补给点'}
+        ],
+        routes:[
+          route([[260,420],[760,420],[760,1280],[6500,1280],[6500,2220],[760,2220],[760,3230],[6900,3230],[6900,3720]])
+        ],
+        notes:[
+          '定位：第一关白盒，路标清晰，玩家一眼能看出“沿蛇道推进”。',
+          '反应炉玩法：推荐小反应炉点相互距离大于1000码，玩家若想铺经济，需要把防线从入口、中段、终段逐步拉开。',
+          '墙体策略：主体使用封闭大障碍，避免未闭合线段造成怪物钻缝或视觉误读。'
+        ]
+      },
+      {
+        id:'double-gate',
+        name:'02 双门汇流',
+        difficulty:'双入口 / 汇流',
+        unitScale:0.78,
+        summary:'上下双入口在中段汇流，考验玩家是否在汇流点布置AOE与减速。',
+        walls:[
+          ...outerWalls(),
+          box(900,640,1500,600), box(3260,520,720,900), box(5060,640,1420,600),
+          box(1280,1840,1660,520), box(4420,1840,1660,520),
+          box(900,2920,1500,620), box(3260,2700,760,980), box(5060,2920,1420,620)
+        ],
+        spawns:[[260,760],[260,3370]],
+        reactor:{x:6960,y:2070},
+        pockets:[
+          {x:1840,y:2070,r:430,label:'双门前哨'},
+          {x:3650,y:2070,r:430,label:'汇流火力区'},
+          {x:5740,y:2070,r:430,label:'终端防线'}
+        ],
+        routes:[
+          route([[260,760],[2920,760],[2920,1530],[3650,1530],[3650,2070],[6960,2070]]),
+          route([[260,3370],[2920,3370],[2920,2550],[3650,2550],[3650,2070],[6960,2070]])
+        ],
+        notes:[
+          '定位：第二关开始引入“多入口但共享杀伤区”的概念。',
+          '节奏：前半段分线，中段汇流，后半段给玩家一个高价值减速/AOE区域。',
+          '风险：如果入口火力太弱，两路会在汇流点叠压；适合测试冷凝塔、电磁塔贝塔、火焰塔表现。'
+        ]
+      },
+      {
+        id:'ring-mine',
+        name:'03 环形矿区',
+        difficulty:'环绕 / 经济诱惑',
+        unitScale:0.74,
+        summary:'中央矿区作为封闭地标，路线绕行形成内外圈感，小反应炉点诱导玩家冒险外扩。',
+        walls:[
+          ...outerWalls(),
+          box(2520,960,2260,180), box(2520,3000,2260,180), box(2520,960,180,2220), box(4600,960,180,2220),
+          box(820,780,920,720), box(5600,760,920,740), box(850,2660,960,760), box(5520,2650,1060,760),
+          box(3360,1680,560,760)
+        ],
+        spawns:[[350,2070],[7000,2070]],
+        reactor:{x:3680,y:3820},
+        pockets:[
+          {x:3650,y:2070,r:460,label:'中央矿区'},
+          {x:1180,y:2050,r:420,label:'西侧矿脉'},
+          {x:6170,y:2050,r:420,label:'东侧矿脉'},
+          {x:3680,y:650,r:420,label:'北侧孤点'}
+        ],
+        routes:[
+          route([[350,2070],[2020,2070],[2020,720],[5120,720],[5120,2070],[3680,3820]]),
+          route([[7000,2070],[5320,2070],[5320,3420],[2070,3420],[2070,2070],[3680,3820]])
+        ],
+        notes:[
+          '定位：用中央闭环地标给地图记忆点，玩家能围绕“矿区”规划战线。',
+          '反应炉玩法：中央矿区收益诱惑强，但会拉开防线；东西两侧矿脉适合制造二线防守。',
+          '战斗预期：双入口绕行长度相近，避免一侧天然更优导致防守退化成单线。'
+        ]
+      },
+      {
+        id:'rift-three',
+        name:'04 裂谷三线',
+        difficulty:'三入口 / 多线防守',
+        unitScale:0.70,
+        summary:'三条裂谷从不同方向压向核心，推荐反应炉点分散，专门测试“不能只守一路”。',
+        walls:[
+          ...outerWalls(),
+          box(940,520,1260,980), box(2860,430,780,1380), box(4940,520,1260,980),
+          box(1320,2050,900,520), box(3000,1940,1350,700), box(5180,2050,900,520),
+          box(900,3060,1420,560), box(3360,2860,720,820), box(5040,3060,1420,560)
+        ],
+        spawns:[[320,660],[3680,260],[7030,660]],
+        reactor:{x:3680,y:3820},
+        pockets:[
+          {x:1130,y:1950,r:430,label:'西裂谷哨站'},
+          {x:3680,y:1260,r:430,label:'北裂谷哨站'},
+          {x:6200,y:1950,r:430,label:'东裂谷哨站'},
+          {x:3680,y:2600,r:430,label:'核心外圈'}
+        ],
+        routes:[
+          route([[320,660],[2480,660],[2480,1860],[2880,1860],[2880,3820],[3680,3820]]),
+          route([[3680,260],[4180,260],[4180,1860],[4680,1860],[4680,3820],[3680,3820]]),
+          route([[7030,660],[6420,660],[6420,1840],[4900,1840],[4900,3820],[3680,3820]])
+        ],
+        notes:[
+          '定位：第四关强调多线防守，小反应炉全图仇恨会让玩家必须为经济点付出防守成本。',
+          '路线：三路在核心前并不完全汇流，避免一个杀伤区解决全部问题。',
+          '建议：这关适合放入E11远程支援怪与E10棘炮兽，迫使玩家处理无人机和前线阻挡塔。'
+        ]
+      },
+      {
+        id:'trial-expedition',
+        name:'05 关卡试验1·远征版',
+        difficulty:'10波 / 约无尽30波基准',
+        unitScale:0.64,
+        summary:'更大的战场感：多入口、长距离奔波、分散经济点，目标是让飞船调度和反应炉距离规则都成立。',
+        walls:[
+          ...outerWalls(),
+          box(760,560,1180,620), box(2520,480,820,980), box(4560,560,1180,620), box(6200,880,620,1040),
+          box(980,1640,880,620), box(2960,1540,1400,500), box(5280,1700,760,620),
+          box(560,2700,1340,620), box(2400,2600,760,980), box(4080,2600,760,980), box(5640,2720,1180,580),
+          box(1980,3600,980,300), box(4380,3600,980,300)
+        ],
+        spawns:[[260,610],[7080,760],[300,3540],[7040,3500]],
+        reactor:{x:3680,y:2160},
+        pockets:[
+          {x:1180,y:2180,r:430,label:'西部前线'},
+          {x:6180,y:2180,r:430,label:'东部前线'},
+          {x:3680,y:620,r:430,label:'北部补给'},
+          {x:3680,y:3540,r:430,label:'南部补给'},
+          {x:5100,y:720,r:430,label:'远征矿点'}
+        ],
+        routes:[
+          route([[260,610],[2180,610],[2180,1340],[3680,1340],[3680,2160]]),
+          route([[7080,760],[6460,760],[6460,2440],[4860,2440],[4860,2160],[3680,2160]]),
+          route([[300,3540],[2220,3540],[2220,2260],[3680,2260],[3680,2160]]),
+          route([[7040,3500],[5200,3500],[5200,2460],[3680,2460],[3680,2160]])
+        ],
+        notes:[
+          '定位：关卡试验1的地图编辑器版本，不直接覆盖 Demo 地图。',
+          '核心体验：地图单位缩放更小，视觉上更大；飞船需要在四路与多个经济点之间来回奔波。',
+          '平衡目标：10波强度可按无尽30波附近校准，但地图本身主要解决路线选择和反应炉距离限制。'
+        ]
+      }
+    ];
 
-<script>
-const canvas=document.getElementById('map'),ctx=canvas.getContext('2d');
-const W=7356,H=4144;
-canvas.width=W; canvas.height=H;
-let walls=[],spawns=[],undoStack=[];
-let reactor={x:3600,y:2600};
-let mode='wall';
+    let levelIndex = 0;
+    let walls = [];
+    let spawns = [];
+    let pockets = [];
+    let routes = [];
+    let reactor = {x:W/2,y:H/2};
+    let unitScale = 1;
+    let mode = 'wall';
+    let selectedWall = -1;
+    let drag = null;
+    let undoStack = [];
 
-// ─── Scale canvas CSS to fit viewport ───
-function fitCanvas(){
-  const wrap=document.getElementById('canvasWrap');
-  const mw=wrap.clientWidth, mh=wrap.clientHeight;
-  const s=Math.min(mw/W, mh/H);
-  canvas.style.width=Math.floor(W*s)+'px';
-  canvas.style.height=Math.floor(H*s)+'px';
-}
-window.addEventListener('resize',fitCanvas);
+    function setMode(next){
+      mode = next;
+      document.querySelectorAll('[data-mode]').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+    }
 
-let selectedWall=-1;
-let drawing=false,drawStart=null,drawCurrent=null;
-let dragging=null,dragIdx=-1;
-let mx=0,my=0;
+    function snap(v){ return $('snapGrid').checked ? Math.round(v/40)*40 : v; }
+    function pushUndo(){ undoStack.push(JSON.stringify({walls,spawns,pockets,routes,reactor,unitScale,levelIndex})); if(undoStack.length>80) undoStack.shift(); }
+    function undo(){
+      const last = undoStack.pop();
+      if(!last) return;
+      const data = JSON.parse(last);
+      walls=data.walls; spawns=data.spawns; pockets=data.pockets||[]; routes=data.routes||[]; reactor=data.reactor; unitScale=data.unitScale||1; levelIndex=data.levelIndex||0;
+      selectedWall=-1; renderAll();
+    }
 
-const presets={
-  rings:{
-    walls:[
-      [0,0,7200,80],[0,0,80,5200],[7120,0,80,5200],[0,5120,7200,80],
-      [1200,1200,4800,80],[1200,1200,80,2800],[5880,1200,80,2800],
-      [1200,3920,1800,80],[3800,3920,2200,80],
-      [2000,1600,80,1200],[3000,1400,80,1400],
-      [4100,1600,80,1200],[5100,1600,80,1200],
-      [3400,2200,600,80],[3400,2200,80,700],[3400,2920,600,80],
-    ],
-    spawns:[[400,200],[3600,200],[6800,200],[400,5000],[3600,5000],[6800,5000]],
-    reactor:{x:3600,y:2600}
-  },
-  empty:{walls:[],spawns:[],reactor:{x:3600,y:2600}},
-  map:{
-    walls:[
-      [0,0,W,80],[0,0,80,H],[W-80,0,80,H],[0,H-80,W,80],
-      [6296,96,288,648],[4528,100,548,492],
-      [80,284,1492,208],[2304,492,342,220],
-      [3484,592,1592,496],[5380,604,592,644],
-      [1184,712,1462,276],[80,752,472,476],
-      [2304,988,342,1964],[3484,1088,592,820],
-      [6338,1176,938,608],[80,1228,1560,260],
-      [80,1488,472,504],[5442,1784,1834,336],
-      [1358,2044,500,1228],[5442,2120,192,1156],
-      [4242,2164,1200,364],[3206,2192,712,312],
-      [4990,2800,200,1264],[3684,2916,844,812],
-      [2304,2952,868,340],[1360,3272,496,792],
-      [1904,80,748,412],[524,3305,832,168],
-      [412,2237,672,248],[412,2773,672,248],
-      [5952,2437,804,188],[5634,3005,920,270]
-    ],
-    spawns:[[168,176],[2200,596],[180,3972],[6316,2277],[1240,3729]],
-    reactor:{x:6984,y:304}
-  }
-};
+    function loadLevel(idx){
+      const lv = LEVELS[idx];
+      levelIndex = idx;
+      walls = clone(lv.walls);
+      spawns = clone(lv.spawns);
+      pockets = clone(lv.pockets || []);
+      routes = clone(lv.routes || []);
+      reactor = clone(lv.reactor);
+      unitScale = lv.unitScale || 1;
+      selectedWall = -1;
+      undoStack = [];
+      renderLevelList();
+      renderAll();
+      $('saveState').textContent = `已加载：${lv.name}`;
+    }
 
-// Helpers
-// Mouse→world: canvas is 1:1, just need to account for CSS scaling
-function canvasPos(e){
-  const r=canvas.getBoundingClientRect();
-  return[Math.round((e.clientX-r.left)*W/r.width),Math.round((e.clientY-r.top)*H/r.height)];
-}
-const s2w=canvasPos;
-function inRect(px,py,rx,ry,rw,rh){return px>=rx&&px<=rx+rw&&py>=ry&&py<=ry+rh}
-
-function saveState(){
-  undoStack.push(JSON.parse(JSON.stringify({walls,spawns,reactor})));
-  if(undoStack.length>50)undoStack.shift();
-}
-
-// Inspector update
-function showInspector(idx){
-  selectedWall=idx;
-  document.getElementById('inspNone').style.display='none';
-  document.getElementById('inspEdit').style.display='block';
-  document.getElementById('inspTitle').textContent=`墙体 #${idx+1}`;
-  const w=walls[idx];
-  document.getElementById('inpX').value=w[0];
-  document.getElementById('inpY').value=w[1];
-  document.getElementById('inpW').value=w[2];
-  document.getElementById('inpH').value=w[3];
-  updateCoords();
-}
-
-function hideInspector(){
-  selectedWall=-1;
-  document.getElementById('inspNone').style.display='block';
-  document.getElementById('inspEdit').style.display='none';
-  document.getElementById('inspTitle').textContent='墙体属性';
-}
-
-function updateCoords(){
-  if(selectedWall<0)return;
-  const w=walls[selectedWall];
-  const x=parseInt(document.getElementById('inpX').value)||w[0];
-  const y=parseInt(document.getElementById('inpY').value)||w[1];
-  const ww=parseInt(document.getElementById('inpW').value)||w[2];
-  const wh=parseInt(document.getElementById('inpH').value)||w[3];
-  document.getElementById('cTL').textContent=`(${x}, ${y})`;
-  document.getElementById('cTR').textContent=`(${x+ww}, ${y})`;
-  document.getElementById('cBL').textContent=`(${x}, ${y+wh})`;
-  document.getElementById('cBR').textContent=`(${x+ww}, ${y+wh})`;
-  document.getElementById('cArea').textContent=`${ww*wh} 单位²`;
-}
-
-function applyInspector(){
-  if(selectedWall<0)return;
-  const x=parseInt(document.getElementById('inpX').value);
-  const y=parseInt(document.getElementById('inpY').value);
-  const w=parseInt(document.getElementById('inpW').value);
-  const h=parseInt(document.getElementById('inpH').value);
-  if(isNaN(x)||isNaN(y)||isNaN(w)||isNaN(h)||w<20||h<20)return;
-  walls[selectedWall]=[x,y,w,h];
-  updateCoords();draw();
-}
-
-['inpX','inpY','inpW','inpH'].forEach(id=>{
-  document.getElementById(id).addEventListener('input',()=>{updateCoords();applyInspector()});
-});
-
-// Rendering (1:1, no scale)
-function draw(){
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#1a2536';ctx.fillRect(0,0,W,H);
-
-  // Grid
-  ctx.strokeStyle='#ffffff06';ctx.lineWidth=0.5;
-  for(let x=0;x<=W;x+=200){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
-  for(let y=0;y<=H;y+=200){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
-
-  // Walls
-  walls.forEach(([x,y,w,h],i)=>{
-    const sel=i===selectedWall;
-    ctx.fillStyle=sel?'#5a6a7a':'#3a4a5a';
-    ctx.fillRect(x,y,w,h);
-    ctx.strokeStyle=sel?'#7ec8e3':'#2a3a4a';
-    ctx.lineWidth=sel?2:1;
-    ctx.strokeRect(x,y,w,h);
-    if(sel){
-      [[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(([px,py])=>{
-        ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);
-        ctx.fillStyle='#7ec8e3';ctx.fill();
+    function renderLevelList(){
+      const host = $('levelList');
+      host.innerHTML = '';
+      LEVELS.forEach((lv, idx) => {
+        const card = document.createElement('div');
+        card.className = 'level-card' + (idx===levelIndex ? ' active' : '');
+        card.innerHTML = `
+          <div class="level-title"><span>${lv.name}</span><span class="tag">${lv.difficulty}</span></div>
+          <div class="small" style="margin-top:6px">${lv.summary}</div>
+          <div class="meta">
+            <span class="tag">${lv.spawns.length}入口</span>
+            <span class="tag">${lv.pockets.length}经济点</span>
+            <span class="tag">缩放 ${lv.unitScale}</span>
+          </div>`;
+        card.onclick = () => { levelIndex = idx; renderLevelList(); renderInfo(); };
+        host.appendChild(card);
       });
     }
-  });
 
-  // Drawing preview
-  if(drawing&&drawStart&&drawCurrent&&mode==='wall'){
-    const[sx,sy]=drawStart,[cx,cy]=drawCurrent;
-    const x=Math.min(sx,cx),y=Math.min(sy,cy),w=Math.abs(cx-sx),h=Math.abs(cy-sy);
-    ctx.fillStyle='#4a6fa566';ctx.fillRect(x,y,w,h);
-    ctx.strokeStyle='#7ec8e3';ctx.lineWidth=2;ctx.setLineDash([6,4]);
-    ctx.strokeRect(x,y,w,h);ctx.setLineDash([]);
-  }
-
-  // Spawns
-  spawns.forEach(([sx,sy],i)=>{
-    ctx.beginPath();ctx.arc(sx,sy,20,0,Math.PI*2);
-    ctx.fillStyle=i===dragIdx&&dragging==='spawn'?'#ff6b6b':'#e94560';ctx.fill();
-    ctx.fillStyle='#fff';ctx.font='bold 10px "Segoe UI"';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(i+1,sx,sy);
-  });
-
-  // Reactor
-  const rx=reactor.x,ry=reactor.y;
-  ctx.beginPath();ctx.arc(rx,ry,26,0,Math.PI*2);
-  ctx.fillStyle=dragging==='reactor'?'#4df0ff':'#00d2ff';ctx.fill();
-  ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
-  ctx.font='14px "Segoe UI"';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('⚡',rx,ry);
-
-  updateStatus();
-}
-
-function updateStatus(){
-  document.getElementById('status').textContent=
-    `墙:${walls.length} | 出生点:${spawns.length} | 模式:${modeLabels[mode]}${selectedWall>=0?' | 选中:#'+(selectedWall+1):''} | ${W}x${H}`;
-}
-const modeLabels={wall:'墙体',select:'选择',spawn:'出生点',reactor:'反应炉',erase:'擦除'};
-
-// Mouse events
-canvas.addEventListener('mousemove',e=>{
-  const[wx,wy]=canvasPos(e);
-  mx=wx;my=wy;
-  if(dragging){
-    if(dragging==='reactor'){reactor.x=wx;reactor.y=wy}
-    if(dragging==='spawn'&&dragIdx>=0){spawns[dragIdx]=[wx,wy]}
-    draw();return;
-  }
-  if(drawing){drawCurrent=[wx,wy];draw();}
-});
-
-canvas.addEventListener('mousedown',e=>{
-  if(e.button!==0)return;
-  const[wx,wy]=canvasPos(e);
-
-  if(mode==='reactor'){
-    if(Math.hypot(wx-reactor.x,wy-reactor.y)<120){saveState();dragging='reactor';draw();}
-    return;
-  }
-  if(mode==='spawn'){
-    for(let i=0;i<spawns.length;i++){
-      if(Math.hypot(wx-spawns[i][0],wy-spawns[i][1])<60){saveState();dragIdx=i;dragging='spawn';draw();return;}
+    function renderInfo(){
+      const lv = LEVELS[levelIndex];
+      const check = inspectOpenEnds();
+      $('levelName').textContent = lv.name;
+      $('levelSummary').textContent = lv.summary;
+      $('wallCount').textContent = walls.length;
+      $('spawnCount').textContent = spawns.length;
+      $('pocketCount').textContent = pockets.length;
+      $('openEnds').textContent = check.openEnds;
+      $('openEnds').style.color = check.openEnds ? '#f59e0b' : '#34d399';
+      $('checkHint').textContent = check.openEnds
+        ? '仍有墙体端点未接入边界、其他墙体或封闭大障碍；建议继续闭合，减少怪物绕缝。'
+        : '墙体闭口检查良好：没有发现明显开放端点。';
+      $('designNotes').innerHTML = `
+        <p><b>难度：</b>${lv.difficulty}</p>
+        <p><b>单位缩放：</b>${unitScale}。缩放越小，视觉地图越大，飞船奔波感越强。</p>
+        <ul>${lv.notes.map(n=>`<li>${n}</li>`).join('')}</ul>
+        ${selectedWall>=0 ? `<p><b>选中墙体：</b>${JSON.stringify(walls[selectedWall])}</p>` : ''}`;
     }
-    saveState();spawns.push([wx,wy]);draw();return;
-  }
-  if(mode==='erase'){
-    for(let i=spawns.length-1;i>=0;i--){
-      if(Math.hypot(wx-spawns[i][0],wy-spawns[i][1])<40){saveState();spawns.splice(i,1);if(selectedWall>=i)hideInspector();draw();return;}
+
+    function toCanvasPoint(evt){
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: snap((evt.clientX - rect.left) * canvas.width / rect.width),
+        y: snap((evt.clientY - rect.top) * canvas.height / rect.height)
+      };
     }
-    const wi=walls.findIndex(([x,y,w,h])=>inRect(wx,wy,x,y,w,h));
-    if(wi>=0){saveState();walls.splice(wi,1);if(selectedWall===wi)hideInspector();else if(selectedWall>wi)selectedWall--;draw();}
-    return;
-  }
-  if(mode==='select'){
-    const wi=walls.findIndex(([x,y,w,h])=>inRect(wx,wy,x,y,w,h));
-    if(wi>=0){showInspector(wi);draw();}
-    else{hideInspector();draw();}
-    return;
-  }
-  if(mode==='wall'){
-    drawing=true;drawStart=[wx,wy];drawCurrent=[wx,wy];draw();
-  }
-});
 
-canvas.addEventListener('mouseup',e=>{
-  if(dragging){dragging=null;dragIdx=-1;draw();return;}
-  if(!drawing||!drawStart||!drawCurrent)return;
-  const[sx,sy]=drawStart,[cx,cy]=drawCurrent;
-  const x=Math.min(sx,cx),y=Math.min(sy,cy);
-  const w=Math.abs(cx-sx),h=Math.abs(cy-sy);
-  if(w>20&&h>20){saveState();walls.push([x,y,w,h]);showInspector(walls.length-1)}
-  drawing=false;drawStart=null;drawCurrent=null;draw();
-});
+    function wallAt(p){
+      for(let i=walls.length-1;i>=0;i--){
+        const [x,y,w,h] = walls[i];
+        if(p.x>=x && p.x<=x+w && p.y>=y && p.y<=y+h) return i;
+      }
+      return -1;
+    }
 
-canvas.addEventListener('contextmenu',e=>{
-  e.preventDefault();
-  const[wx,wy]=canvasPos(e);
-  for(let i=spawns.length-1;i>=0;i--){
-    if(Math.hypot(wx-spawns[i][0],wy-spawns[i][1])<40){saveState();spawns.splice(i,1);draw();return;}
-  }
-  const wi=walls.findIndex(([x,y,w,h])=>inRect(wx,wy,x,y,w,h));
-  if(wi>=0){saveState();walls.splice(wi,1);if(selectedWall===wi)hideInspector();else if(selectedWall>wi)selectedWall--;draw();}
-});
+    function eraseAt(p){
+      const wi = wallAt(p);
+      if(wi >= 0){ walls.splice(wi,1); return true; }
+      const si = spawns.findIndex(s => Math.hypot(s[0]-p.x,s[1]-p.y) < 140);
+      if(si >= 0){ spawns.splice(si,1); return true; }
+      const pi = pockets.findIndex(r => Math.hypot(r.x-p.x,r.y-p.y) < r.r);
+      if(pi >= 0){ pockets.splice(pi,1); return true; }
+      return false;
+    }
 
-// Buttons
-function setActive(id){
-  ['btnWall','btnSelect','btnSpawn','btnReactor','btnErase'].forEach(b=>document.getElementById(b).classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
+    function rectTouchPoint(rect, px, py, pad=8){
+      const [x,y,w,h] = rect;
+      return px >= x-pad && px <= x+w+pad && py >= y-pad && py <= y+h+pad;
+    }
 
-document.getElementById('btnWall').onclick=()=>{mode='wall';setActive('btnWall');drawing=false;drawStart=null;drawCurrent=null};
-document.getElementById('btnSelect').onclick=()=>{mode='select';setActive('btnSelect');drawing=false;drawStart=null;drawCurrent=null};
-document.getElementById('btnSpawn').onclick=()=>{mode='spawn';setActive('btnSpawn');drawing=false;drawStart=null;drawCurrent=null};
-document.getElementById('btnReactor').onclick=()=>{mode='reactor';setActive('btnReactor');drawing=false;drawStart=null;drawCurrent=null};
-document.getElementById('btnErase').onclick=()=>{mode='erase';setActive('btnErase');drawing=false;drawStart=null;drawCurrent=null};
+    function connectedToAny(point, selfIndex){
+      if(point.x <= 8 || point.y <= 8 || point.x >= W-8 || point.y >= H-8) return true;
+      return walls.some((rect, idx) => idx !== selfIndex && rectTouchPoint(rect, point.x, point.y, 10));
+    }
 
-document.getElementById('btnClear').onclick=()=>{
-  if(!confirm('确定清空整个地图？'))return;
-  saveState();walls=[];spawns=[];reactor={x:3600,y:2600};hideInspector();draw();
-};
+    function inspectOpenEnds(){
+      let openEnds = 0;
+      walls.forEach((r, i) => {
+        const [x,y,w,h] = r;
+        if(w > 220 && h > 220) return;
+        const horizontal = w >= h;
+        const ends = horizontal
+          ? [{x,y:y+h/2},{x:x+w,y:y+h/2}]
+          : [{x:x+w/2,y},{x:x+w/2,y:y+h}];
+        ends.forEach(pt => { if(!connectedToAny(pt, i)) openEnds++; });
+      });
+      return {openEnds};
+    }
 
-document.getElementById('btnUndo').onclick=()=>{
-  const snap=undoStack.pop();if(!snap)return;
-  walls=snap.walls;spawns=snap.spawns;reactor=snap.reactor;hideInspector();draw();
-};
+    function drawGrid(){
+      if(!$('showGrid').checked) return;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(148,163,184,.12)';
+      ctx.lineWidth = 1;
+      for(let x=0;x<=W;x+=400){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+      for(let y=0;y<=H;y+=400){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+      ctx.restore();
+    }
 
-document.getElementById('btnExport').onclick=()=>{
-  const data={walls,spawns,reactor,worldSize:{w:W,h:H}};
-  localStorage.setItem('r32-map',JSON.stringify(data));
-  const p=document.getElementById('exportPanel');p.style.display='block';
-  document.getElementById('jsonOut').value=JSON.stringify(data,null,2);
-};
+    function drawRoutes(){
+      if(!$('showRoutes').checked) return;
+      ctx.save();
+      routes.forEach((pts, idx) => {
+        if(pts.length < 2) return;
+        ctx.setLineDash([36,24]);
+        ctx.lineWidth = 34;
+        ctx.strokeStyle = idx % 2 ? 'rgba(52,211,153,.24)' : 'rgba(96,165,250,.24)';
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = idx % 2 ? 'rgba(52,211,153,.85)' : 'rgba(96,165,250,.85)';
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
 
-document.getElementById('btnLoad').onclick=()=>{
-  const key=prompt('预设: rings / empty / map');
-  if(!key||!presets[key])return;
-  saveState();hideInspector();
-  walls=JSON.parse(JSON.stringify(presets[key].walls));
-  spawns=JSON.parse(JSON.stringify(presets[key].spawns));
-  reactor={...presets[key].reactor};
-  draw();
-};
+    function drawLabel(text, x, y, color){
+      ctx.save();
+      ctx.font = 'bold 58px Microsoft YaHei, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = 'rgba(3,7,18,.88)';
+      ctx.strokeText(text, x, y);
+      ctx.fillStyle = color;
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
 
-// Init
-saveState();
-walls=JSON.parse(JSON.stringify(presets['map'].walls));
-spawns=JSON.parse(JSON.stringify(presets['map'].spawns));
-reactor={...presets['map'].reactor};
-fitCanvas();
-draw();
-</script>
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle = '#07111f';
+      ctx.fillRect(0,0,W,H);
+      drawGrid();
+      drawRoutes();
+
+      walls.forEach((r, i) => {
+        const [x,y,w,h] = r;
+        ctx.fillStyle = i === selectedWall ? '#64748b' : '#334155';
+        ctx.strokeStyle = i === selectedWall ? '#fbbf24' : '#94a3b8';
+        ctx.lineWidth = i === selectedWall ? 8 : 3;
+        ctx.fillRect(x,y,w,h);
+        ctx.strokeRect(x,y,w,h);
+      });
+
+      pockets.forEach((p, i) => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle = 'rgba(167,139,250,.10)';
+        ctx.strokeStyle = 'rgba(167,139,250,.75)';
+        ctx.lineWidth = 5;
+        ctx.fill();
+        ctx.stroke();
+        drawLabel(p.label || `小反应炉${i+1}`, p.x, p.y - p.r - 30, '#c4b5fd');
+        ctx.restore();
+      });
+
+      spawns.forEach((s, i) => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(s[0],s[1],90,0,Math.PI*2);
+        ctx.fillStyle = 'rgba(249,115,22,.9)';
+        ctx.strokeStyle = '#fed7aa';
+        ctx.lineWidth = 6;
+        ctx.fill();
+        ctx.stroke();
+        drawLabel(`出生${i+1}`, s[0], s[1]-130, '#fdba74');
+        ctx.restore();
+      });
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(reactor.x,reactor.y,120,0,Math.PI*2);
+      ctx.fillStyle = 'rgba(56,189,248,.92)';
+      ctx.strokeStyle = '#e0f2fe';
+      ctx.lineWidth = 7;
+      ctx.fill();
+      ctx.stroke();
+      drawLabel('主反应炉', reactor.x, reactor.y-165, '#bae6fd');
+      ctx.restore();
+
+      if(drag){
+        const x = Math.min(drag.x, drag.cx), y = Math.min(drag.y, drag.cy);
+        const w = Math.abs(drag.cx-drag.x), h = Math.abs(drag.cy-drag.y);
+        ctx.fillStyle = 'rgba(96,165,250,.24)';
+        ctx.strokeStyle = '#60a5fa';
+        ctx.lineWidth = 5;
+        ctx.fillRect(x,y,w,h);
+        ctx.strokeRect(x,y,w,h);
+      }
+    }
+
+    function renderAll(){
+      draw();
+      renderInfo();
+    }
+
+    canvas.addEventListener('mousemove', e => {
+      const p = toCanvasPoint(e);
+      $('coord').textContent = `坐标：${Math.round(p.x)}, ${Math.round(p.y)} / 模式：${mode}`;
+      if(drag){ drag.cx=p.x; drag.cy=p.y; draw(); }
+    });
+
+    canvas.addEventListener('mousedown', e => {
+      const p = toCanvasPoint(e);
+      if(mode === 'wall'){
+        pushUndo();
+        drag = {x:p.x,y:p.y,cx:p.x,cy:p.y};
+      }else if(mode === 'select'){
+        selectedWall = wallAt(p);
+        renderAll();
+      }else if(mode === 'spawn'){
+        pushUndo();
+        spawns.push([p.x,p.y]);
+        renderAll();
+      }else if(mode === 'reactor'){
+        pushUndo();
+        reactor = {x:p.x,y:p.y};
+        renderAll();
+      }else if(mode === 'pocket'){
+        pushUndo();
+        pockets.push({x:p.x,y:p.y,r:430,label:`小反应炉点${pockets.length+1}`});
+        renderAll();
+      }else if(mode === 'erase'){
+        pushUndo();
+        eraseAt(p);
+        selectedWall = -1;
+        renderAll();
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if(!drag) return;
+      const x = Math.min(drag.x, drag.cx), y = Math.min(drag.y, drag.cy);
+      const w = Math.abs(drag.cx-drag.x), h = Math.abs(drag.cy-drag.y);
+      if(w > 20 && h > 20) walls.push([x,y,w,h]);
+      drag = null;
+      renderAll();
+    });
+
+    window.addEventListener('keydown', e => {
+      if(e.ctrlKey && e.key.toLowerCase()==='z'){ e.preventDefault(); undo(); return; }
+      if(e.target && ['TEXTAREA','INPUT'].includes(e.target.tagName)) return;
+      const key = e.key.toLowerCase();
+      if(key === 'w') setMode('wall');
+      if(key === 's') setMode('select');
+      if(key === 'delete' && selectedWall >= 0){
+        pushUndo();
+        walls.splice(selectedWall,1);
+        selectedWall=-1;
+        renderAll();
+      }
+    });
+
+    document.querySelectorAll('[data-mode]').forEach(btn => btn.onclick = () => setMode(btn.dataset.mode));
+    $('loadLevel').onclick = () => loadLevel(levelIndex);
+    $('undoBtn').onclick = undo;
+    $('clearBtn').onclick = () => {
+      pushUndo();
+      walls=[]; spawns=[]; pockets=[]; routes=[]; reactor={x:W/2,y:H/2}; selectedWall=-1;
+      renderAll();
+    };
+    $('fitBtn').onclick = () => {
+      canvas.style.width = Math.max(980, wrap.clientWidth - 40) + 'px';
+      canvas.style.height = 'auto';
+      wrap.scrollTo({left:0,top:0,behavior:'smooth'});
+    };
+    $('showRoutes').onchange = draw;
+    $('showGrid').onchange = draw;
+
+    function exportData(){
+      const lv = LEVELS[levelIndex];
+      return {
+        levelId: lv.id,
+        levelName: lv.name,
+        summary: lv.summary,
+        unitScale,
+        worldSize:{w:W,h:H},
+        walls: clone(walls),
+        spawns: clone(spawns),
+        reactor: clone(reactor),
+        pockets: clone(pockets),
+        routes: clone(routes),
+        notes: clone(lv.notes)
+      };
+    }
+
+    function writeOut(data=exportData()){
+      const text = JSON.stringify(data, null, 2);
+      $('out').value = text;
+      return text;
+    }
+
+    $('exportBtn').onclick = () => { writeOut(); $('saveState').textContent = '已导出 JSON'; };
+    $('copyBtn').onclick = async () => {
+      const text = writeOut();
+      try{
+        await navigator.clipboard.writeText(text);
+        $('saveState').textContent = 'JSON 已复制';
+      }catch(err){
+        $('out').select();
+        document.execCommand('copy');
+        $('saveState').textContent = 'JSON 已复制（兼容模式）';
+      }
+    };
+    $('saveDraftBtn').onclick = () => {
+      localStorage.setItem('r32-map-editor-draft', writeOut());
+      $('saveState').textContent = '编辑器草稿已保存';
+    };
+    $('loadDraftBtn').onclick = () => {
+      const raw = localStorage.getItem('r32-map-editor-draft');
+      if(!raw){ $('saveState').textContent = '没有找到草稿'; return; }
+      const data = JSON.parse(raw);
+      pushUndo();
+      walls = data.walls || [];
+      spawns = data.spawns || [];
+      pockets = data.pockets || [];
+      routes = data.routes || [];
+      reactor = data.reactor || {x:W/2,y:H/2};
+      unitScale = data.unitScale || 1;
+      selectedWall = -1;
+      const idx = LEVELS.findIndex(lv => lv.id === data.levelId);
+      if(idx >= 0) levelIndex = idx;
+      renderLevelList();
+      renderAll();
+      $('saveState').textContent = '草稿已读取';
+    };
+    $('sendDemoBtn').onclick = () => {
+      const data = exportData();
+      localStorage.setItem('r32-map', JSON.stringify(data));
+      writeOut(data);
+      $('saveState').textContent = '已写入 r32-map，打开 Demo 无尽模式可测试墙体/出生点/主反应炉';
+    };
+
+    renderLevelList();
+    loadLevel(0);
+    $('fitBtn').click();
+  </script>
 </body>
 </html>
