@@ -674,18 +674,33 @@ function setGameChromeVisible(visible){
 function bindViewSettingsUI(){
   if(bindViewSettingsUI._bound)return;
   bindViewSettingsUI._bound=true;
+  const clickTarget=e=>e.target instanceof Element?e.target:e.target?.parentElement;
+  const applyViewButton=(btn,e)=>{
+    if(e)e.preventDefault();
+    if(btn.dataset.viewCamera){
+      setViewSettings({cameraMode:btn.dataset.viewCamera});
+      return;
+    }
+    if(btn.dataset.viewMinimap){
+      setViewSettings({miniMap:!viewSettings().miniMap});
+    }
+  };
+  document.querySelectorAll('[data-view-camera],[data-view-minimap]').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      applyViewButton(btn,e);
+    });
+  });
   document.addEventListener('click',e=>{
-    const target=e.target instanceof Element?e.target:null;
+    const target=clickTarget(e);
     const cameraBtn=target?.closest('[data-view-camera]');
     if(cameraBtn){
-      e.preventDefault();
-      setViewSettings({cameraMode:cameraBtn.dataset.viewCamera});
+      applyViewButton(cameraBtn,e);
       return;
     }
     const miniMapBtn=target?.closest('[data-view-minimap]');
     if(miniMapBtn){
-      e.preventDefault();
-      setViewSettings({miniMap:!viewSettings().miniMap});
+      applyViewButton(miniMapBtn,e);
     }
   });
   syncViewSettingsUI();
@@ -693,12 +708,21 @@ function bindViewSettingsUI(){
 function bindHomePaneNavigation(){
   if(bindHomePaneNavigation._bound)return;
   bindHomePaneNavigation._bound=true;
+  const openPane=(paneId,e)=>{
+    if(e)e.preventDefault();
+    if(paneId)showHomePane(paneId);
+  };
+  document.querySelectorAll('[data-home-pane]').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      openPane(btn.dataset.homePane,e);
+    });
+  });
   document.addEventListener('click',e=>{
-    const target=e.target instanceof Element?e.target:null;
+    const target=e.target instanceof Element?e.target:e.target?.parentElement;
     const paneBtn=target?.closest('[data-home-pane]');
     if(!paneBtn)return;
-    e.preventDefault();
-    showHomePane(paneBtn.dataset.homePane);
+    openPane(paneBtn.dataset.homePane,e);
   });
 }
 function syncViewSettingsUI(){
