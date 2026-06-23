@@ -114,6 +114,16 @@ canvas{display:block}
 .menuBtn{padding:8px 18px;border:1px solid #7ec8e3;border-radius:5px;background:#10243a;color:#7ec8e3;cursor:pointer;font-family:monospace}
 .menuBtn:hover{background:#1a3a59}
 .menuBtn:disabled{opacity:.4;cursor:not-allowed}
+.viewSettings{width:min(900px,100%);border:1px solid #214057;border-radius:8px;background:#0f1926cc;padding:9px 12px;margin-bottom:10px;font-size:10px;color:#91a6b8}
+.viewSettingsTitle{color:#7ec8e3;margin-bottom:7px;font-size:12px}
+.viewSettingsRows{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.viewSettingRow{display:flex;align-items:center;gap:6px}
+.settingBtn{padding:5px 10px;border:1px solid #2a4a5a;border-radius:5px;background:#101f31;color:#9fb0bd;cursor:pointer;font-family:monospace;font-size:10px}
+.settingBtn:hover{border-color:#4d8aac;color:#dff7ff}
+.settingBtn.active{border-color:#7ec8e3;color:#7ec8e3;background:#0f3460;box-shadow:0 0 8px #7ec8e333}
+#miniMapWrap{position:fixed;right:14px;top:54px;z-index:19;width:238px;padding:7px;border:1px solid #315878;border-radius:8px;background:#07111dcc;box-shadow:0 0 14px #17364a88;pointer-events:none}
+#miniMap{display:block;width:220px;height:140px;border:1px solid #1e4057;border-radius:4px;background:#07101a}
+.miniMapLabel{margin-top:4px;text-align:center;color:#7ec8e3;font-size:9px;letter-spacing:1px}
 #metaPage{display:none;z-index:130;background:#0d1219;padding:20px}
 .metaHeader{width:min(1050px,100%);display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 .metaHeader h2{color:#7ec8e3;font-weight:400}
@@ -141,6 +151,9 @@ canvas{display:block}
 .pauseCard{width:min(360px,88vw);padding:24px;text-align:center;border:2px solid #7ec8e3;border-radius:10px;background:#111b29;box-shadow:0 0 30px #397ca055}
 .pauseCard h2{color:#dff7ff;font-size:26px;font-weight:400;margin-bottom:8px}
 .pauseCard p{color:#8196a8;margin-bottom:16px}
+.pauseSettings{border:1px solid #29435a;border-radius:8px;background:#0c1724;padding:9px;margin:0 0 13px;text-align:left}
+.pauseSettings .viewSettingsTitle{margin-bottom:6px}
+.pauseSettings .viewSettingsRows{gap:7px}
 .pauseActions{display:flex;flex-direction:column;gap:9px}
 .pauseActions .danger{border-color:#9c3d50;color:#ff8ca1}
 @media(max-width:700px){.towerGrid{grid-template-columns:repeat(2,1fr)}
@@ -189,6 +202,20 @@ canvas{display:block}
   <button class="menuBtn" id="btnMeta">进入星核整备舱</button>
   <span class="sub">最高撑过 <span id="homeBestWave">0</span> 波</span>
 </div>
+<div class="viewSettings">
+  <div class="viewSettingsTitle">视角设置</div>
+  <div class="viewSettingsRows">
+    <div class="viewSettingRow">
+      <span>操作模式</span>
+      <button class="settingBtn" id="btnViewLocal">局部指挥</button>
+      <button class="settingBtn" id="btnViewGlobal">全局战术</button>
+    </div>
+    <div class="viewSettingRow">
+      <span>小地图</span>
+      <button class="settingBtn" id="btnMiniMap">开启</button>
+    </div>
+  </div>
+</div>
 <div class="sub" id="modeHint">选择无尽模式出击塔（最多10个）</div>
 <div class="counter"><span id="selCount">0</span>/10</div>
 <div class="towerGrid" id="towerGrid"></div>
@@ -222,6 +249,10 @@ canvas{display:block}
   <div class="hud-item">塔 <span id="hudTowers">0</span></div>
   <div class="hud-item"><span id="hudPhase">准备 10.0s</span></div>
   <div class="hud-item">FPS <span id="hudFps">--</span></div>
+</div>
+<div id="miniMapWrap">
+  <canvas id="miniMap" width="220" height="140"></canvas>
+  <div class="miniMapLabel">TACTICAL MAP</div>
 </div>
 <div id="buildPanel"></div>
 <div id="twPanel">
@@ -259,6 +290,20 @@ canvas{display:block}
   <div class="pauseCard">
     <h2>游戏已暂停</h2>
     <p>Esc 或空格键可继续游戏</p>
+    <div class="pauseSettings">
+      <div class="viewSettingsTitle">视角设置</div>
+      <div class="viewSettingsRows">
+        <div class="viewSettingRow">
+          <span>操作模式</span>
+          <button class="settingBtn" id="btnPauseViewLocal">局部指挥</button>
+          <button class="settingBtn" id="btnPauseViewGlobal">全局战术</button>
+        </div>
+        <div class="viewSettingRow">
+          <span>小地图</span>
+          <button class="settingBtn" id="btnPauseMiniMap">开启</button>
+        </div>
+      </div>
+    </div>
     <div class="pauseActions">
       <button class="menuBtn" id="btnPauseContinue">继续游戏</button>
       <button class="menuBtn danger" id="btnPauseHome">返回主页面</button>
@@ -430,6 +475,7 @@ const DRONE_TOWERS=[
 const ALL_TOWERS=[...PATH_TOWERS,...BLOCK_TOWERS,...DRONE_TOWERS];
 
 const META_SAVE_KEY='r32-meta-v1';
+const DEFAULT_VIEW_SETTINGS={cameraMode:'local',miniMap:true};
 const META_NODES=[
   {id:'ship_speed_1',group:'ship',name:'推进器校准 I',cost:1,desc:'飞船速度 +50'},
   {id:'ship_speed_2',group:'ship',name:'推进器校准 II',cost:1,req:['ship_speed_1'],desc:'飞船速度再 +50'},
@@ -462,17 +508,67 @@ function loadMetaSave(){
   }
 }
 function emptyMetaSave(){
-  return {cores:0,bestWave:0,nodes:{}};
+  return {cores:0,bestWave:0,nodes:{},settings:{...DEFAULT_VIEW_SETTINGS}};
 }
 function normalizeMetaSave(raw){
+  const settings={
+    ...DEFAULT_VIEW_SETTINGS,
+    ...(raw?.settings&&typeof raw.settings==='object'?raw.settings:{})
+  };
+  if(!['local','global'].includes(settings.cameraMode))settings.cameraMode=DEFAULT_VIEW_SETTINGS.cameraMode;
+  settings.miniMap=settings.miniMap!==false;
   return {
     cores:Math.max(0,Number(raw?.cores)||0),
     bestWave:Math.max(0,Number(raw?.bestWave)||0),
-    nodes:raw?.nodes&&typeof raw.nodes==='object'?raw.nodes:{}
+    nodes:raw?.nodes&&typeof raw.nodes==='object'?raw.nodes:{},
+    settings
   };
 }
 let metaSave=loadMetaSave(),gameInstance=null;
 function saveMeta(){localStorage.setItem(META_SAVE_KEY,JSON.stringify(metaSave))}
+function viewSettings(){
+  metaSave=normalizeMetaSave(metaSave);
+  return metaSave.settings;
+}
+function setViewSettings(patch){
+  metaSave.settings={...viewSettings(),...patch};
+  saveMeta();
+  syncViewSettingsUI();
+  activeGameScene()?.applyViewSettings?.();
+}
+function activeGameScene(){
+  return gameInstance?.scene?.getScene?.('Game')||gameInstance?.scene?.scenes?.[0]||null;
+}
+function bindViewSettingsUI(){
+  const bind=(id,patch)=>{
+    const el=document.getElementById(id);
+    if(el)el.onclick=()=>setViewSettings(patch());
+  };
+  bind('btnViewLocal',()=>({cameraMode:'local'}));
+  bind('btnViewGlobal',()=>({cameraMode:'global'}));
+  bind('btnPauseViewLocal',()=>({cameraMode:'local'}));
+  bind('btnPauseViewGlobal',()=>({cameraMode:'global'}));
+  bind('btnMiniMap',()=>({miniMap:!viewSettings().miniMap}));
+  bind('btnPauseMiniMap',()=>({miniMap:!viewSettings().miniMap}));
+  syncViewSettingsUI();
+}
+function syncViewSettingsUI(){
+  const s=viewSettings();
+  const setActive=(id,on)=>{
+    const el=document.getElementById(id);
+    if(el)el.classList.toggle('active',!!on);
+  };
+  setActive('btnViewLocal',s.cameraMode==='local');
+  setActive('btnViewGlobal',s.cameraMode==='global');
+  setActive('btnPauseViewLocal',s.cameraMode==='local');
+  setActive('btnPauseViewGlobal',s.cameraMode==='global');
+  ['btnMiniMap','btnPauseMiniMap'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.classList.toggle('active',s.miniMap);
+    el.textContent=s.miniMap?'开启':'关闭';
+  });
+}
 function hasMeta(id){return !!metaSave.nodes[id]}
 function metaEffects(){
   const shipSpeedFlat=500
@@ -499,6 +595,7 @@ function metaEffects(){
   };
 }
 function renderHome(){
+  syncViewSettingsUI();
   setText('homeCoreCount',metaSave.cores);
   setText('homeBestWave',metaSave.bestWave);
   setText('metaCoreCount',metaSave.cores);
@@ -690,12 +787,14 @@ function destroyGameInstance(){
 document.getElementById('btnReturnHome').onclick=returnToHome;
 document.getElementById('btnPauseContinue').onclick=()=>gameInstance?.scene?.scenes?.[0]?.togglePause(false);
 document.getElementById('btnPauseHome').onclick=()=>{const scene=gameInstance?.scene?.scenes?.[0];if(scene)scene.gameOver('主动撤离');else returnToHome()};
+bindViewSettingsUI();
 renderHome();
 
 // ═══════ GAME ═══════
 const W=7356,H=4144,CELL=80,NAV_CLEARANCE=20;
 const DRONE_CHASE_LIMIT=1200,DRONE_STUCK_LIMIT=650,DRONE_CHASE_SPEED=320;
 const SHIP_SPD=500,SHIP_RNG=1200,MSL_CD=8000,MSL_DMG=20,MSL_SPD=800;
+const LOCAL_CAMERA_ZOOM=3.2,MINIMAP_REFRESH=120;
 const P3_SHELL_SPD=700,POISON_BOLT_SPD=520,RX_HP=200;
 const EN_START=200,EN_CAP=9999,PREP_TIME=10000,SHIP_RESPAWN=5000;
 const CLOSE_ATTACK_RANGE=60,PATH_SNAP_DISTANCE=120;
@@ -1559,6 +1658,8 @@ function launch(sel,mode='endless1'){
       this.setupInputHandlers();
       this.bindTowerPanelButtons();
       this.rebuildPanel();
+      this.initMiniMap();
+      this.applyViewSettings();
     }
     initSceneState(){
       this.selTowers=selIds;
@@ -1659,6 +1760,94 @@ function launch(sel,mode='endless1'){
       this.ship.setCollideWorldBounds(true);
       this.physics.add.collider(this.ship,this.wallGrp);
       this.rng=this.add.image(0,0,'rng').setDepth(5).setAlpha(0.2).setScale(unitScale());
+    }
+    initMiniMap(){
+      this.miniMapWrap=document.getElementById('miniMapWrap');
+      this.miniMapCanvas=document.getElementById('miniMap');
+      this.miniMapCtx=this.miniMapCanvas?.getContext?.('2d')||null;
+      this.miniMapTimer=0;
+    }
+    applyViewSettings(){
+      this.view=viewSettings();
+      this.applyCameraMode();
+      this.updateMiniMapVisibility();
+      this.drawMiniMap(true);
+    }
+    applyCameraMode(){
+      if(!this.ship)return;
+      const cam=this.cameras.main;
+      cam.setBounds(0,0,mapW(),mapH());
+      if(this.view.cameraMode==='local'){
+        cam.setZoom(LOCAL_CAMERA_ZOOM);
+        cam.startFollow(this.ship,true,0.12,0.12);
+        cam.setDeadzone(cam.width*0.08,cam.height*0.08);
+      }else{
+        cam.stopFollow();
+        cam.setDeadzone(0,0);
+        cam.setZoom(1);
+        cam.centerOn(mapW()/2,mapH()/2);
+      }
+    }
+    updateMiniMapVisibility(){
+      if(this.miniMapWrap)this.miniMapWrap.style.display=this.view?.miniMap?'block':'none';
+    }
+    updateMiniMap(dt,force=false){
+      if(!this.view?.miniMap||!this.miniMapCtx)return;
+      this.miniMapTimer=(this.miniMapTimer||0)+dt;
+      if(!force&&this.miniMapTimer<MINIMAP_REFRESH)return;
+      this.miniMapTimer=0;
+      this.drawMiniMap(force);
+    }
+    drawMiniMap(){
+      const ctx=this.miniMapCtx,canvas=this.miniMapCanvas;
+      if(!ctx||!canvas||!this.view?.miniMap)return;
+      const w=canvas.width,h=canvas.height,pad=7,mw=mapW(),mh=mapH();
+      const scale=Math.min((w-pad*2)/mw,(h-pad*2)/mh);
+      const ox=(w-mw*scale)/2,oy=(h-mh*scale)/2;
+      const px=x=>ox+x*scale,py=y=>oy+y*scale;
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle='#07101a';
+      ctx.fillRect(0,0,w,h);
+      ctx.strokeStyle='rgba(126,200,227,.45)';
+      ctx.lineWidth=1;
+      ctx.strokeRect(ox,oy,mw*scale,mh*scale);
+      ctx.fillStyle='rgba(64,104,130,.72)';
+      MAP.walls.forEach(([x,y,ww,hh])=>ctx.fillRect(px(x),py(y),Math.max(1,ww*scale),Math.max(1,hh*scale)));
+      ctx.fillStyle='#e94560';
+      MAP.spawns.forEach(([x,y])=>{ctx.beginPath();ctx.arc(px(x),py(y),3,0,Math.PI*2);ctx.fill()});
+      this.drawMiniMapGroup(ctx,px,py,this.towers,2.2,'#66e0ff');
+      this.drawMiniMapGroup(ctx,px,py,this.blockers,3,'#aeb8c4');
+      this.drawMiniMapGroup(ctx,px,py,this.drones,3,'#ffcc44');
+      this.drawMiniMapGroup(ctx,px,py,this.droneHelpers,1.7,'#ffe08a');
+      this.drawMiniMapGroup(ctx,px,py,this.enemies,2.2,'#ff5570');
+      for(const r of this.reactors||[]){
+        if(!this.reactorAlive(r))continue;
+        ctx.fillStyle=r._isMainReactor?'#7ec8e3':'#44ff88';
+        ctx.beginPath();
+        ctx.arc(px(r.x),py(r.y),r._isMainReactor?5:3.5,0,Math.PI*2);
+        ctx.fill();
+      }
+      if(this.ship&&!this.shipDead){
+        ctx.fillStyle='#ffffff';
+        ctx.beginPath();
+        ctx.arc(px(this.ship.x),py(this.ship.y),4,0,Math.PI*2);
+        ctx.fill();
+      }
+      const cam=this.cameras.main;
+      const vw=cam.width/cam.zoom,vh=cam.height/cam.zoom;
+      ctx.strokeStyle=this.view.cameraMode==='local'?'rgba(255,255,255,.9)':'rgba(126,200,227,.7)';
+      ctx.lineWidth=1;
+      ctx.strokeRect(px(cam.scrollX),py(cam.scrollY),vw*scale,vh*scale);
+    }
+    drawMiniMapGroup(ctx,px,py,group,radius,color){
+      if(!group)return;
+      ctx.fillStyle=color;
+      group.children.iterate(obj=>{
+        if(!obj||!obj.active)return;
+        ctx.beginPath();
+        ctx.arc(px(obj.x),py(obj.y),radius,0,Math.PI*2);
+        ctx.fill();
+      })
     }
     createRuntimeGraphics(){
       this.ghost=this.add.image(0,0,'ghP1').setDepth(12).setAlpha(0.8).setVisible(false);
@@ -1821,6 +2010,8 @@ function launch(sel,mode='endless1'){
       this.physics.world.pause();
       this.time.paused=true;
       this.tweens.pauseAll();
+      syncViewSettingsUI();
+      this.updateMiniMap(0,true);
       document.getElementById('pausePanel').style.display='flex';
       document.getElementById('hudPhase').textContent='已暂停 · Esc继续';
     }
@@ -2824,6 +3015,7 @@ function launch(sel,mode='endless1'){
       // HP bars
       this.renderOverlayBars();
       this.updateHud(t,dt);
+      this.updateMiniMap(dt);
     }
 
     updateEnemies(dt){
