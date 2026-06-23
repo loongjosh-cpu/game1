@@ -87,14 +87,14 @@
 <body>
   <header>
     <h1>R32 地图编辑器</h1>
-    <div class="hint">关卡列表 / 白盒路线 / 闭口检查 / 反应炉战线规划</div>
+    <div class="hint">关卡列表 / 白盒路线 / 闭口检查 / 干净地图白盒</div>
   </header>
 
   <div class="wrap">
     <aside>
       <div class="section">
         <h2>关卡列表</h2>
-        <div class="small">选择关卡后可直接在画布上继续编辑。五关只写入编辑器，不改 Demo 当前关卡。</div>
+        <div class="small">选择关卡后可直接在画布上继续编辑。旧关卡数据保留，新地图不再显示经济点圈或文字提示。</div>
       </div>
       <div id="levelList" class="levels"></div>
       <div class="section">
@@ -104,10 +104,9 @@
           <button data-mode="select">选择 S</button>
           <button data-mode="spawn">出生点</button>
           <button data-mode="reactor">主反应炉</button>
-          <button data-mode="pocket">小反应炉点</button>
           <button data-mode="erase" class="danger">擦除</button>
         </div>
-        <p class="small">墙体：拖拽矩形。出生/反应炉/小反应炉点：点击放置。选择模式可点击墙体查看坐标。</p>
+        <p class="small">墙体：拖拽矩形。出生点/主反应炉：点击放置。选择模式可点击墙体查看坐标。</p>
       </div>
       <div class="section">
         <h3>图例</h3>
@@ -115,7 +114,6 @@
           <span><i class="swatch" style="background:var(--wall)"></i> 墙体/封闭障碍</span>
           <span><i class="swatch" style="background:var(--spawn)"></i> 出生点</span>
           <span><i class="swatch" style="background:var(--reactor)"></i> 主反应炉</span>
-          <span><i class="swatch" style="background:var(--pocket)"></i> 推荐小反应炉点</span>
         </div>
       </div>
     </aside>
@@ -154,7 +152,6 @@
           <div class="stat"><span class="small">墙体</span><b id="wallCount">0</b></div>
           <div class="stat"><span class="small">开口端点</span><b id="openEnds">0</b></div>
           <div class="stat"><span class="small">出生点</span><b id="spawnCount">0</b></div>
-          <div class="stat"><span class="small">小反应炉点</span><b id="pocketCount">0</b></div>
           <div class="stat"><span class="small">寻路问题</span><b id="pathIssues">-</b></div>
         </div>
         <p id="checkHint" class="small"></p>
@@ -169,12 +166,13 @@
         <div class="row" style="margin-bottom:8px">
           <button id="exportBtn" class="good">导出 JSON</button>
           <button id="copyBtn">复制</button>
+          <button id="importBtn">从 JSON 导入</button>
           <button id="saveDraftBtn">保存草稿</button>
           <button id="loadDraftBtn">读取草稿</button>
           <button id="sendDemoBtn" class="warn">导出到 Demo 无尽</button>
         </div>
         <textarea id="out" spellcheck="false" placeholder="导出的地图 JSON 会显示在这里"></textarea>
-        <p class="small">“导出到 Demo 无尽”会写入 localStorage 的 <code>r32-map</code>。Demo 目前读取墙体、出生点、主反应炉；路线和小反应炉点作为编辑器设计元数据保留。</p>
+        <p class="small">“导出到 Demo 无尽”会写入 localStorage 的 <code>r32-map</code>。Demo 只使用 <code>walls</code> 做碰撞/寻路；<code>paths</code> 是路线设计元数据，不等于墙体。</p>
       </div>
     </aside>
   </div>
@@ -261,16 +259,16 @@
         spawns:[[260,420]],
         reactor:{x:6900,y:3720},
         pockets:[
-          {x:1720,y:3830,r:420,label:'前线经济点'},
-          {x:3350,y:1120,r:420,label:'中段诱导点'},
-          {x:5670,y:3050,r:420,label:'终段补给点'}
+          {x:1720,y:3830,r:420,label:'历史点位A'},
+          {x:3350,y:1120,r:420,label:'历史点位B'},
+          {x:5670,y:3050,r:420,label:'历史点位C'}
         ],
         routes:[
           route([[260,420],[760,420],[760,1280],[6500,1280],[6500,2220],[760,2220],[760,3230],[6900,3230],[6900,3720]])
         ],
         notes:[
           '定位：第一关白盒，路标清晰，玩家一眼能看出“沿蛇道推进”。',
-          '反应炉玩法：推荐小反应炉点相互距离大于1000码，玩家若想铺经济，需要把防线从入口、中段、终段逐步拉开。',
+          '反应炉玩法：通过长路线和1000码反应炉距离限制，迫使玩家把防线从入口、中段、终段逐步拉开。',
           '墙体策略：主体使用封闭大障碍，避免未闭合线段造成怪物钻缝或视觉误读。'
         ]
       },
@@ -309,7 +307,7 @@
         name:'03 环形矿区',
         difficulty:'环绕 / 经济诱惑',
         unitScale:0.74,
-        summary:'中央矿区作为封闭地标，路线绕行形成内外圈感，小反应炉点诱导玩家冒险外扩。',
+        summary:'中央矿区作为封闭地标，路线绕行形成内外圈感，外侧长线诱导玩家冒险外扩。',
         walls:[
           ...outerWalls(),
           ...corridorWalls([
@@ -404,6 +402,44 @@
           '核心体验：地图单位缩放更小，视觉上更大；飞船需要在四路与多个经济点之间来回奔波。',
           '平衡目标：10波强度可按无尽30波附近校准，但地图本身主要解决路线选择和反应炉距离限制。'
         ]
+      },
+      {
+        id:'trial-large-whitebox',
+        name:'06 关卡试验1·大地图白盒',
+        difficulty:'10波 / 大物理地图基准',
+        unitScale:0.48,
+        summary:'8入口长距离封闭廊道；同一画布代表约2.08倍物理距离，飞船需要跨战线奔波，地图保持干净不画经济点提示。',
+        walls:[
+          ...corridorWalls([
+            [[180,520],[1150,520],[1150,1040],[2300,1040],[2300,1580],[3120,1580],[3440,1900],[3678,2072]],
+            [[180,2000],[900,2000],[900,2660],[2100,2660],[2100,2180],[3000,2180],[3400,2080],[3678,2072]],
+            [[180,3620],[1320,3620],[1320,3140],[2560,3140],[2560,2500],[3240,2380],[3678,2072]],
+            [[7176,520],[6200,520],[6200,1040],[5060,1040],[5060,1580],[4260,1580],[3920,1900],[3678,2072]],
+            [[7176,2080],[6460,2080],[6460,2680],[5240,2680],[5240,2180],[4380,2180],[3960,2080],[3678,2072]],
+            [[7176,3620],[6040,3620],[6040,3140],[4800,3140],[4800,2500],[4120,2380],[3678,2072]],
+            [[3678,180],[2820,180],[2820,760],[3460,760],[3460,1390],[3600,1840],[3678,2072]],
+            [[3678,3964],[4540,3964],[4540,3380],[3900,3380],[3900,2740],[3760,2300],[3678,2072]]
+          ], 220, 140)
+        ],
+        spawns:[[180,520],[180,2000],[180,3620],[7176,520],[7176,2080],[7176,3620],[3678,180],[3678,3964]],
+        reactor:{x:3678,y:2072},
+        pockets:[],
+        routes:[
+          route([[180,520],[1150,520],[1150,1040],[2300,1040],[2300,1580],[3120,1580],[3440,1900],[3678,2072]]),
+          route([[180,2000],[900,2000],[900,2660],[2100,2660],[2100,2180],[3000,2180],[3400,2080],[3678,2072]]),
+          route([[180,3620],[1320,3620],[1320,3140],[2560,3140],[2560,2500],[3240,2380],[3678,2072]]),
+          route([[7176,520],[6200,520],[6200,1040],[5060,1040],[5060,1580],[4260,1580],[3920,1900],[3678,2072]]),
+          route([[7176,2080],[6460,2080],[6460,2680],[5240,2680],[5240,2180],[4380,2180],[3960,2080],[3678,2072]]),
+          route([[7176,3620],[6040,3620],[6040,3140],[4800,3140],[4800,2500],[4120,2380],[3678,2072]]),
+          route([[3678,180],[2820,180],[2820,760],[3460,760],[3460,1390],[3600,1840],[3678,2072]]),
+          route([[3678,3964],[4540,3964],[4540,3380],[3900,3380],[3900,2740],[3760,2300],[3678,2072]])
+        ],
+        notes:[
+          '定位：大物理地图白盒；不是扩大镜头，而是降低单位缩放，让射程、速度、操作半径和反应炉间距在视觉上整体变小。',
+          '结构：东西各三路、南北各一路；外侧线路较长，中路较直接，最后从不同角度压向主反应炉。',
+          '地图表现：只保留墙体、入口和主反应炉，不绘制前线经济点、建议圈或文字提示。',
+          '寻路测试：8个入口全部可达，实际路径长度约为设计路线的0.96至1.08倍，未发现明显抄近路。'
+        ]
       }
     ];
 
@@ -465,7 +501,6 @@
           <div class="small" style="margin-top:6px">${lv.summary}</div>
           <div class="meta">
             <span class="tag">${lv.spawns.length}入口</span>
-            <span class="tag">${lv.pockets.length}经济点</span>
             <span class="tag">缩放 ${lv.unitScale}</span>
           </div>`;
         card.onclick = () => loadLevel(idx);
@@ -480,7 +515,6 @@
       $('levelSummary').textContent = lv.summary;
       $('wallCount').textContent = walls.length;
       $('spawnCount').textContent = spawns.length;
-      $('pocketCount').textContent = pockets.length;
       $('openEnds').textContent = check.openEnds;
       $('openEnds').style.color = check.openEnds ? '#f59e0b' : '#34d399';
       $('pathIssues').textContent = pathReport.length ? pathReport.filter(r => r.level !== 'ok').length : '-';
@@ -742,19 +776,6 @@
 
       drawActualPaths();
 
-      pockets.forEach((p, i) => {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-        ctx.fillStyle = 'rgba(167,139,250,.10)';
-        ctx.strokeStyle = 'rgba(167,139,250,.75)';
-        ctx.lineWidth = 5;
-        ctx.fill();
-        ctx.stroke();
-        drawLabel(p.label || `小反应炉${i+1}`, p.x, p.y - p.r - 30, '#c4b5fd');
-        ctx.restore();
-      });
-
       spawns.forEach((s, i) => {
         ctx.save();
         ctx.beginPath();
@@ -770,13 +791,14 @@
 
       ctx.save();
       ctx.beginPath();
-      ctx.arc(reactor.x,reactor.y,120,0,Math.PI*2);
+      const reactorRadius = Math.max(42, 120 * unitScale);
+      ctx.arc(reactor.x,reactor.y,reactorRadius,0,Math.PI*2);
       ctx.fillStyle = 'rgba(56,189,248,.92)';
       ctx.strokeStyle = '#e0f2fe';
       ctx.lineWidth = 7;
       ctx.fill();
       ctx.stroke();
-      drawLabel('主反应炉', reactor.x, reactor.y-165, '#bae6fd');
+      drawLabel('主反应炉', reactor.x, reactor.y-reactorRadius-45, '#bae6fd');
       ctx.restore();
 
       if(drag){
@@ -816,10 +838,6 @@
       }else if(mode === 'reactor'){
         pushUndo();
         reactor = {x:p.x,y:p.y};
-        renderAll();
-      }else if(mode === 'pocket'){
-        pushUndo();
-        pockets.push({x:p.x,y:p.y,r:430,label:`小反应炉点${pockets.length+1}`});
         renderAll();
       }else if(mode === 'erase'){
         pushUndo();
@@ -872,7 +890,12 @@
 
     function exportData(){
       const lv = LEVELS[levelIndex];
+      const paths = clone(routes).map(route => route.map(p => [p.x, p.y]));
       return {
+        schemaVersion: 1,
+        kind: 'level-map',
+        id: lv.id,
+        name: lv.name,
         levelId: lv.id,
         levelName: lv.name,
         summary: lv.summary,
@@ -882,9 +905,49 @@
         spawns: clone(spawns),
         reactor: clone(reactor),
         pockets: clone(pockets),
+        paths,
         routes: clone(routes),
         notes: clone(lv.notes)
       };
+    }
+
+    function normalizePoint(p){
+      return Array.isArray(p) ? {x:p[0], y:p[1]} : {x:p.x, y:p.y};
+    }
+
+    function normalizeImportedMap(data){
+      const src = data.map || data;
+      const rawPaths = src.paths || src.routes || data.paths || data.routes || [];
+      return {
+        levelId: data.levelId || data.id || src.id || 'custom',
+        levelName: data.levelName || data.name || src.name || '自定义地图',
+        unitScale: Number(src.unitScale || data.unitScale || 1),
+        walls: clone(src.walls || data.walls || []),
+        spawns: clone(src.spawns || data.spawns || []),
+        reactor: clone(src.reactor || data.reactor || {x:W/2,y:H/2}),
+        pockets: clone(src.pockets || data.pockets || []),
+        routes: clone(rawPaths).map(route => route.map(normalizePoint)),
+        notes: clone(src.notes || data.notes || [])
+      };
+    }
+
+    function applyMapData(data){
+      const m = normalizeImportedMap(data);
+      pushUndo();
+      walls = m.walls;
+      spawns = m.spawns;
+      pockets = m.pockets;
+      routes = m.routes;
+      reactor = m.reactor;
+      unitScale = m.unitScale;
+      selectedWall = -1;
+      actualPaths = [];
+      pathReport = [];
+      const idx = LEVELS.findIndex(lv => lv.id === m.levelId || lv.name === m.levelName);
+      if(idx >= 0) levelIndex = idx;
+      renderLevelList();
+      renderAll();
+      return m;
     }
 
     function writeOut(data=exportData()){
@@ -905,6 +968,14 @@
         $('saveState').textContent = 'JSON 已复制（兼容模式）';
       }
     };
+    $('importBtn').onclick = () => {
+      try{
+        const m = applyMapData(JSON.parse($('out').value));
+        $('saveState').textContent = `已从 JSON 导入：${m.levelName}`;
+      }catch(err){
+        $('saveState').textContent = `JSON 导入失败：${err.message}`;
+      }
+    };
     $('saveDraftBtn').onclick = () => {
       localStorage.setItem('r32-map-editor-draft', writeOut());
       $('saveState').textContent = '编辑器草稿已保存';
@@ -912,20 +983,12 @@
     $('loadDraftBtn').onclick = () => {
       const raw = localStorage.getItem('r32-map-editor-draft');
       if(!raw){ $('saveState').textContent = '没有找到草稿'; return; }
-      const data = JSON.parse(raw);
-      pushUndo();
-      walls = data.walls || [];
-      spawns = data.spawns || [];
-      pockets = data.pockets || [];
-      routes = data.routes || [];
-      reactor = data.reactor || {x:W/2,y:H/2};
-      unitScale = data.unitScale || 1;
-      selectedWall = -1;
-      const idx = LEVELS.findIndex(lv => lv.id === data.levelId);
-      if(idx >= 0) levelIndex = idx;
-      renderLevelList();
-      renderAll();
-      $('saveState').textContent = '草稿已读取';
+      try{
+        applyMapData(JSON.parse(raw));
+        $('saveState').textContent = '草稿已读取';
+      }catch(err){
+        $('saveState').textContent = `草稿读取失败：${err.message}`;
+      }
     };
     $('sendDemoBtn').onclick = () => {
       const data = exportData();
