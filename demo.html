@@ -23,7 +23,7 @@ canvas{display:block}
 .type-block{background:#1a2a30;color:#8899aa}
 .type-drone{background:#1a1a40;color:#6688ff}
 .counter{color:#7ec8e3;font-size:13px;margin:8px 0}
-#btnStart{padding:10px 40px;background:#0f3460;border:2px solid #7ec8e3;color:#7ec8e3;border-radius:6px;cursor:pointer;font-size:14px;font-family:monospace;margin-top:4px}
+#btnStart{width:100%;padding:10px 18px;background:#0f3460;border:2px solid #7ec8e3;color:#7ec8e3;border-radius:6px;cursor:pointer;font-size:14px;font-family:monospace;margin-top:4px}
 #btnStart:hover{background:#1a4a7a}
 #btnStart:disabled{border-color:#2a3a4a;color:#555;cursor:not-allowed}
 #gamePage{display:none}
@@ -106,29 +106,49 @@ canvas{display:block}
 .channelTrack{height:9px;border:1px solid #34566e;background:#08121c;border-radius:5px;overflow:hidden}
 .channelFill{height:100%;width:0;background:linear-gradient(90deg,#238ab1,#75e6ff)}
 .channelHint{margin-top:4px;color:#8299aa;text-align:center}
-.homeTop{width:min(900px,100%);display:flex;justify-content:space-between;align-items:center;gap:10px}
-.coreCount{color:#ffdc67;border:1px solid #745f22;background:#211d12;padding:7px 12px;border-radius:6px}
-.modeGrid{width:min(900px,100%);display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:8px 0 12px}
-.modeCard{border:2px solid #24445b;border-radius:8px;background:#101c2a;padding:10px;text-align:left;color:#aaa;cursor:pointer}
-.modeCard:hover{border-color:#4d8aac}
-.modeCard.active{border-color:#7ec8e3;box-shadow:0 0 10px #7ec8e333}
+.homeShell{width:min(1120px,100%);display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.85fr);gap:14px;align-items:start}
+.homeHero,.homeSection{border:1px solid #214057;border-radius:12px;background:linear-gradient(180deg,#101c2ad8,#09121ed8);box-shadow:0 0 18px #07111c77}
+.homeHero{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px}
+.homeHero h1{margin:0 0 4px!important}
+.homeKicker{color:#75e6ff;font-size:10px;letter-spacing:2px;margin-bottom:4px}
+.homeIntro{max-width:680px;color:#8fa5b5;font-size:11px;line-height:1.55}
+.homeSection{padding:13px}
+.sectionHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.sectionHead h2{color:#dff7ff;font-size:14px;font-weight:400}
+.sectionHead p{color:#8196a8;font-size:10px;line-height:1.5;margin-top:3px}
+.homeSide{display:flex;flex-direction:column;gap:14px;position:sticky;top:18px}
+.modeSection{grid-column:1}
+.loadoutSection{grid-column:1}
+.coreCount{color:#ffdc67;border:1px solid #745f22;background:#211d12;padding:7px 12px;border-radius:6px;white-space:nowrap}
+.modeGrid{width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:9px;margin:0}
+.modeCard{position:relative;border:2px solid #24445b;border-radius:9px;background:#101c2a;padding:11px 12px;text-align:left;color:#9aa8b4;cursor:pointer;line-height:1.5;transition:border-color .15s,background .15s,transform .15s,box-shadow .15s}
+.modeCard:hover{border-color:#4d8aac;background:#132235;transform:translateY(-1px)}
+.modeCard.active{border-color:#7ec8e3;background:#122c43;box-shadow:0 0 13px #7ec8e344}
+.modeCard.active::after{content:"已选择";position:absolute;right:9px;top:8px;color:#10243a;background:#7ec8e3;border-radius:10px;padding:1px 7px;font-size:9px}
 .modeCard.locked{opacity:.45}
-.modeCard strong{display:block;color:#7ec8e3;margin-bottom:3px}
-.menuRow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.modeCard strong{display:block;color:#7ec8e3;margin-bottom:4px;padding-right:46px}
+.menuRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.menuRow .sub{margin-bottom:0!important}
 .menuBtn{padding:8px 18px;border:1px solid #7ec8e3;border-radius:5px;background:#10243a;color:#7ec8e3;cursor:pointer;font-family:monospace}
 .menuBtn:hover{background:#1a3a59}
 .menuBtn:disabled{opacity:.4;cursor:not-allowed}
-.viewSettings{width:min(900px,100%);border:1px solid #214057;border-radius:8px;background:#0f1926cc;padding:9px 12px;margin-bottom:10px;font-size:10px;color:#91a6b8}
+.viewSettings{width:100%;border:1px solid #214057;border-radius:8px;background:#0f1926cc;padding:9px 12px;font-size:10px;color:#91a6b8}
 .viewSettingsTitle{color:#7ec8e3;margin-bottom:7px;font-size:12px}
-.viewSettingsRows{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
-.viewSettingRow{display:flex;align-items:center;gap:6px}
+.viewSettingsRows{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.viewSettingRow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.settingGroup{display:flex;gap:6px}
 .settingBtn{padding:5px 10px;border:1px solid #2a4a5a;border-radius:5px;background:#101f31;color:#9fb0bd;cursor:pointer;font-family:monospace;font-size:10px}
 .settingBtn:hover{border-color:#4d8aac;color:#dff7ff}
 .settingBtn.active{border-color:#7ec8e3;color:#7ec8e3;background:#0f3460;box-shadow:0 0 8px #7ec8e333}
-#miniMapWrap{position:fixed;right:14px;top:54px;z-index:19;width:238px;padding:7px;border:1px solid #315878;border-radius:8px;background:#07111dcc;box-shadow:0 0 14px #17364a88;pointer-events:none}
+.loadoutHeader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.loadoutHeader .sub{margin-bottom:0!important}
+.loadoutCounter{color:#7ec8e3;border:1px solid #315878;background:#0d1826;border-radius:999px;padding:4px 10px;font-size:11px;white-space:nowrap}
+.startDock{border-color:#315878;background:linear-gradient(180deg,#10243add,#081521dd)}
+.startDock .sub{margin:0 0 8px!important;line-height:1.5}
+#miniMapWrap{position:fixed;right:14px;top:54px;z-index:19;width:238px;padding:7px;border:1px solid #315878;border-radius:8px;background:#07111dcc;box-shadow:0 0 14px #17364a88;pointer-events:none;display:none}
 #miniMap{display:block;width:220px;height:140px;border:1px solid #1e4057;border-radius:4px;background:#07101a}
 .miniMapLabel{margin-top:4px;text-align:center;color:#7ec8e3;font-size:9px;letter-spacing:1px}
-#controlHints{position:fixed;left:12px;bottom:14px;z-index:18;max-width:min(460px,50vw);padding:7px 10px;border:1px solid #214057;border-radius:8px;background:#07111ccc;color:#8fa5b5;font-size:10px;line-height:1.5;pointer-events:none;box-shadow:0 0 12px #07111c88}
+#controlHints{position:fixed;left:12px;bottom:14px;z-index:18;max-width:min(460px,50vw);padding:7px 10px;border:1px solid #214057;border-radius:8px;background:#07111ccc;color:#8fa5b5;font-size:10px;line-height:1.5;pointer-events:none;box-shadow:0 0 12px #07111c88;display:none}
 #controlHints span{color:#dff7ff}
 #metaPage{display:none;z-index:130;background:#0d1219;padding:20px}
 .metaHeader{width:min(1050px,100%);display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
@@ -162,10 +182,13 @@ canvas{display:block}
 .pauseSettings .viewSettingsRows{gap:7px}
 .pauseActions{display:flex;flex-direction:column;gap:9px}
 .pauseActions .danger{border-color:#9c3d50;color:#ff8ca1}
-@media(max-width:700px){.towerGrid{grid-template-columns:repeat(2,1fr)}
+@media(max-width:700px){.homeShell{grid-template-columns:1fr}
+.homeHero{flex-direction:column;align-items:flex-start}
+.homeSide,.modeSection,.loadoutSection{grid-column:1;position:static}
+.sectionHead,.loadoutHeader{flex-direction:column;align-items:flex-start}
+.towerGrid{grid-template-columns:repeat(2,1fr)}
 .modeGrid{grid-template-columns:1fr}
 .metaHeader{align-items:flex-start}
-.homeTop{align-items:flex-start}
 #hud{right:12px}
 #miniMapWrap{width:178px;top:86px}
 #miniMap{width:160px;height:102px}
@@ -175,61 +198,99 @@ canvas{display:block}
 </head>
 <body>
 <div class="page" id="selectPage">
-<div class="homeTop">
-  <div>
-    <h1>R-32 星际殖民塔防</h1>
-    <div class="sub">部署终端</div>
-  </div>
-  <div class="coreCount">星核 ◈ <span id="homeCoreCount">0</span></div>
-</div>
-<div class="modeGrid">
-  <div class="modeCard active" data-mode="endless1">
-    <strong>无尽模式一</strong>
-    大物理地图，8 入口长廊压向中央主反应炉；每完整撑过 5 波结算 1 星核。
-  </div>
-  <div class="modeCard" data-mode="level1">
-    <strong>关卡 01 · 边境蛇道</strong>
-    单入口长蛇形路线，适合验证基础塔位和反应炉距离规则。
-  </div>
-  <div class="modeCard" data-mode="level2">
-    <strong>关卡 02 · 双门汇流</strong>
-    上下双入口在中段汇流，考验减速、AOE 与汇流点防守。
-  </div>
-  <div class="modeCard" data-mode="level3">
-    <strong>关卡 03 · 环形矿区</strong>
-    双入口绕行中央封闭区，拉扯内外圈战线与经济扩张。
-  </div>
-  <div class="modeCard" data-mode="level4">
-    <strong>关卡 04 · 裂谷三线</strong>
-    三入口多线压迫，避免单一路线通吃全局。
-  </div>
-  <div class="modeCard" data-mode="level5">
-    <strong>关卡 05 · 远征试验</strong>
-    四入口大地图关卡，10 波固定强度，约等于无尽 30 波。
-  </div>
-</div>
-<div class="menuRow">
-  <button class="menuBtn" id="btnMeta">进入星核整备舱</button>
-  <span class="sub">最高撑过 <span id="homeBestWave">0</span> 波</span>
-</div>
-<div class="viewSettings">
-  <div class="viewSettingsTitle">视角设置</div>
-  <div class="viewSettingsRows">
-    <div class="viewSettingRow">
-      <span>操作模式</span>
-      <button class="settingBtn" id="btnViewLocal">局部指挥</button>
-      <button class="settingBtn" id="btnViewGlobal">全局战术</button>
+<div class="homeShell">
+  <div class="homeHero">
+    <div>
+      <div class="homeKicker">R-32 DEFENSE TERMINAL</div>
+      <h1>R-32 星际殖民塔防</h1>
+      <div class="homeIntro">先选择地图，再确认视角与出击塔组。局部指挥适合大地图奔波作战，全局战术适合快速总览。</div>
     </div>
-    <div class="viewSettingRow">
-      <span>小地图</span>
-      <button class="settingBtn" id="btnMiniMap">开启</button>
-    </div>
+    <div class="coreCount">星核 ◈ <span id="homeCoreCount">0</span></div>
   </div>
+  <section class="homeSection modeSection">
+    <div class="sectionHead">
+      <div>
+        <h2>1. 选择作战地图</h2>
+        <p>关卡模式固定奖励 1 星核；无尽模式每完整撑过 5 波结算 1 星核。</p>
+      </div>
+    </div>
+    <div class="modeGrid">
+      <div class="modeCard active" data-mode="endless1">
+        <strong>无尽模式一</strong>
+        大物理地图，8 入口长廊压向中央主反应炉；每完整撑过 5 波结算 1 星核。
+      </div>
+      <div class="modeCard" data-mode="level1">
+        <strong>关卡 01 · 边境蛇道</strong>
+        单入口长蛇形路线，适合验证基础塔位和反应炉距离规则。
+      </div>
+      <div class="modeCard" data-mode="level2">
+        <strong>关卡 02 · 双门汇流</strong>
+        上下双入口在中段汇流，考验减速、AOE 与汇流点防守。
+      </div>
+      <div class="modeCard" data-mode="level3">
+        <strong>关卡 03 · 环形矿区</strong>
+        双入口绕行中央封闭区，拉扯内外圈战线与经济扩张。
+      </div>
+      <div class="modeCard" data-mode="level4">
+        <strong>关卡 04 · 裂谷三线</strong>
+        三入口多线压迫，避免单一路线通吃全局。
+      </div>
+      <div class="modeCard" data-mode="level5">
+        <strong>关卡 05 · 远征试验</strong>
+        四入口大地图关卡，10 波固定强度，约等于无尽 30 波。
+      </div>
+    </div>
+  </section>
+  <aside class="homeSide">
+    <section class="homeSection">
+      <div class="sectionHead">
+        <div>
+          <h2>2. 出击设置</h2>
+          <p>这些设置也可以在暂停菜单中修改。</p>
+        </div>
+      </div>
+      <div class="menuRow">
+        <button type="button" class="menuBtn" id="btnMeta">进入星核整备舱</button>
+        <span class="sub">最高撑过 <span id="homeBestWave">0</span> 波</span>
+      </div>
+      <div class="viewSettings">
+        <div class="viewSettingsTitle">视角设置</div>
+        <div class="viewSettingsRows">
+          <div class="viewSettingRow">
+            <span>操作模式</span>
+            <div class="settingGroup">
+              <button type="button" class="settingBtn" id="btnViewLocal">局部指挥</button>
+              <button type="button" class="settingBtn" id="btnViewGlobal">全局战术</button>
+            </div>
+          </div>
+          <div class="viewSettingRow">
+            <span>小地图</span>
+            <button type="button" class="settingBtn" id="btnMiniMap">开启</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="homeSection startDock">
+      <div class="sectionHead">
+        <div>
+          <h2>确认出击</h2>
+          <p id="modeHint">选择无尽模式出击塔（最多10个）</p>
+        </div>
+      </div>
+      <button type="button" id="btnStart" disabled>开始无尽模式</button>
+    </section>
+  </aside>
+  <section class="homeSection loadoutSection">
+    <div class="loadoutHeader">
+      <div>
+        <h2>3. 选择出击塔组</h2>
+        <div class="sub">最多携带 10 种塔，进入战斗后从下方建造栏部署。</div>
+      </div>
+      <div class="loadoutCounter"><span id="selCount">0</span>/10</div>
+    </div>
+    <div class="towerGrid" id="towerGrid"></div>
+  </section>
 </div>
-<div class="sub" id="modeHint">选择无尽模式出击塔（最多10个）</div>
-<div class="counter"><span id="selCount">0</span>/10</div>
-<div class="towerGrid" id="towerGrid"></div>
-<button id="btnStart" disabled>开始无尽模式</button>
 </div>
 <div class="page" id="metaPage">
 <div class="metaHeader">
@@ -311,12 +372,14 @@ canvas{display:block}
       <div class="viewSettingsRows">
         <div class="viewSettingRow">
           <span>操作模式</span>
-          <button class="settingBtn" id="btnPauseViewLocal">局部指挥</button>
-          <button class="settingBtn" id="btnPauseViewGlobal">全局战术</button>
+          <div class="settingGroup">
+            <button type="button" class="settingBtn" id="btnPauseViewLocal">局部指挥</button>
+            <button type="button" class="settingBtn" id="btnPauseViewGlobal">全局战术</button>
+          </div>
         </div>
         <div class="viewSettingRow">
           <span>小地图</span>
-          <button class="settingBtn" id="btnPauseMiniMap">开启</button>
+          <button type="button" class="settingBtn" id="btnPauseMiniMap">开启</button>
         </div>
       </div>
     </div>
@@ -555,10 +618,26 @@ function setViewSettings(patch){
 function activeGameScene(){
   return gameInstance?.scene?.getScene?.('Game')||gameInstance?.scene?.scenes?.[0]||null;
 }
+function setGameChromeVisible(visible){
+  const hud=document.getElementById('hud');
+  const hints=document.getElementById('controlHints');
+  if(hud)hud.style.display=visible?'flex':'none';
+  if(hints)hints.style.display=visible?'block':'none';
+  if(!visible){
+    ['miniMapWrap','buildPanel','twPanel','channelPanel'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.style.display='none';
+    });
+  }
+}
 function bindViewSettingsUI(){
   const bind=(id,patch)=>{
     const el=document.getElementById(id);
-    if(el)el.onclick=()=>setViewSettings(patch());
+    if(!el)return;
+    el.addEventListener('click',e=>{
+      e.preventDefault();
+      setViewSettings(patch());
+    });
   };
   bind('btnViewLocal',()=>({cameraMode:'local'}));
   bind('btnViewGlobal',()=>({cameraMode:'global'}));
@@ -572,7 +651,9 @@ function syncViewSettingsUI(){
   const s=viewSettings();
   const setActive=(id,on)=>{
     const el=document.getElementById(id);
-    if(el)el.classList.toggle('active',!!on);
+    if(!el)return;
+    el.classList.toggle('active',!!on);
+    el.setAttribute('aria-pressed',on?'true':'false');
   };
   setActive('btnViewLocal',s.cameraMode==='local');
   setActive('btnViewGlobal',s.cameraMode==='global');
@@ -582,6 +663,7 @@ function syncViewSettingsUI(){
     const el=document.getElementById(id);
     if(!el)return;
     el.classList.toggle('active',s.miniMap);
+    el.setAttribute('aria-pressed',s.miniMap?'true':'false');
     el.textContent=s.miniMap?'开启':'关闭';
   });
 }
@@ -611,6 +693,7 @@ function metaEffects(){
   };
 }
 function renderHome(){
+  setGameChromeVisible(false);
   syncViewSettingsUI();
   setText('homeCoreCount',metaSave.cores);
   setText('homeBestWave',metaSave.bestWave);
@@ -755,8 +838,8 @@ function toggleTowerSelection(card,i){
 }
 grid.addEventListener('wheel',e=>{
   e.preventDefault();
-  grid.parentElement.scrollTop+=e.deltaY;
-});
+  document.getElementById('selectPage').scrollTop+=e.deltaY;
+},{passive:false});
 document.querySelectorAll('[data-mode]').forEach(card=>card.addEventListener('click',()=>selectModeCard(card)));
 function selectModeCard(card){
   selectedMode=card.dataset.mode;
@@ -781,6 +864,7 @@ function startSelectedMode(){
   hidePage('selectPage');
   hidePage('gameOverPanel');
   document.getElementById('gamePage').style.display='flex';
+  setGameChromeVisible(true);
   gameInstance=launch(selectedTowers,selectedMode);
 }
 function returnToHome(){
