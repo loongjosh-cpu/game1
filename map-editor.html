@@ -72,6 +72,11 @@
     .legend{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
     .swatch{width:12px;height:12px;border-radius:50%;display:inline-block}
     .kbd{border:1px solid #475569;border-bottom-width:2px;border-radius:5px;padding:0 5px;background:#0f172a;color:#e2e8f0}
+    .path-report{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+    .path-row{border:1px solid var(--line);border-radius:10px;background:#0b1220;padding:8px;color:#cbd5e1;font-size:12px}
+    .path-row.ok{border-color:rgba(52,211,153,.45)}
+    .path-row.warn{border-color:rgba(245,158,11,.7);background:rgba(146,64,14,.18)}
+    .path-row.bad{border-color:rgba(251,113,133,.75);background:rgba(127,29,29,.18)}
     @media(max-width:1200px){
       .wrap{grid-template-columns:280px 1fr}
       .inspector{grid-column:1/3;min-height:260px}
@@ -121,8 +126,10 @@
         <button id="undoBtn">撤销</button>
         <button id="clearBtn" class="danger">清空</button>
         <button id="fitBtn">适配视图</button>
+        <button id="testPathBtn" class="warn">实际寻路测试</button>
         <span class="spacer"></span>
         <label class="pill"><input id="showRoutes" type="checkbox" checked> 路线预览</label>
+        <label class="pill"><input id="showActualPaths" type="checkbox" checked> 实际寻路</label>
         <label class="pill"><input id="showGrid" type="checkbox" checked> 网格</label>
         <label class="pill"><input id="snapGrid" type="checkbox" checked> 40码吸附</label>
       </div>
@@ -148,8 +155,10 @@
           <div class="stat"><span class="small">开口端点</span><b id="openEnds">0</b></div>
           <div class="stat"><span class="small">出生点</span><b id="spawnCount">0</b></div>
           <div class="stat"><span class="small">小反应炉点</span><b id="pocketCount">0</b></div>
+          <div class="stat"><span class="small">寻路问题</span><b id="pathIssues">-</b></div>
         </div>
         <p id="checkHint" class="small"></p>
+        <div id="pathReport" class="path-report"></div>
       </div>
       <div class="section notes">
         <h3>设计说明</h3>
@@ -181,6 +190,60 @@
     const outerWalls = () => [[0,0,W,80],[0,0,80,H],[W-80,0,80,H],[0,H-80,W,80]];
     const box = (x,y,w,h) => [x,y,w,h];
     const route = points => points.map(([x,y]) => ({x,y}));
+    const CELL = 80;
+    const NAV_CLEARANCE = 20;
+
+    function distToSegment(px, py, ax, ay, bx, by){
+      const vx = bx - ax, vy = by - ay;
+      const len2 = vx*vx + vy*vy;
+      if(len2 <= 0.0001) return Math.hypot(px - ax, py - ay);
+      const t = Math.max(0, Math.min(1, ((px - ax) * vx + (py - ay) * vy) / len2));
+      const x = ax + vx * t, y = ay + vy * t;
+      return Math.hypot(px - x, py - y);
+    }
+
+    function pointNearRoutes(x, y, routeSets, radius){
+      return routeSets.some(points => {
+        for(let i=1;i<points.length;i++){
+          if(distToSegment(x, y, points[i-1][0], points[i-1][1], points[i][0], points[i][1]) <= radius) return true;
+        }
+        return false;
+      });
+    }
+
+    function corridorWalls(routeSets, radius=330, step=160){
+      const rects = [];
+      const cols = Math.ceil(W / step);
+      const rows = Math.ceil(H / step);
+      for(let r=0;r<rows;r++){
+        let runStart = -1;
+        for(let c=0;c<=cols;c++){
+          const cx = c * step + step/2;
+          const cy = r * step + step/2;
+          const inBounds = c < cols;
+          const insidePlayable = cx > 100 && cx < W-100 && cy > 100 && cy < H-100;
+          const open = inBounds && insidePlayable && pointNearRoutes(cx, cy, routeSets, radius);
+          const blocked = c < cols && !open;
+          if(blocked && runStart < 0) runStart = c;
+          if((!blocked || c === cols) && runStart >= 0){
+            rects.push([runStart * step, r * step, (c - runStart) * step, step]);
+            runStart = -1;
+          }
+        }
+      }
+      return rects;
+    }
+
+    function pathLength(points){
+      let d = 0;
+      for(let i=1;i<points.length;i++){
+        const a = points[i-1], b = points[i];
+        const ax = Array.isArray(a) ? a[0] : a.x, ay = Array.isArray(a) ? a[1] : a.y;
+        const bx = Array.isArray(b) ? b[0] : b.x, by = Array.isArray(b) ? b[1] : b.y;
+        d += Math.hypot(bx-ax, by-ay);
+      }
+      return d;
+    }
 
     const LEVELS = [
       {
@@ -191,8 +254,9 @@
         summary:'单入口长蛇形路线，用大块封闭障碍制造回头路，验证基础塔位和反应炉距离规则。',
         walls:[
           ...outerWalls(),
-          box(960,520,5200,520), box(1280,1460,5000,520), box(960,2380,5200,520),
-          box(620,3360,720,520), box(2140,3360,900,520), box(3920,3360,980,520), box(5860,3360,620,520)
+          ...corridorWalls([
+            [[260,420],[760,420],[760,1280],[6500,1280],[6500,2220],[760,2220],[760,3230],[6900,3230],[6900,3720]]
+          ], 240, 160)
         ],
         spawns:[[260,420]],
         reactor:{x:6900,y:3720},
@@ -218,9 +282,10 @@
         summary:'上下双入口在中段汇流，考验玩家是否在汇流点布置AOE与减速。',
         walls:[
           ...outerWalls(),
-          box(900,640,1500,600), box(3260,520,720,900), box(5060,640,1420,600),
-          box(1280,1840,1660,520), box(4420,1840,1660,520),
-          box(900,2920,1500,620), box(3260,2700,760,980), box(5060,2920,1420,620)
+          ...corridorWalls([
+            [[260,760],[2920,760],[2920,1530],[3650,1530],[3650,2070],[6960,2070]],
+            [[260,3370],[2920,3370],[2920,2550],[3650,2550],[3650,2070],[6960,2070]]
+          ], 330, 160)
         ],
         spawns:[[260,760],[260,3370]],
         reactor:{x:6960,y:2070},
@@ -247,9 +312,11 @@
         summary:'中央矿区作为封闭地标，路线绕行形成内外圈感，小反应炉点诱导玩家冒险外扩。',
         walls:[
           ...outerWalls(),
-          box(2520,960,2260,180), box(2520,3000,2260,180), box(2520,960,180,2220), box(4600,960,180,2220),
-          box(820,780,920,720), box(5600,760,920,740), box(850,2660,960,760), box(5520,2650,1060,760),
-          box(3360,1680,560,760)
+          ...corridorWalls([
+            [[350,2070],[1300,2070],[1300,620],[3400,620],[3400,1280],[2700,1280],[2700,3820],[3500,3820]],
+            [[7000,2070],[6200,2070],[6200,3520],[5400,3520],[5200,3700],[3860,3820]]
+          ], 240, 160),
+          box(3240,1700,880,720)
         ],
         spawns:[[350,2070],[7000,2070]],
         reactor:{x:3680,y:3820},
@@ -260,8 +327,8 @@
           {x:3680,y:650,r:420,label:'北侧孤点'}
         ],
         routes:[
-          route([[350,2070],[2020,2070],[2020,720],[5120,720],[5120,2070],[3680,3820]]),
-          route([[7000,2070],[5320,2070],[5320,3420],[2070,3420],[2070,2070],[3680,3820]])
+          route([[350,2070],[1300,2070],[1300,620],[3400,620],[3400,1280],[2700,1280],[2700,3820],[3500,3820]]),
+          route([[7000,2070],[6200,2070],[6200,3520],[5400,3520],[5200,3700],[3860,3820]])
         ],
         notes:[
           '定位：用中央闭环地标给地图记忆点，玩家能围绕“矿区”规划战线。',
@@ -277,9 +344,11 @@
         summary:'三条裂谷从不同方向压向核心，推荐反应炉点分散，专门测试“不能只守一路”。',
         walls:[
           ...outerWalls(),
-          box(940,520,1260,980), box(2860,430,780,1380), box(4940,520,1260,980),
-          box(1320,2050,900,520), box(3000,1940,1350,700), box(5180,2050,900,520),
-          box(900,3060,1420,560), box(3360,2860,720,820), box(5040,3060,1420,560)
+          ...corridorWalls([
+            [[320,660],[2480,660],[2480,1860],[2880,1860],[2880,3820],[3680,3820]],
+            [[3680,260],[4180,260],[4180,1860],[4680,1860],[4680,3820],[3680,3820]],
+            [[7030,660],[6420,660],[6420,1840],[4900,1840],[4900,3820],[3680,3820]]
+          ], 310, 160)
         ],
         spawns:[[320,660],[3680,260],[7030,660]],
         reactor:{x:3680,y:3820},
@@ -308,10 +377,12 @@
         summary:'更大的战场感：多入口、长距离奔波、分散经济点，目标是让飞船调度和反应炉距离规则都成立。',
         walls:[
           ...outerWalls(),
-          box(760,560,1180,620), box(2520,480,820,980), box(4560,560,1180,620), box(6200,880,620,1040),
-          box(980,1640,880,620), box(2960,1540,1400,500), box(5280,1700,760,620),
-          box(560,2700,1340,620), box(2400,2600,760,980), box(4080,2600,760,980), box(5640,2720,1180,580),
-          box(1980,3600,980,300), box(4380,3600,980,300)
+          ...corridorWalls([
+            [[260,610],[2180,610],[2180,1340],[3680,1340],[3680,2160]],
+            [[7080,760],[6460,760],[6460,2440],[4860,2440],[4860,2160],[3680,2160]],
+            [[300,3540],[2220,3540],[2220,2260],[3680,2260],[3680,2160]],
+            [[7040,3500],[5200,3500],[5200,2460],[3680,2460],[3680,2160]]
+          ], 310, 160)
         ],
         spawns:[[260,610],[7080,760],[300,3540],[7040,3500]],
         reactor:{x:3680,y:2160},
@@ -347,6 +418,8 @@
     let selectedWall = -1;
     let drag = null;
     let undoStack = [];
+    let actualPaths = [];
+    let pathReport = [];
 
     function setMode(next){
       mode = next;
@@ -354,7 +427,7 @@
     }
 
     function snap(v){ return $('snapGrid').checked ? Math.round(v/40)*40 : v; }
-    function pushUndo(){ undoStack.push(JSON.stringify({walls,spawns,pockets,routes,reactor,unitScale,levelIndex})); if(undoStack.length>80) undoStack.shift(); }
+    function pushUndo(){ undoStack.push(JSON.stringify({walls,spawns,pockets,routes,reactor,unitScale,levelIndex})); actualPaths=[]; pathReport=[]; if(undoStack.length>80) undoStack.shift(); }
     function undo(){
       const last = undoStack.pop();
       if(!last) return;
@@ -373,6 +446,8 @@
       reactor = clone(lv.reactor);
       unitScale = lv.unitScale || 1;
       selectedWall = -1;
+      actualPaths = [];
+      pathReport = [];
       undoStack = [];
       renderLevelList();
       renderAll();
@@ -393,7 +468,7 @@
             <span class="tag">${lv.pockets.length}经济点</span>
             <span class="tag">缩放 ${lv.unitScale}</span>
           </div>`;
-        card.onclick = () => { levelIndex = idx; renderLevelList(); renderInfo(); };
+        card.onclick = () => loadLevel(idx);
         host.appendChild(card);
       });
     }
@@ -408,9 +483,14 @@
       $('pocketCount').textContent = pockets.length;
       $('openEnds').textContent = check.openEnds;
       $('openEnds').style.color = check.openEnds ? '#f59e0b' : '#34d399';
+      $('pathIssues').textContent = pathReport.length ? pathReport.filter(r => r.level !== 'ok').length : '-';
+      $('pathIssues').style.color = pathReport.some(r => r.level === 'bad') ? '#fb7185' : pathReport.some(r => r.level === 'warn') ? '#f59e0b' : '#34d399';
       $('checkHint').textContent = check.openEnds
         ? '仍有墙体端点未接入边界、其他墙体或封闭大障碍；建议继续闭合，减少怪物绕缝。'
         : '墙体闭口检查良好：没有发现明显开放端点。';
+      $('pathReport').innerHTML = pathReport.length
+        ? pathReport.map(r => `<div class="path-row ${r.level}">${r.text}</div>`).join('')
+        : '<div class="path-row">还未运行实际寻路测试。点击“实际寻路测试”后会按 Demo 的 A* 规则检查每个出生点。</div>';
       $('designNotes').innerHTML = `
         <p><b>难度：</b>${lv.difficulty}</p>
         <p><b>单位缩放：</b>${unitScale}。缩放越小，视觉地图越大，飞船奔波感越强。</p>
@@ -468,6 +548,122 @@
       return {openEnds};
     }
 
+    function buildGrid(){
+      const gw = Math.ceil(W / CELL), gh = Math.ceil(H / CELL), grid = [];
+      for(let r=0;r<gh;r++){
+        grid[r] = [];
+        for(let c=0;c<gw;c++){
+          const cx = c * CELL + CELL/2;
+          const cy = r * CELL + CELL/2;
+          grid[r][c] = walls.some(w => cx >= w[0]-NAV_CLEARANCE && cx <= w[0]+w[2]+NAV_CLEARANCE && cy >= w[1]-NAV_CLEARANCE && cy <= w[1]+w[3]+NAV_CLEARANCE) ? 1 : 0;
+        }
+      }
+      return grid;
+    }
+
+    function nearestOpenCell(grid, c, r, maxRadius=8){
+      const h = grid.length, w = grid[0].length;
+      if(c>=0 && c<w && r>=0 && r<h && !grid[r][c]) return {c,r};
+      for(let radius=1;radius<=maxRadius;radius++){
+        let best=null, bestD=Infinity;
+        for(let y=r-radius;y<=r+radius;y++){
+          for(let x=c-radius;x<=c+radius;x++){
+            if(x<0 || x>=w || y<0 || y>=h || grid[y][x] || Math.max(Math.abs(x-c), Math.abs(y-r)) !== radius) continue;
+            const d = (x-c)*(x-c) + (y-r)*(y-r);
+            if(d < bestD){ best = {c:x,r:y}; bestD = d; }
+          }
+        }
+        if(best) return best;
+      }
+      return null;
+    }
+
+    function astar(grid, sx, sy, ex, ey){
+      const h = grid.length, w = grid[0].length;
+      const startRaw = {c:Math.floor(sx/CELL), r:Math.floor(sy/CELL)};
+      const endRaw = {c:Math.floor(ex/CELL), r:Math.floor(ey/CELL)};
+      const start = nearestOpenCell(grid, startRaw.c, startRaw.r);
+      const end = nearestOpenCell(grid, endRaw.c, endRaw.r);
+      if(!start || !end) return [];
+      const sc=start.c, sr=start.r, ec=end.c, er=end.r;
+      const endAdjusted = ec !== endRaw.c || er !== endRaw.r;
+      const open=[], closed=new Set(), key=(c,r)=>r*w+c, gScore={}, fScore={}, from={};
+      const startKey = key(sc,sr);
+      gScore[startKey] = 0;
+      fScore[startKey] = Math.abs(sc-ec) + Math.abs(sr-er);
+      open.push({c:sc,r:sr,f:fScore[startKey]});
+      const nearWall = (c,r) => c>0 && c<w-1 && r>0 && r<h-1 && (grid[r-1][c] || grid[r+1][c] || grid[r][c-1] || grid[r][c+1]);
+      while(open.length){
+        open.sort((a,b)=>a.f-b.f);
+        const cur = open.shift(), curKey = key(cur.c, cur.r);
+        if(closed.has(curKey)) continue;
+        if(cur.c === ec && cur.r === er){
+          const path = [[ec*CELL+CELL/2, er*CELL+CELL/2]];
+          let k = curKey;
+          while(k !== startKey){
+            const prev = from[k];
+            if(!prev) break;
+            if(key(prev.c, prev.r) !== startKey) path.unshift([prev.c*CELL+CELL/2, prev.r*CELL+CELL/2]);
+            k = key(prev.c, prev.r);
+          }
+          if(!endAdjusted) path.push([ex, ey]);
+          return path;
+        }
+        closed.add(curKey);
+        for(const [dc,dr] of [[0,-1],[0,1],[-1,0],[1,0]]){
+          const nc = cur.c + dc, nr = cur.r + dr;
+          if(nc<0 || nc>=w || nr<0 || nr>=h || grid[nr][nc]) continue;
+          const nk = key(nc,nr);
+          if(closed.has(nk)) continue;
+          const tg = gScore[curKey] + 1 + (nearWall(nc,nr) ? 0.4 : 0);
+          if(tg < (gScore[nk] ?? Infinity)){
+            gScore[nk] = tg;
+            fScore[nk] = tg + Math.abs(nc-ec) + Math.abs(nr-er);
+            from[nk] = {c:cur.c,r:cur.r};
+            open.push({c:nc,r:nr,f:fScore[nk]});
+          }
+        }
+      }
+      return [];
+    }
+
+    function maxPathDeviation(path, planned){
+      let maxD = 0, sum = 0, count = 0;
+      path.forEach(([x,y]) => {
+        let best = Infinity;
+        for(let i=1;i<planned.length;i++){
+          best = Math.min(best, distToSegment(x, y, planned[i-1].x, planned[i-1].y, planned[i].x, planned[i].y));
+        }
+        maxD = Math.max(maxD, best);
+        sum += best;
+        count++;
+      });
+      return {max:maxD, avg:count ? sum/count : 0};
+    }
+
+    function runPathTest(){
+      const grid = buildGrid();
+      actualPaths = [];
+      pathReport = spawns.map((spawn, idx) => {
+        const path = astar(grid, spawn[0], spawn[1], reactor.x, reactor.y);
+        actualPaths.push(path);
+        if(!path.length) return {level:'bad', text:`出生点 ${idx+1}：不可达，敌人无法从出生点走到主反应炉。`};
+        const actualLen = pathLength(path);
+        const planned = routes[idx] || routes[routes.length-1] || [];
+        const plannedLen = pathLength(planned);
+        const ratio = plannedLen ? actualLen / plannedLen : 1;
+        const dev = planned.length ? maxPathDeviation(path, planned) : {max:0, avg:0};
+        const level = ratio < 0.78 || dev.max > 520 ? 'bad' : ratio < 0.88 || dev.max > 360 ? 'warn' : 'ok';
+        const label = level === 'ok' ? '通过' : level === 'warn' ? '疑似近路' : '存在近路';
+        return {
+          level,
+          text:`出生点 ${idx+1}：${label}。实际 ${Math.round(actualLen)} 码 / 预设 ${Math.round(plannedLen)} 码，比例 ${ratio.toFixed(2)}，最大偏离 ${Math.round(dev.max)} 码。`
+        };
+      });
+      $('saveState').textContent = `实际寻路测试完成：${pathReport.filter(r=>r.level!=='ok').length} 个问题`;
+      renderAll();
+    }
+
     function drawGrid(){
       if(!$('showGrid').checked) return;
       ctx.save();
@@ -493,6 +689,24 @@
         ctx.setLineDash([]);
         ctx.lineWidth = 5;
         ctx.strokeStyle = idx % 2 ? 'rgba(52,211,153,.85)' : 'rgba(96,165,250,.85)';
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+
+    function drawActualPaths(){
+      if(!$('showActualPaths').checked || !actualPaths.length) return;
+      ctx.save();
+      actualPaths.forEach((pts, idx) => {
+        if(pts.length < 2) return;
+        const level = pathReport[idx]?.level || 'ok';
+        ctx.lineWidth = 18;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = level === 'bad' ? 'rgba(251,113,133,.92)' : level === 'warn' ? 'rgba(245,158,11,.92)' : 'rgba(34,197,94,.92)';
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i][0], pts[i][1]);
         ctx.stroke();
       });
       ctx.restore();
@@ -525,6 +739,8 @@
         ctx.fillRect(x,y,w,h);
         ctx.strokeRect(x,y,w,h);
       });
+
+      drawActualPaths();
 
       pockets.forEach((p, i) => {
         ctx.save();
@@ -649,7 +865,9 @@
       canvas.style.height = 'auto';
       wrap.scrollTo({left:0,top:0,behavior:'smooth'});
     };
+    $('testPathBtn').onclick = runPathTest;
     $('showRoutes').onchange = draw;
+    $('showActualPaths').onchange = draw;
     $('showGrid').onchange = draw;
 
     function exportData(){
