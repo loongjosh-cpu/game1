@@ -199,14 +199,22 @@ canvas{display:block}
 .archiveTab{border:1px solid #24445b;border-radius:999px;background:#0d1826;color:#91a6b8;padding:8px 14px;font-family:monospace;cursor:pointer}
 .archiveTab:hover{border-color:#4d8aac;color:#dff7ff}
 .archiveTab.active{border-color:#7ec8e3;background:#12304a;color:#dff7ff;box-shadow:0 0 12px #7ec8e326}
-.archiveLayout{display:grid;grid-template-columns:minmax(220px,260px) minmax(0,1fr);gap:16px;align-items:start}
-.archiveList{display:flex;flex-direction:column;gap:7px;position:sticky;top:18px}
+.archivePage.active{display:flex;flex-direction:column;height:calc(100vh - 68px);max-height:calc(100vh - 68px);overflow:hidden}
+.archivePage .homeNavBar{flex:0 0 auto}
+.archivePage .homeSection{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.archivePage .archiveTabs{flex:0 0 auto}
+.archiveLayout{display:grid;grid-template-columns:minmax(220px,260px) minmax(0,1fr);gap:16px;align-items:stretch;flex:1 1 auto;min-height:0;overflow:hidden}
+.archiveList{display:flex;flex-direction:column;gap:7px;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:4px}
+.archiveList,.archiveDetail{scrollbar-width:thin;scrollbar-color:#315878 #0d1826}
+.archiveList::-webkit-scrollbar,.archiveDetail::-webkit-scrollbar{width:8px}
+.archiveList::-webkit-scrollbar-track,.archiveDetail::-webkit-scrollbar-track{background:#0d1826;border-radius:999px}
+.archiveList::-webkit-scrollbar-thumb,.archiveDetail::-webkit-scrollbar-thumb{background:#315878;border-radius:999px}
 .archiveListBtn{border:1px solid #24445b;border-radius:9px;background:#0d1826;color:#91a6b8;padding:10px 12px;text-align:left;cursor:pointer;font-family:monospace;display:grid;grid-template-columns:34px 1fr;gap:9px;align-items:center}
 .archiveListBtn:hover{border-color:#4d8aac;color:#dff7ff}
 .archiveListBtn.active{border-color:#7ec8e3;background:#10243a;color:#dff7ff;box-shadow:0 0 10px #7ec8e322}
 .archiveListBtn strong{display:block;color:#7ec8e3;margin-bottom:3px}
 .archiveListBtn span{font-size:9px;color:#70889b}
-.archiveDetail{border:1px solid #29445d;background:#111b29;border-radius:12px;padding:18px;font-size:12px;line-height:1.7;min-height:420px}
+.archiveDetail{border:1px solid #29445d;background:#111b29;border-radius:12px;padding:18px;font-size:12px;line-height:1.7;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .archiveDetail h3{color:#7ec8e3;font-size:18px;font-weight:400;margin-bottom:6px}
 .archiveTitle{display:flex;gap:12px;align-items:center;margin-bottom:8px}
 .archiveTitle h3{margin-bottom:2px}
@@ -470,6 +478,7 @@ body::after{
 .homeHero{flex-direction:column;align-items:flex-start}
 .homeSummaryGrid,.mainMenuActions{grid-template-columns:1fr}
 .settingsLayout,.archiveLayout{grid-template-columns:1fr}
+.archiveLayout{grid-template-rows:minmax(150px,35%) minmax(0,1fr)}
 .settingsPanel{border-left:0;border-top:1px solid #214057;padding-left:0;padding-top:12px}
 .archiveList{position:static}
 .homeSide,.modeSection,.loadoutSection{grid-column:1;position:static}
@@ -613,7 +622,7 @@ body::after{
     </div>
   </section>
 
-  <section class="homePane" id="homeArchivePane">
+  <section class="homePane archivePage" id="homeArchivePane">
     <div class="homeNavBar">
       <div class="homeNavTitle">
         <h2>作战档案</h2>
@@ -1589,21 +1598,35 @@ function renderTowerArchive(){
     btn.onclick=()=>selectArchiveTower(btn.dataset.archiveTower);
   });
 }
+function archiveListScrollTop(){
+  const list=document.getElementById('archiveList');
+  return list?list.scrollTop:0;
+}
+function resetArchiveScroll(options={}){
+  const detail=document.getElementById('archiveDetail');
+  const list=document.getElementById('archiveList');
+  if(detail)detail.scrollTop=0;
+  if(list){
+    if(options.list)list.scrollTop=0;
+    else if(Number.isFinite(options.listTop))list.scrollTop=options.listTop;
+  }
+}
 function selectArchiveTower(id){
+  const listTop=archiveListScrollTop();
   activeArchiveTowerId=id;
   renderTowerArchive();
+  resetArchiveScroll({listTop});
 }
 function selectArchiveEnemy(id){
+  const listTop=archiveListScrollTop();
   activeArchiveEnemyId=id;
   renderTowerArchive();
+  resetArchiveScroll({listTop});
 }
 function selectArchiveType(type){
   activeArchiveType=type==='enemy'?'enemy':'tower';
   renderTowerArchive();
-  const archivePane=document.getElementById('homeArchivePane');
-  if(archivePane&&archivePane.classList.contains('active')){
-    archivePane.scrollIntoView({block:'start'});
-  }
+  resetArchiveScroll({list:true});
   const selectPage=document.getElementById('selectPage');
   if(selectPage)selectPage.scrollTop=0;
 }
@@ -1814,7 +1837,10 @@ function showHomePane(paneId='homeMainPane'){
   try{
     renderHome();
     refreshStartButton();
-    if(paneId==='homeArchivePane')renderTowerArchive();
+    if(paneId==='homeArchivePane'){
+      renderTowerArchive();
+      resetArchiveScroll({list:true});
+    }
   }catch(err){
     console.warn('主界面刷新失败，已保留页面切换结果',err);
   }
