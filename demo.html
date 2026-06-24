@@ -179,7 +179,7 @@ canvas{display:block}
 .miniMapLabel{margin-top:4px;text-align:center;color:#7ec8e3;font-size:9px;letter-spacing:1px}
 #controlHints{position:fixed;left:12px;bottom:14px;z-index:18;max-width:min(460px,50vw);padding:7px 10px;border:1px solid #214057;border-radius:8px;background:#07111ccc;color:#8fa5b5;font-size:10px;line-height:1.5;pointer-events:none;box-shadow:0 0 12px #07111c88;display:none}
 #controlHints span{color:#dff7ff}
-#metaPage{display:none;z-index:130;background:#0d1219;padding:20px}
+#metaPage,#shopPage{display:none;z-index:130;background:#0d1219;padding:20px}
 .metaHeader{width:min(1050px,100%);display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 .metaHeader h2{color:#7ec8e3;font-weight:400}
 .metaBody{width:min(1050px,100%)}
@@ -187,9 +187,12 @@ canvas{display:block}
 .metaGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px}
 .metaNode,.archiveCard{border:1px solid #29445d;background:#111b29;border-radius:7px;padding:10px;font-size:10px;line-height:1.5}
 .metaNode.owned{border-color:#43845b;background:#11251c}
+.metaNode.equipped{border-color:#65cfe8;background:#102a34;box-shadow:0 0 10px #65cfe822}
 .metaNode.locked{opacity:.58}
 .metaNode h4,.archiveCard h4{font-size:12px;color:#7ec8e3;margin-bottom:4px}
 .metaNode .price{color:#ffdc67;margin:5px 0}
+.metaNode .state{color:#8fcce2;margin:5px 0}
+.metaNode .req{color:#8fa5b5;margin:4px 0}
 .metaNode button{width:100%;padding:5px;border:1px solid #477b9b;background:#132b41;color:#bceaff;border-radius:4px;cursor:pointer;font-family:monospace}
 .metaNode button:disabled{cursor:not-allowed;color:#777;border-color:#3b4650}
 .archiveTabs{display:flex;gap:8px;margin-bottom:12px;border-bottom:1px solid #214057;padding-bottom:10px}
@@ -496,7 +499,6 @@ body::after{
     </div>
     <div class="homeSummaryGrid">
       <div class="summaryCard"><span>当前地图</span><strong id="homeCurrentMode">无尽模式一</strong></div>
-      <div class="summaryCard"><span>出击塔组</span><strong><span id="homeTowerCount">0</span>/10</strong></div>
       <div class="summaryCard"><span>无尽最高</span><strong><span id="homeBestWave">0</span> 波</strong></div>
       <div class="summaryCard"><span>视角模式</span><strong id="homeViewMode">局部视角</strong></div>
     </div>
@@ -504,7 +506,8 @@ body::after{
       <button type="button" class="mainMenuBtn primary" data-home-pane="homeLevelPane" onclick="activateHomePane(this,event)"><strong>关卡模式</strong><span>按顺序挑战固定关卡，通关上一关后解锁下一关。</span></button>
       <button type="button" class="mainMenuBtn" data-home-pane="homeEndlessPane" onclick="activateHomePane(this,event)"><strong>无尽模式</strong><span>选择无尽地图，尽可能撑过更多波次并获取星核。</span></button>
       <button type="button" class="mainMenuBtn" data-home-pane="homeArchivePane" onclick="activateHomePane(this,event)"><strong>作战档案</strong><span>查看防御塔、怪物定位与关键作战信息。</span></button>
-      <button type="button" class="mainMenuBtn" id="btnMeta"><strong>星核整备舱</strong><span>消耗星核进行局外永久升级。</span></button>
+      <button type="button" class="mainMenuBtn" id="btnShop"><strong>专精商店</strong><span>购买飞船与防御塔专精芯片。</span></button>
+      <button type="button" class="mainMenuBtn" id="btnMeta"><strong>星核整备舱</strong><span>装备或卸下已拥有的专精芯片。</span></button>
       <button type="button" class="mainMenuBtn" data-home-pane="homeSettingsPane" onclick="activateHomePane(this,event)"><strong>设置</strong><span>调整视角、操作与音频。</span></button>
     </div>
   </section>
@@ -700,7 +703,7 @@ body::after{
 <div class="metaHeader">
   <div>
     <h2>星核整备舱</h2>
-    <div class="sub">消耗星核进行永久升级。塔与怪物的详细信息请进入作战档案查看。</div>
+    <div class="sub">装备或卸下已拥有的专精芯片。已装备芯片会在作战中生效。</div>
   </div>
   <div>
     <span class="coreCount">星核 ◈ <span id="metaCoreCount">0</span></span>
@@ -709,10 +712,29 @@ body::after{
   </div>
 </div>
 <div class="metaBody">
-  <h3>飞船系统</h3>
+  <h3>飞船芯片</h3>
   <div class="metaGrid" id="shipMetaGrid"></div>
-  <h3>防御塔养成</h3>
+  <h3>防御塔芯片</h3>
   <div class="metaGrid" id="towerMetaGrid"></div>
+</div>
+</div>
+<div class="page" id="shopPage">
+<div class="metaHeader">
+  <div>
+    <h2>专精商店</h2>
+    <div class="sub">使用星核购买飞船与防御塔专精芯片。芯片需要在星核整备舱装备后生效。</div>
+  </div>
+  <div>
+    <span class="coreCount">星核 ◈ <span id="shopCoreCount">0</span></span>
+    <button class="menuBtn" id="btnShopArchive">查看作战档案</button>
+    <button class="menuBtn" id="btnShopBack">返回部署终端</button>
+  </div>
+</div>
+<div class="metaBody">
+  <h3>飞船专精</h3>
+  <div class="metaGrid" id="shopShipGrid"></div>
+  <h3>防御塔专精</h3>
+  <div class="metaGrid" id="shopTowerGrid"></div>
 </div>
 </div>
 <div class="page" id="gamePage" style="display:none;flex-direction:column">
@@ -983,7 +1005,7 @@ const META_NODES=[
   {id:'ship_multi_2',group:'ship',name:'多目标锁定 II',cost:2,req:['ship_multi_1'],desc:'导弹同时攻击 3 个目标'},
   {id:'ship_blast',group:'ship',name:'爆裂弹头',cost:3,req:['ship_damage_2','ship_cd_2','ship_multi_2'],desc:'导弹命中造成半径100范围伤害'},
   {id:'tower_p1',group:'tower',tower:'P1',name:'双管炮',cost:2,desc:'每次攻击有33%概率追加一发'},
-  {id:'tower_p2',group:'tower',tower:'P2',name:'电磁停顿',cost:3,desc:'命中使敌人减速90%，持续0.5秒'},
+  {id:'tower_p2',group:'tower',tower:'P2',name:'电磁停顿',cost:3,desc:'命中使敌人减速70%，持续0.5秒'},
   {id:'tower_p3',group:'tower',tower:'P3',name:'电磁残留',cost:4,desc:'攻击区域残留1.5秒，每0.3秒造成1伤害'},
   {id:'tower_p4',group:'tower',tower:'P4',name:'低温强化',cost:3,desc:'减速效果由40%提高至50%'},
   {id:'tower_p5',group:'tower',tower:'P5',name:'聚焦校准',cost:2,desc:'每第二次攻击额外增加1层专注'},
@@ -997,12 +1019,21 @@ function loadMetaSave(){
     const raw=JSON.parse(safeStorageGet(META_SAVE_KEY)||'null');
     return normalizeMetaSave(raw);
   }catch(err){
-    console.warn('局外养成存档读取失败',err);
+    console.warn('专精芯片存档读取失败',err);
     return emptyMetaSave();
   }
 }
 function emptyMetaSave(){
-  return {cores:0,bestWave:0,nodes:{},levelClears:{},settings:{...DEFAULT_VIEW_SETTINGS}};
+  return {cores:0,bestWave:0,nodes:{},ownedChips:{},equippedChips:{},levelClears:{},settings:{...DEFAULT_VIEW_SETTINGS}};
+}
+function normalizeChipFlags(rawFlags){
+  const flags={},validIds=new Set(META_NODES.map(n=>n.id));
+  if(rawFlags&&typeof rawFlags==='object'){
+    Object.keys(rawFlags).forEach(id=>{
+      if(validIds.has(id)&&rawFlags[id])flags[id]=true;
+    });
+  }
+  return flags;
 }
 function normalizeMetaSave(raw){
   const settings={
@@ -1015,16 +1046,33 @@ function normalizeMetaSave(raw){
   if(raw?.levelClears&&typeof raw.levelClears==='object'){
     Object.keys(raw.levelClears).forEach(id=>{if(raw.levelClears[id])levelClears[id]=true});
   }
+  const oldNodes=normalizeChipFlags(raw?.nodes);
+  const ownedChips={
+    ...oldNodes,
+    ...normalizeChipFlags(raw?.ownedChips)
+  };
+  const equippedChips={
+    ...oldNodes,
+    ...normalizeChipFlags(raw?.equippedChips)
+  };
+  Object.keys(equippedChips).forEach(id=>{
+    if(!ownedChips[id])delete equippedChips[id];
+  });
   return {
     cores:Math.max(0,Number(raw?.cores)||0),
     bestWave:Math.max(0,Number(raw?.bestWave)||0),
-    nodes:raw?.nodes&&typeof raw.nodes==='object'?raw.nodes:{},
+    nodes:{...equippedChips},
+    ownedChips,
+    equippedChips,
     levelClears,
     settings
   };
 }
 let metaSave=loadMetaSave(),gameInstance=null;
-function saveMeta(){safeStorageSet(META_SAVE_KEY,JSON.stringify(metaSave))}
+function saveMeta(){
+  if(metaSave?.equippedChips)metaSave.nodes={...metaSave.equippedChips};
+  safeStorageSet(META_SAVE_KEY,JSON.stringify(metaSave));
+}
 function activeGameScene(){
   return gameInstance?.scene?.getScene?.('Game')||gameInstance?.scene?.scenes?.[0]||null;
 }
@@ -1187,7 +1235,28 @@ function syncViewSettingsUI(){
 function syncHomeViewSummary(){
   syncViewSettingsUI();
 }
-function hasMeta(id){return !!metaSave.nodes[id]}
+function syncMetaNodeAlias(){
+  metaSave.nodes={...metaSave.equippedChips};
+}
+function ownsChip(id){return !!metaSave.ownedChips?.[id]}
+function isChipEquipped(id){return !!metaSave.equippedChips?.[id]}
+function hasMeta(id){return isChipEquipped(id)}
+function chipRequirementsMet(node,predicate){
+  return (node.req||[]).every(predicate);
+}
+function enforceEquippedRequirements(){
+  let changed=true;
+  while(changed){
+    changed=false;
+    META_NODES.forEach(node=>{
+      if(isChipEquipped(node.id)&&!chipRequirementsMet(node,isChipEquipped)){
+        delete metaSave.equippedChips[node.id];
+        changed=true;
+      }
+    });
+  }
+  syncMetaNodeAlias();
+}
 function metaEffects(){
   const shipSpeedFlat=500
     +(hasMeta('ship_speed_1')?50:0)
@@ -1218,8 +1287,8 @@ function renderHome(){
   setText('homeCoreCount',metaSave.cores);
   setText('homeBestWave',metaSave.bestWave);
   setText('metaCoreCount',metaSave.cores);
+  setText('shopCoreCount',metaSave.cores);
   setText('homeCurrentMode',modeLabel());
-  setText('homeTowerCount',selectedTowers.length);
   syncHomeViewSummary();
 }
 function setText(id,value){
@@ -1227,33 +1296,69 @@ function setText(id,value){
   if(el)el.textContent=value;
 }
 function nodeState(node){
-  const owned=hasMeta(node.id);
-  const requirements=node.req||[];
-  const ready=requirements.every(hasMeta);
-  return {owned,ready,canBuy:!owned&&ready&&metaSave.cores>=node.cost};
+  const owned=ownsChip(node.id);
+  const equipped=isChipEquipped(node.id);
+  const ready=chipRequirementsMet(node,ownsChip);
+  const equipReady=chipRequirementsMet(node,isChipEquipped);
+  return {
+    owned,
+    equipped,
+    ready,
+    equipReady,
+    canBuy:!owned&&ready&&metaSave.cores>=node.cost,
+    canEquip:owned&&!equipped&&equipReady
+  };
 }
-function missingMetaRequirements(node){
+function missingShopRequirements(node){
   return (node.req||[])
-    .filter(id=>!hasMeta(id))
+    .filter(id=>!ownsChip(id))
     .map(id=>META_NODES.find(n=>n.id===id)?.name||id);
 }
-function metaNodeButtonText(state,node){
-  if(state.owned)return '已激活';
-  if(!state.ready)return '前置未完成';
-  return metaSave.cores>=node.cost?'激活':'星核不足';
+function missingEquipRequirements(node){
+  return (node.req||[])
+    .filter(id=>!isChipEquipped(id))
+    .map(id=>META_NODES.find(n=>n.id===id)?.name||id);
 }
-function nodeHtml(node){
+function shopNodeButtonText(state,node){
+  if(state.owned)return '已拥有';
+  if(!state.ready)return '前置未获得';
+  return metaSave.cores>=node.cost?'购买':'星核不足';
+}
+function equipNodeButtonText(state,node){
+  if(!state.owned)return '未拥有';
+  if(state.equipped)return '已装备 · 点击卸下';
+  if(!state.equipReady)return '前置未装备';
+  return '装备';
+}
+function shopNodeHtml(node){
   const state=nodeState(node);
-  const reqNames=missingMetaRequirements(node);
-  const reqHtml=reqNames.length?`<div>前置：${reqNames.join('、')}</div>`:'';
+  const reqNames=missingShopRequirements(node);
+  const reqHtml=reqNames.length?`<div class="req">前置：${reqNames.join('、')}</div>`:'';
   return [
     `<div class="metaNode ${state.owned?'owned':state.ready?'':'locked'}">`,
     `<h4>${node.name}</h4>`,
     `<div>${node.desc}</div>`,
     `<div class="price">◈ ${node.cost} 星核</div>`,
+    `<div class="state">${state.owned?'已拥有':state.ready?'可购买':'需要前置芯片'}</div>`,
     reqHtml,
-    `<button data-meta-buy="${node.id}" ${state.canBuy?'':'disabled'}>`,
-    metaNodeButtonText(state,node),
+    `<button data-chip-buy="${node.id}" ${state.canBuy?'':'disabled'}>`,
+    shopNodeButtonText(state,node),
+    '</button>',
+    '</div>'
+  ].join('');
+}
+function equipNodeHtml(node){
+  const state=nodeState(node);
+  const reqNames=missingEquipRequirements(node);
+  const reqHtml=reqNames.length&&!state.equipped?`<div class="req">需先装备：${reqNames.join('、')}</div>`:'';
+  return [
+    `<div class="metaNode ${state.equipped?'equipped':state.owned?'owned':'locked'}">`,
+    `<h4>${node.name}</h4>`,
+    `<div>${node.desc}</div>`,
+    `<div class="state">${state.equipped?'已装备':state.owned?'已拥有 · 未装备':`未拥有 · ${node.cost} 星核`}</div>`,
+    reqHtml,
+    `<button data-chip-toggle="${node.id}" ${state.owned&&(state.equipped||state.canEquip)?'':'disabled'}>`,
+    equipNodeButtonText(state,node),
     '</button>',
     '</div>'
   ].join('');
@@ -1357,9 +1462,15 @@ function towerArchiveDetailHtml(t){
       '</div>'
     ].join(''))
     .join('');
+  const state=node?nodeState(node):null;
   const nodeStateText=node
-    ? nodeState(node).owned?'已解锁':`未解锁 · ${node.cost} 星核`
-    : '当前无局外养成节点';
+    ? state.equipped?'已装备':state.owned?'已拥有 · 未装备':`未拥有 · ${node.cost} 星核`
+    : '当前无专精芯片';
+  const nodeButton=node
+    ? state.owned
+      ? '<button type="button" class="settingBtn" data-open-meta>进入星核整备舱</button>'
+      : '<button type="button" class="settingBtn" data-open-shop>进入专精商店</button>'
+    : '';
   return [
     '<div class="archiveTitle">',
     archiveIcon(TOWER_ICONS[t.id]),
@@ -1380,9 +1491,9 @@ function towerArchiveDetailHtml(t){
     levels,
     '</div>',
     '<div class="archiveNode">',
-    '<div class="archiveNodeTitle">局外养成</div>',
+    '<div class="archiveNodeTitle">专精芯片</div>',
     `<div>${nodeStateText}</div>`,
-    node?`<button type="button" class="settingBtn" data-open-meta>进入星核整备舱</button>`:'',
+    nodeButton,
     '</div>'
   ].join('');
 }
@@ -1495,28 +1606,50 @@ function towerMetaNodeCard(t){
   if(!node)return [
     '<div class="metaNode locked">',
     `<h4>${t.id} · ${t.name}</h4>`,
-    '<div>当前无局外养成节点</div>',
+    '<div>当前无专精芯片</div>',
     '</div>'
   ].join('');
   return [
     '<div class="archiveNode">',
     `<div class="archiveNodeTitle">${t.id} · ${t.name}</div>`,
     `<div>${towerTypeName(t)} · 建造 ${t.cost}⚡</div>`,
-    nodeHtml(node),
+    equipNodeHtml(node),
+    '</div>'
+  ].join('');
+}
+function towerShopNodeCard(t){
+  const node=META_NODES.find(n=>n.tower===t.id);
+  if(!node)return [
+    '<div class="metaNode locked">',
+    `<h4>${t.id} · ${t.name}</h4>`,
+    '<div>当前无专精芯片</div>',
+    '</div>'
+  ].join('');
+  return [
+    '<div class="archiveNode">',
+    `<div class="archiveNodeTitle">${t.id} · ${t.name}</div>`,
+    `<div>${towerTypeName(t)} · 建造 ${t.cost}⚡</div>`,
+    shopNodeHtml(node),
     '</div>'
   ].join('');
 }
 function bindMetaButtons(){
   document
-    .querySelectorAll('[data-meta-buy]')
-    .forEach(btn=>btn.onclick=()=>buyMeta(btn.dataset.metaBuy));
+    .querySelectorAll('[data-chip-toggle]')
+    .forEach(btn=>btn.onclick=()=>toggleChip(btn.dataset.chipToggle));
+}
+function bindShopButtons(){
+  document
+    .querySelectorAll('[data-chip-buy]')
+    .forEach(btn=>btn.onclick=()=>buyChip(btn.dataset.chipBuy));
 }
 function renderMeta(){
+  enforceEquippedRequirements();
   renderHome();
   const shipGrid=document.getElementById('shipMetaGrid');
   if(shipGrid)shipGrid.innerHTML=META_NODES
       .filter(n=>n.group==='ship')
-      .map(nodeHtml)
+      .map(equipNodeHtml)
       .join('');
   const towerMetaGrid=document.getElementById('towerMetaGrid');
   if(towerMetaGrid)towerMetaGrid.innerHTML=ALL_TOWERS
@@ -1524,15 +1657,45 @@ function renderMeta(){
       .join('');
   bindMetaButtons();
 }
-function buyMeta(id){
+function renderShop(){
+  renderHome();
+  const shipGrid=document.getElementById('shopShipGrid');
+  if(shipGrid)shipGrid.innerHTML=META_NODES
+      .filter(n=>n.group==='ship')
+      .map(shopNodeHtml)
+      .join('');
+  const towerShopGrid=document.getElementById('shopTowerGrid');
+  if(towerShopGrid)towerShopGrid.innerHTML=ALL_TOWERS
+      .map(towerShopNodeCard)
+      .join('');
+  bindShopButtons();
+}
+function buyChip(id){
   const node=META_NODES.find(n=>n.id===id);
   if(!node)return;
   const state=nodeState(node);
   if(!state.canBuy)return;
   metaSave.cores-=node.cost;
-  metaSave.nodes[id]=true;
+  metaSave.ownedChips[id]=true;
+  syncMetaNodeAlias();
+  saveMeta();
+  renderShop();
+  renderTowerArchive();
+}
+function toggleChip(id){
+  const node=META_NODES.find(n=>n.id===id);
+  if(!node||!ownsChip(id))return;
+  if(isChipEquipped(id)){
+    delete metaSave.equippedChips[id];
+  }else{
+    const state=nodeState(node);
+    if(!state.canEquip)return;
+    metaSave.equippedChips[id]=true;
+  }
+  enforceEquippedRequirements();
   saveMeta();
   renderMeta();
+  renderTowerArchive();
 }
 
 const LEVEL_UI_ORDER=['level1','level2','level3','level4','level5'];
@@ -1565,7 +1728,6 @@ function refreshStartButton(){
   setTextAll('.selCount',selectedTowers.length);
   setTextAll('.homeStartTowerCount',selectedTowers.length);
   setText('homeCurrentMode',label);
-  setText('homeTowerCount',selectedTowers.length);
   document.querySelectorAll('.btnStartMode').forEach(btn=>{
     btn.disabled=selectedTowers.length===0||locked;
     btn.textContent=locked?'关卡未解锁':startButtonText(label);
@@ -1655,6 +1817,9 @@ bindHomePaneNavigation();
 document.getElementById('btnMeta').onclick=showMetaPage;
 document.getElementById('btnMetaBack').onclick=showSelectPage;
 document.getElementById('btnMetaArchive').onclick=showArchivePage;
+document.getElementById('btnShop').onclick=showShopPage;
+document.getElementById('btnShopBack').onclick=showSelectPage;
+document.getElementById('btnShopArchive').onclick=showArchivePage;
 document.querySelectorAll('.btnStartMode').forEach(btn=>btn.addEventListener('click',startSelectedMode));
 document.addEventListener('click',e=>{
   const btn=e.target.closest('[data-open-meta]');
@@ -1662,18 +1827,33 @@ document.addEventListener('click',e=>{
   e.preventDefault();
   showMetaPage();
 });
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('[data-open-shop]');
+  if(!btn)return;
+  e.preventDefault();
+  showShopPage();
+});
 function showMetaPage(){
   hidePage('selectPage');
+  hidePage('shopPage');
   document.getElementById('metaPage').style.display='flex';
   renderMeta();
 }
+function showShopPage(){
+  hidePage('selectPage');
+  hidePage('metaPage');
+  document.getElementById('shopPage').style.display='flex';
+  renderShop();
+}
 function showArchivePage(){
   hidePage('metaPage');
+  hidePage('shopPage');
   document.getElementById('selectPage').style.display='flex';
   showHomePane('homeArchivePane');
 }
 function showSelectPage(){
   hidePage('metaPage');
+  hidePage('shopPage');
   document.getElementById('selectPage').style.display='flex';
   showHomePane('homeMainPane');
 }
@@ -1690,6 +1870,7 @@ function returnToHome(){
   hidePage('pausePanel');
   hidePage('gamePage');
   hidePage('metaPage');
+  hidePage('shopPage');
   destroyGameInstance();
   document.getElementById('selectPage').style.display='flex';
   showHomePane('homeMainPane');
