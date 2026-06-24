@@ -189,19 +189,33 @@ canvas{display:block}
 .metaNode .price{color:#ffdc67;margin:5px 0}
 .metaNode button{width:100%;padding:5px;border:1px solid #477b9b;background:#132b41;color:#bceaff;border-radius:4px;cursor:pointer;font-family:monospace}
 .metaNode button:disabled{cursor:not-allowed;color:#777;border-color:#3b4650}
-.archiveLayout{display:grid;grid-template-columns:260px 1fr;gap:12px;align-items:start}
+.archiveTabs{display:flex;gap:8px;margin-bottom:12px;border-bottom:1px solid #214057;padding-bottom:10px}
+.archiveTab{border:1px solid #24445b;border-radius:999px;background:#0d1826;color:#91a6b8;padding:8px 14px;font-family:monospace;cursor:pointer}
+.archiveTab:hover{border-color:#4d8aac;color:#dff7ff}
+.archiveTab.active{border-color:#7ec8e3;background:#12304a;color:#dff7ff;box-shadow:0 0 12px #7ec8e326}
+.archiveLayout{display:grid;grid-template-columns:280px 1fr;gap:12px;align-items:start}
 .archiveList{display:flex;flex-direction:column;gap:7px;position:sticky;top:18px}
-.archiveListBtn{border:1px solid #24445b;border-radius:9px;background:#0d1826;color:#91a6b8;padding:10px 12px;text-align:left;cursor:pointer;font-family:monospace}
+.archiveListBtn{border:1px solid #24445b;border-radius:9px;background:#0d1826;color:#91a6b8;padding:10px 12px;text-align:left;cursor:pointer;font-family:monospace;display:grid;grid-template-columns:34px 1fr;gap:9px;align-items:center}
 .archiveListBtn:hover{border-color:#4d8aac;color:#dff7ff}
 .archiveListBtn.active{border-color:#7ec8e3;background:#10243a;color:#dff7ff;box-shadow:0 0 10px #7ec8e322}
 .archiveListBtn strong{display:block;color:#7ec8e3;margin-bottom:3px}
 .archiveListBtn span{font-size:9px;color:#70889b}
 .archiveDetail{border:1px solid #29445d;background:#111b29;border-radius:10px;padding:14px;font-size:11px;line-height:1.6;min-height:360px}
 .archiveDetail h3{color:#7ec8e3;font-size:18px;font-weight:400;margin-bottom:6px}
+.archiveTitle{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.archiveTitle h3{margin-bottom:2px}
+.archiveIcon{width:32px;height:32px;border:1px solid #315878;border-radius:9px;background:radial-gradient(circle at 50% 40%,#1a4564,#0d1826 70%);display:inline-flex;align-items:center;justify-content:center;color:#dff7ff;font-size:17px;box-shadow:inset 0 0 10px #7ec8e31f,0 0 10px #7ec8e31a;flex:0 0 auto}
+.archiveDetail .archiveIcon{width:46px;height:46px;font-size:24px;border-radius:12px}
+.archiveIntro{border-left:2px solid #7ec8e3;padding:6px 10px;margin:8px 0 12px;background:#0d1826;color:#c5d7e2}
 .archiveMeta{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 12px}
 .archivePill{border:1px solid #315878;border-radius:999px;background:#0d1826;color:#a9bdc9;padding:3px 8px;font-size:10px}
+.archiveStatGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:10px 0}
+.archiveStat{border:1px solid #1d3348;border-radius:7px;background:#0d1826;padding:7px 8px}
+.archiveStat b{display:block;color:#7ec8e3;font-weight:400;margin-bottom:2px}
 .archiveLevels{margin-top:10px;border-top:1px solid #25394b;padding-top:8px;color:#aaa}
 .archiveLevel{margin:5px 0;padding:6px 8px;border:1px solid #1d3348;border-radius:6px;background:#0d1826}
+.archiveLevelHead{display:flex;justify-content:space-between;gap:10px;color:#dff7ff;margin-bottom:2px}
+.archiveCost{color:#ffdc67;white-space:nowrap}
 .archiveNode{margin-top:10px;padding:8px;border:1px solid #25394b;border-radius:7px;background:#0d1826}
 .archiveNodeTitle{color:#dff7ff;margin-bottom:4px}
 #gameOverPanel{display:none;position:fixed;inset:0;z-index:120;background:#07101acc;align-items:center;justify-content:center}
@@ -257,7 +271,7 @@ canvas{display:block}
     </div>
     <div class="mainMenuActions">
       <button type="button" class="mainMenuBtn primary" data-home-pane="homeMapPane" onclick="activateHomePane(this,event)"><strong>开始作战</strong><span>选择关卡或无尽地图，并确认出击。</span></button>
-      <button type="button" class="mainMenuBtn" data-home-pane="homeArchivePane" onclick="activateHomePane(this,event)"><strong>塔库档案</strong><span>逐个查看防御塔定位、等级数据与养成入口。</span></button>
+      <button type="button" class="mainMenuBtn" data-home-pane="homeArchivePane" onclick="activateHomePane(this,event)"><strong>作战档案</strong><span>查看防御塔、怪物定位与关键作战信息。</span></button>
       <button type="button" class="mainMenuBtn" id="btnMeta"><strong>星核整备舱</strong><span>消耗星核进行局外永久升级。</span></button>
       <button type="button" class="mainMenuBtn" data-home-pane="homeSettingsPane" onclick="activateHomePane(this,event)"><strong>设置</strong><span>调整显示、视角与操作说明。</span></button>
     </div>
@@ -326,15 +340,19 @@ canvas{display:block}
   <section class="homePane" id="homeArchivePane">
     <div class="homeNavBar">
       <div class="homeNavTitle">
-        <h2>塔库档案</h2>
-        <p>一次只展开一个塔的详细数据。需要永久强化时，可从这里进入星核整备舱。</p>
+        <h2>作战档案</h2>
+        <p>分为防御塔与怪物两类。速度类信息在怪物档案中只显示快慢描述。</p>
       </div>
       <button type="button" class="menuBtn" data-home-pane="homeMainPane" onclick="activateHomePane(this,event)">返回主界面</button>
     </div>
     <section class="homeSection">
+      <div class="archiveTabs" aria-label="档案分类">
+        <button type="button" class="archiveTab active" data-archive-type="tower">防御塔</button>
+        <button type="button" class="archiveTab" data-archive-type="enemy">怪物</button>
+      </div>
       <div class="archiveLayout">
-        <div class="archiveList" id="towerArchiveList"></div>
-        <div class="archiveDetail" id="towerArchiveDetail"></div>
+        <div class="archiveList" id="archiveList"></div>
+        <div class="archiveDetail" id="archiveDetail"></div>
       </div>
     </section>
   </section>
@@ -409,11 +427,11 @@ canvas{display:block}
 <div class="metaHeader">
   <div>
     <h2>星核整备舱</h2>
-    <div class="sub">消耗星核进行永久升级。塔的详细数值请进入塔库档案查看。</div>
+    <div class="sub">消耗星核进行永久升级。塔与怪物的详细信息请进入作战档案查看。</div>
   </div>
   <div>
     <span class="coreCount">星核 ◈ <span id="metaCoreCount">0</span></span>
-    <button class="menuBtn" id="btnMetaArchive">查看塔库档案</button>
+    <button class="menuBtn" id="btnMetaArchive">查看作战档案</button>
     <button class="menuBtn" id="btnMetaBack">返回部署终端</button>
   </div>
 </div>
@@ -876,6 +894,15 @@ function bindHomePaneNavigation(){
     });
   });
 }
+function bindArchiveTabs(){
+  if(bindArchiveTabs._bound)return;
+  bindArchiveTabs._bound=true;
+  document.querySelectorAll('[data-archive-type]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      selectArchiveType(btn.dataset.archiveType);
+    });
+  });
+}
 function syncViewSettingsUI(){
   ViewModeController.sync();
 }
@@ -969,32 +996,107 @@ function towerLevelText(t,u){
 function towerTypeName(t){
   return t.type==='path'?'路径塔':t.type==='block'?'阻挡塔':'无人机核心';
 }
+const TOWER_ICONS={
+  P1:'◎',P2:'⌁',P3:'✦',P4:'❄',P5:'◈',P6:'☣',P7:'◇',
+  B1:'▣',B2:'♨',B3:'⬢',B4:'ϟ',B5:'✚',B6:'☢',B7:'✹',
+  D1:'✣',D2:'◆',D3:'✚'
+};
+const ENEMY_ICONS={
+  E1:'◇',E2:'⇢',E3:'裂',E4:'血',E5:'巢',E6:'甲',
+  E7:'»',E8:'增',E9:'震',E10:'召',E11:'翼',E12:'棘'
+};
+const TOWER_INTROS={
+  P1:'可靠的基础单体火力，费用低，适合补线和处理漏怪。',
+  P2:'连锁电磁塔，擅长在密集敌群中制造稳定多目标伤害。',
+  P3:'弹道型范围电磁炮，炮弹抵达落点后覆盖一片区域。',
+  P4:'低温控制塔，优先压制已减速目标，用低伤害换高频控制。',
+  P5:'远距离狙击塔，适合打击高价值目标，专注层数让长战线收益更高。',
+  P6:'挂毒型功能塔，优先寻找未中毒目标，为毒系收割建立前置。',
+  P7:'毒伤收割塔，对中毒敌人收益更高，后期可同时处理双目标。',
+  B1:'主力阻挡肉盾，承担战线锚点和危险等级拦截职责。',
+  B2:'近距离灼烧阻挡塔，持续伤害范围内全部敌人。',
+  B3:'阻挡输出塔，血量与火力兼备，适合守窄口。',
+  B4:'电磁阻挡塔，主动脉冲并在受击时反击，适合高压接敌点。',
+  B5:'治疗支援塔，维修友方阻挡单位，是阵地续航核心。',
+  B6:'范围挂毒阻挡塔，给进入射程的敌群施加毒层。',
+  B7:'低费自爆阻挡塔，用一次性爆发换取紧急清场。',
+  D1:'轻型无人机核心，用数量拦截和追击中低血量目标。',
+  D2:'重装无人机核心，少量高伤无人机适合处理重点目标。',
+  D3:'维修无人机核心，不直接战斗，通过消耗自身生命维修阻挡塔。'
+};
+const ENEMY_INTROS={
+  E1:'基础炮灰，数量压力来源，单体威胁低但会消耗前线火力。',
+  E2:'突进型轻怪，会周期性加速，容易穿过火力空档。',
+  E3:'分裂单位，死亡后制造额外小怪，考验持续清杂能力。',
+  E4:'续航型近战怪，攻击成功后按最大生命值回血。',
+  E5:'慢速母体，会持续孵化小怪，必须尽快压制。',
+  E6:'重甲肉盾，生命值极高，用来拖住塔组火力。',
+  E7:'高速突破怪，速度极快，专门惩罚战线漏口。',
+  E8:'支援怪，周期性给周围敌人加速，放大整波压力。',
+  E9:'重型攻坚怪，近身攻击会对周围其他目标造成附带伤害。',
+  E10:'召唤型攻坚怪，每攻击数次生成嗜血兽，拖久后压力滚雪球。',
+  E11:'远程支援小怪，优先清理射程内无人机，削弱无人机防线。',
+  E12:'远程炮击怪，炮弹落点造成建筑范围伤害，威胁密集阵地。'
+};
+function archiveIcon(symbol){
+  return `<span class="archiveIcon">${symbol||'?'}</span>`;
+}
+function towerIntro(t){
+  return TOWER_INTROS[t.id]||t.desc||'暂无介绍';
+}
+function towerTotalCost(t){
+  return (Number(t.cost)||0)+t.upg.slice(1).reduce((sum,u)=>sum+(Number(u.c)||0),0);
+}
+function towerLevelCostText(t,u,i){
+  if(i===0)return `建造 ${t.cost}⚡`;
+  return u.c?`升级 ${u.c}⚡`:'升级费用未配置';
+}
 let activeArchiveTowerId=ALL_TOWERS[0]?.id||'';
+let activeArchiveEnemyId='E1';
+let activeArchiveType='tower';
 function towerArchiveListButton(t){
   const active=t.id===activeArchiveTowerId?' active':'';
   return [
     `<button type="button" class="archiveListBtn${active}" data-archive-tower="${t.id}">`,
+    archiveIcon(TOWER_ICONS[t.id]),
+    '<span>',
     `<strong>${t.id} · ${t.name}</strong>`,
-    `<span>${towerTypeName(t)} · 建造 ${t.cost}⚡</span>`,
+    `<span>${towerTypeName(t)} · ${towerIntro(t)}</span>`,
+    '</span>',
     '</button>'
   ].join('');
 }
 function towerArchiveDetailHtml(t){
   const node=META_NODES.find(n=>n.tower===t.id);
   const levels=t.upg
-    .map((u,i)=>`<div class="archiveLevel">Lv${i+1}：${towerLevelText(t,u)}</div>`)
+    .map((u,i)=>[
+      '<div class="archiveLevel">',
+      '<div class="archiveLevelHead">',
+      `<strong>Lv${i+1}</strong>`,
+      `<span class="archiveCost">${towerLevelCostText(t,u,i)}</span>`,
+      '</div>',
+      `<div>${towerLevelText(t,u)||'特殊机制'}</div>`,
+      '</div>'
+    ].join(''))
     .join('');
   const nodeStateText=node
     ? nodeState(node).owned?'已解锁':`未解锁 · ${node.cost} 星核`
     : '当前无局外养成节点';
   return [
+    '<div class="archiveTitle">',
+    archiveIcon(TOWER_ICONS[t.id]),
+    '<div>',
     `<h3>${t.id} · ${t.name}</h3>`,
+    `<div>${towerTypeName(t)}</div>`,
+    '</div>',
+    '</div>',
+    `<div class="archiveIntro">${towerIntro(t)}</div>`,
     '<div class="archiveMeta">',
-    `<span class="archivePill">${towerTypeName(t)}</span>`,
     `<span class="archivePill">建造 ${t.cost}⚡</span>`,
+    `<span class="archivePill">满级总投入 ${towerTotalCost(t)}⚡</span>`,
     `<span class="archivePill">${t.upg.length} 级</span>`,
     '</div>',
-    `<div>${t.desc}</div>`,
+    `<div>规则摘要：${t.desc}</div>`,
     '<div class="archiveLevels">',
     '<div class="archiveNodeTitle">等级数据</div>',
     levels,
@@ -1006,10 +1108,90 @@ function towerArchiveDetailHtml(t){
     '</div>'
   ].join('');
 }
+function enemyList(){
+  return Object.entries(EC||{}).map(([id,e])=>({id,...e}));
+}
+function enemySpeedLabel(e){
+  const speed=Number(e.spd)||0;
+  if(speed>=360)return '极快';
+  if(speed>=260)return '快';
+  if(speed>=180)return '中速';
+  return '慢';
+}
+function enemyAttackText(id,e){
+  if(id==='E11')return '远程晶针，优先无人机';
+  if(id==='E12')return '远程棘刺炮弹，落点范围伤害';
+  if(id==='E9')return '近战重击，周围附带伤害';
+  if(id==='E10')return '近战攻击并周期召唤';
+  if(id==='E5')return '低伤近战并持续孵化';
+  return e.dmg?`近战 ${e.dmg} 伤害`:'特殊行动';
+}
+function enemySpecialText(id,e){
+  const lines=[];
+  if(e.burst)lines.push('周期性进入加速态');
+  if(e.split)lines.push('死亡后分裂为2只镰爪虫');
+  if(e.leechPct)lines.push('攻击成功后回复自身最大生命值');
+  if(e.hatch)lines.push('持续孵化镰爪虫');
+  if(e.auraPulse)lines.push('周期性为周围敌人提供加速脉冲');
+  if(e.meleeSplash)lines.push('近身攻击对周围其他目标造成附带伤害');
+  if(e.summonEvery)lines.push('每2次攻击生成1只嗜血兽');
+  if(e.droneRange)lines.push('射程内优先锁定无人机');
+  if(e.rangeAtk)lines.push('远程炮弹抵达落点后结算范围伤害');
+  return lines.join('；')||'无特殊机制';
+}
+function enemyArchiveListButton(enemy){
+  const active=enemy.id===activeArchiveEnemyId?' active':'';
+  return [
+    `<button type="button" class="archiveListBtn${active}" data-archive-enemy="${enemy.id}">`,
+    archiveIcon(ENEMY_ICONS[enemy.id]),
+    '<span>',
+    `<strong>${enemy.id} · ${enemy.name}</strong>`,
+    `<span>移动${enemySpeedLabel(enemy)} · 危险 ${enemy.danger} · ${ENEMY_INTROS[enemy.id]||'暂无介绍'}</span>`,
+    '</span>',
+    '</button>'
+  ].join('');
+}
+function enemyArchiveDetailHtml(enemy){
+  return [
+    '<div class="archiveTitle">',
+    archiveIcon(ENEMY_ICONS[enemy.id]),
+    '<div>',
+    `<h3>${enemy.id} · ${enemy.name}</h3>`,
+    `<div>危险等级 ${enemy.danger}</div>`,
+    '</div>',
+    '</div>',
+    `<div class="archiveIntro">${ENEMY_INTROS[enemy.id]||'暂无介绍'}</div>`,
+    '<div class="archiveStatGrid">',
+    `<div class="archiveStat"><b>耐久</b><span>${enemy.hp} HP</span></div>`,
+    `<div class="archiveStat"><b>移动</b><span>${enemySpeedLabel(enemy)}</span></div>`,
+    `<div class="archiveStat"><b>攻击</b><span>${enemyAttackText(enemy.id,enemy)}</span></div>`,
+    `<div class="archiveStat"><b>威胁预算</b><span>${THREAT_COST[enemy.id]||'-'}</span></div>`,
+    '</div>',
+    '<div class="archiveLevels">',
+    '<div class="archiveNodeTitle">特殊机制</div>',
+    `<div class="archiveLevel">${enemySpecialText(enemy.id,enemy)}</div>`,
+    '</div>',
+    '<div class="settingsHint">注：怪物档案不暴露具体速度数值，只显示慢/中速/快/极快等作战描述。</div>'
+  ].join('');
+}
 function renderTowerArchive(){
-  const list=document.getElementById('towerArchiveList');
-  const detail=document.getElementById('towerArchiveDetail');
+  const list=document.getElementById('archiveList');
+  const detail=document.getElementById('archiveDetail');
   if(!list||!detail)return;
+  document.querySelectorAll('[data-archive-type]').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.archiveType===activeArchiveType);
+  });
+  if(activeArchiveType==='enemy'){
+    const enemies=enemyList();
+    if(!enemies.some(e=>e.id===activeArchiveEnemyId))activeArchiveEnemyId=enemies[0]?.id||'';
+    const active=enemies.find(e=>e.id===activeArchiveEnemyId)||enemies[0];
+    list.innerHTML=enemies.map(enemyArchiveListButton).join('');
+    detail.innerHTML=active?enemyArchiveDetailHtml(active):'<div class="settingsHint">暂无怪物数据</div>';
+    list.querySelectorAll('[data-archive-enemy]').forEach(btn=>{
+      btn.onclick=()=>selectArchiveEnemy(btn.dataset.archiveEnemy);
+    });
+    return;
+  }
   if(!ALL_TOWERS.some(t=>t.id===activeArchiveTowerId))activeArchiveTowerId=ALL_TOWERS[0]?.id||'';
   const active=ALL_TOWERS.find(t=>t.id===activeArchiveTowerId)||ALL_TOWERS[0];
   list.innerHTML=ALL_TOWERS.map(towerArchiveListButton).join('');
@@ -1020,6 +1202,14 @@ function renderTowerArchive(){
 }
 function selectArchiveTower(id){
   activeArchiveTowerId=id;
+  renderTowerArchive();
+}
+function selectArchiveEnemy(id){
+  activeArchiveEnemyId=id;
+  renderTowerArchive();
+}
+function selectArchiveType(type){
+  activeArchiveType=type==='enemy'?'enemy':'tower';
   renderTowerArchive();
 }
 function towerMetaNodeCard(t){
@@ -1087,6 +1277,7 @@ function startButtonText(label){
 }
 bindHomePaneNavigation();
 bindViewSettingsUI();
+bindArchiveTabs();
 const grid=document.getElementById('towerGrid');
 if(grid){
   ALL_TOWERS.forEach((t,i)=>{
