@@ -230,13 +230,13 @@ canvas{display:block}
       <div class="summaryCard"><span>当前地图</span><strong id="homeCurrentMode">无尽模式一</strong></div>
       <div class="summaryCard"><span>出击塔组</span><strong><span id="homeTowerCount">0</span>/10</strong></div>
       <div class="summaryCard"><span>无尽最高</span><strong><span id="homeBestWave">0</span> 波</strong></div>
-      <div class="summaryCard"><span>视角模式</span><strong id="homeViewMode">局部指挥</strong></div>
+      <div class="summaryCard"><span>视角模式</span><strong id="homeViewMode">局部视角</strong></div>
     </div>
     <div class="mainMenuActions">
       <button type="button" class="mainMenuBtn primary" data-home-pane="homeMapPane" onclick="activateHomePane(this,event)"><strong>开始作战</strong><span>选择关卡或无尽地图，并确认出击。</span></button>
       <button type="button" class="mainMenuBtn" data-home-pane="homeLoadoutPane" onclick="activateHomePane(this,event)"><strong>塔组配置</strong><span>选择最多 10 种进入战斗的防御塔。</span></button>
       <button type="button" class="mainMenuBtn" id="btnMeta"><strong>星核整备舱</strong><span>局外养成、永久升级与塔型档案。</span></button>
-      <button type="button" class="mainMenuBtn" data-home-pane="homeSettingsPane" onclick="activateHomePane(this,event)"><strong>设置</strong><span>切换局部/全局视角与小地图显示。</span></button>
+      <button type="button" class="mainMenuBtn" data-home-pane="homeSettingsPane" onclick="activateHomePane(this,event)"><strong>设置</strong><span>切换局部视角与全局视角。</span></button>
     </div>
   </section>
 
@@ -316,15 +316,8 @@ canvas{display:block}
         <div class="viewSettingsTitle">视角设置</div>
         <div class="viewSettingsRows">
           <div class="viewSettingRow">
-            <span>操作模式</span>
-            <div class="settingGroup">
-              <button type="button" class="settingBtn" id="btnViewLocal" data-view-camera="local" onclick="activateViewControl(this,event)">局部指挥</button>
-              <button type="button" class="settingBtn" id="btnViewGlobal" data-view-camera="global" onclick="activateViewControl(this,event)">全局战术</button>
-            </div>
-          </div>
-          <div class="viewSettingRow">
-            <span>小地图</span>
-            <button type="button" class="settingBtn" id="btnMiniMap" data-view-minimap="toggle" onclick="activateViewControl(this,event)">开启</button>
+            <span>当前视角：<strong id="homeSettingsViewMode">局部视角</strong></span>
+            <button type="button" class="settingBtn" id="btnViewToggle" data-view-toggle>视角切换</button>
           </div>
         </div>
       </div>
@@ -411,15 +404,8 @@ canvas{display:block}
       <div class="viewSettingsTitle">视角设置</div>
       <div class="viewSettingsRows">
         <div class="viewSettingRow">
-          <span>操作模式</span>
-          <div class="settingGroup">
-            <button type="button" class="settingBtn" id="btnPauseViewLocal" data-view-camera="local" onclick="activateViewControl(this,event)">局部指挥</button>
-            <button type="button" class="settingBtn" id="btnPauseViewGlobal" data-view-camera="global" onclick="activateViewControl(this,event)">全局战术</button>
-          </div>
-        </div>
-        <div class="viewSettingRow">
-          <span>小地图</span>
-          <button type="button" class="settingBtn" id="btnPauseMiniMap" data-view-minimap="toggle" onclick="activateViewControl(this,event)">开启</button>
+          <span>当前视角：<strong id="pauseViewMode">局部视角</strong></span>
+          <button type="button" class="settingBtn" id="btnPauseViewToggle" data-view-toggle>视角切换</button>
         </div>
       </div>
     </div>
@@ -594,7 +580,7 @@ const DRONE_TOWERS=[
 const ALL_TOWERS=[...PATH_TOWERS,...BLOCK_TOWERS,...DRONE_TOWERS];
 
 const META_SAVE_KEY='r32-meta-v1';
-const DEFAULT_VIEW_SETTINGS={cameraMode:'local',miniMap:true};
+const DEFAULT_VIEW_SETTINGS={cameraMode:'local'};
 function safeStorageGet(key){
   try{
     return localStorage.getItem(key);
@@ -652,7 +638,7 @@ function normalizeMetaSave(raw){
     ...(raw?.settings&&typeof raw.settings==='object'?raw.settings:{})
   };
   if(!['local','global'].includes(settings.cameraMode))settings.cameraMode=DEFAULT_VIEW_SETTINGS.cameraMode;
-  settings.miniMap=settings.miniMap!==false;
+  delete settings.miniMap;
   return {
     cores:Math.max(0,Number(raw?.cores)||0),
     bestWave:Math.max(0,Number(raw?.bestWave)||0),
@@ -679,24 +665,30 @@ function activeGameScene(){
 function eventElement(e){
   return e?.target instanceof Element?e.target:e?.target?.parentElement||null;
 }
+function viewModeLabel(mode=viewSettings().cameraMode){
+  return mode==='global'?'全局视角':'局部视角';
+}
+function toggleViewMode(){
+  setViewSettings({cameraMode:viewSettings().cameraMode==='local'?'global':'local'});
+}
 function activateViewControl(btn,e){
   if(!btn)return false;
   if(e){
     e.preventDefault();
     e.stopPropagation();
   }
-  if(btn.dataset.viewCamera){
-    setViewSettings({cameraMode:btn.dataset.viewCamera});
+  if(Object.prototype.hasOwnProperty.call(btn.dataset,'viewToggle')){
+    toggleViewMode();
     return true;
   }
-  if(btn.dataset.viewMinimap){
-    setViewSettings({miniMap:!viewSettings().miniMap});
+  if(btn.dataset.viewCamera){
+    setViewSettings({cameraMode:btn.dataset.viewCamera});
     return true;
   }
   return false;
 }
 function handleViewSettingsClick(e){
-  const btn=eventElement(e)?.closest?.('[data-view-camera],[data-view-minimap]');
+  const btn=eventElement(e)?.closest?.('[data-view-toggle],[data-view-camera]');
   if(btn)activateViewControl(btn,e);
 }
 function activateHomePane(btn,e){
@@ -730,12 +722,7 @@ function setGameChromeVisible(visible){
 function bindViewSettingsUI(){
   if(bindViewSettingsUI._bound)return;
   bindViewSettingsUI._bound=true;
-  document.addEventListener('click',handleViewSettingsClick,true);
-  document.querySelectorAll('[data-view-camera],[data-view-minimap]').forEach(btn=>{
-    btn.addEventListener('click',e=>{
-      activateViewControl(btn,e);
-    });
-  });
+  document.addEventListener('click',handleViewSettingsClick);
   syncViewSettingsUI();
 }
 function bindHomePaneNavigation(){
@@ -750,27 +737,21 @@ function bindHomePaneNavigation(){
 }
 function syncViewSettingsUI(){
   const s=viewSettings();
-  const setActive=(id,on)=>{
+  const label=viewModeLabel(s.cameraMode);
+  setText('homeViewMode',label);
+  setText('homeSettingsViewMode',label);
+  setText('pauseViewMode',label);
+  ['btnViewToggle','btnPauseViewToggle'].forEach(id=>{
     const el=document.getElementById(id);
     if(!el)return;
-    el.classList.toggle('active',!!on);
-    el.setAttribute('aria-pressed',on?'true':'false');
-  };
-  setActive('btnViewLocal',s.cameraMode==='local');
-  setActive('btnViewGlobal',s.cameraMode==='global');
-  setActive('btnPauseViewLocal',s.cameraMode==='local');
-  setActive('btnPauseViewGlobal',s.cameraMode==='global');
-  ['btnMiniMap','btnPauseMiniMap'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(!el)return;
-    el.classList.toggle('active',s.miniMap);
-    el.setAttribute('aria-pressed',s.miniMap?'true':'false');
-    el.textContent=s.miniMap?'开启':'关闭';
+    el.classList.toggle('active',s.cameraMode==='local');
+    el.setAttribute('aria-pressed',s.cameraMode==='local'?'true':'false');
+    el.title=s.cameraMode==='local'?'切换到全局视角':'切换到局部视角';
+    el.textContent='视角切换';
   });
 }
 function syncHomeViewSummary(){
-  const s=viewSettings();
-  setText('homeViewMode',s.cameraMode==='local'?'局部指挥':'全局战术');
+  syncViewSettingsUI();
 }
 function hasMeta(id){return !!metaSave.nodes[id]}
 function metaEffects(){
@@ -800,13 +781,12 @@ function metaEffects(){
 function renderHome(){
   setGameChromeVisible(false);
   syncViewSettingsUI();
-  const s=viewSettings();
   setText('homeCoreCount',metaSave.cores);
   setText('homeBestWave',metaSave.bestWave);
   setText('metaCoreCount',metaSave.cores);
   setText('homeCurrentMode',modeLabel());
   setText('homeTowerCount',selectedTowers.length);
-  setText('homeViewMode',s.cameraMode==='local'?'局部指挥':'全局战术');
+  syncHomeViewSummary();
 }
 function setText(id,value){
   const el=document.getElementById(id);
@@ -2014,11 +1994,14 @@ function launch(sel,mode='endless1'){
         cam.centerOn(mapW()/2,mapH()/2);
       }
     }
+    shouldShowMiniMap(){
+      return this.view?.cameraMode==='local';
+    }
     updateMiniMapVisibility(){
-      if(this.miniMapWrap)this.miniMapWrap.style.display=this.view?.miniMap?'block':'none';
+      if(this.miniMapWrap)this.miniMapWrap.style.display=this.shouldShowMiniMap()?'block':'none';
     }
     updateMiniMap(dt,force=false){
-      if(!this.view?.miniMap||!this.miniMapCtx)return;
+      if(!this.shouldShowMiniMap()||!this.miniMapCtx)return;
       this.miniMapTimer=(this.miniMapTimer||0)+dt;
       if(!force&&this.miniMapTimer<MINIMAP_REFRESH)return;
       this.miniMapTimer=0;
@@ -2026,7 +2009,7 @@ function launch(sel,mode='endless1'){
     }
     drawMiniMap(){
       const ctx=this.miniMapCtx,canvas=this.miniMapCanvas;
-      if(!ctx||!canvas||!this.view?.miniMap)return;
+      if(!ctx||!canvas||!this.shouldShowMiniMap())return;
       const w=canvas.width,h=canvas.height,pad=7,mw=mapW(),mh=mapH();
       const scale=Math.min((w-pad*2)/mw,(h-pad*2)/mh);
       const ox=(w-mw*scale)/2,oy=(h-mh*scale)/2;
