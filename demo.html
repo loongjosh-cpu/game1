@@ -659,6 +659,43 @@ function setViewSettings(patch){
 function activeGameScene(){
   return gameInstance?.scene?.getScene?.('Game')||gameInstance?.scene?.scenes?.[0]||null;
 }
+function eventElement(e){
+  return e?.target instanceof Element?e.target:e?.target?.parentElement||null;
+}
+function activateViewControl(btn,e){
+  if(!btn)return false;
+  if(e){
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  if(btn.dataset.viewCamera){
+    setViewSettings({cameraMode:btn.dataset.viewCamera});
+    return true;
+  }
+  if(btn.dataset.viewMinimap){
+    setViewSettings({miniMap:!viewSettings().miniMap});
+    return true;
+  }
+  return false;
+}
+function handleViewSettingsClick(e){
+  const btn=eventElement(e)?.closest?.('[data-view-camera],[data-view-minimap]');
+  if(btn)activateViewControl(btn,e);
+}
+function activateHomePane(btn,e){
+  const paneId=btn?.dataset?.homePane;
+  if(!paneId)return false;
+  if(e){
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  showHomePane(paneId);
+  return true;
+}
+function handleHomePaneClick(e){
+  const btn=eventElement(e)?.closest?.('[data-home-pane]');
+  if(btn)activateHomePane(btn,e);
+}
 function setGameChromeVisible(visible){
   const hud=document.getElementById('hud');
   const hints=document.getElementById('controlHints');
@@ -674,55 +711,22 @@ function setGameChromeVisible(visible){
 function bindViewSettingsUI(){
   if(bindViewSettingsUI._bound)return;
   bindViewSettingsUI._bound=true;
-  const clickTarget=e=>e.target instanceof Element?e.target:e.target?.parentElement;
-  const applyViewButton=(btn,e)=>{
-    if(e)e.preventDefault();
-    if(btn.dataset.viewCamera){
-      setViewSettings({cameraMode:btn.dataset.viewCamera});
-      return;
-    }
-    if(btn.dataset.viewMinimap){
-      setViewSettings({miniMap:!viewSettings().miniMap});
-    }
-  };
+  document.addEventListener('click',handleViewSettingsClick,true);
   document.querySelectorAll('[data-view-camera],[data-view-minimap]').forEach(btn=>{
     btn.addEventListener('click',e=>{
-      e.stopPropagation();
-      applyViewButton(btn,e);
+      activateViewControl(btn,e);
     });
-  });
-  document.addEventListener('click',e=>{
-    const target=clickTarget(e);
-    const cameraBtn=target?.closest('[data-view-camera]');
-    if(cameraBtn){
-      applyViewButton(cameraBtn,e);
-      return;
-    }
-    const miniMapBtn=target?.closest('[data-view-minimap]');
-    if(miniMapBtn){
-      applyViewButton(miniMapBtn,e);
-    }
   });
   syncViewSettingsUI();
 }
 function bindHomePaneNavigation(){
   if(bindHomePaneNavigation._bound)return;
   bindHomePaneNavigation._bound=true;
-  const openPane=(paneId,e)=>{
-    if(e)e.preventDefault();
-    if(paneId)showHomePane(paneId);
-  };
+  document.addEventListener('click',handleHomePaneClick,true);
   document.querySelectorAll('[data-home-pane]').forEach(btn=>{
     btn.addEventListener('click',e=>{
-      e.stopPropagation();
-      openPane(btn.dataset.homePane,e);
+      activateHomePane(btn,e);
     });
-  });
-  document.addEventListener('click',e=>{
-    const target=e.target instanceof Element?e.target:e.target?.parentElement;
-    const paneBtn=target?.closest('[data-home-pane]');
-    if(!paneBtn)return;
-    openPane(paneBtn.dataset.homePane,e);
   });
 }
 function syncViewSettingsUI(){
