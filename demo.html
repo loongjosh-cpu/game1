@@ -490,7 +490,7 @@ body::after{
       <div>
         <div class="homeKicker">R-32 DEFENSE TERMINAL</div>
         <h1>R-32 星际殖民塔防</h1>
-        <div class="homeIntro">主界面只保留作战入口。地图、塔组、局外养成和视角设置都进入独立页面，避免把所有操作堆在同一屏。</div>
+        <div class="homeIntro">选择作战模式，整备塔组，守住 R-32 主反应炉。</div>
       </div>
       <div class="coreCount">星核 ◈ <span id="homeCoreCount">0</span></div>
     </div>
@@ -505,7 +505,7 @@ body::after{
       <button type="button" class="mainMenuBtn" data-home-pane="homeEndlessPane" onclick="activateHomePane(this,event)"><strong>无尽模式</strong><span>选择无尽地图，尽可能撑过更多波次并获取星核。</span></button>
       <button type="button" class="mainMenuBtn" data-home-pane="homeArchivePane" onclick="activateHomePane(this,event)"><strong>作战档案</strong><span>查看防御塔、怪物定位与关键作战信息。</span></button>
       <button type="button" class="mainMenuBtn" id="btnMeta"><strong>星核整备舱</strong><span>消耗星核进行局外永久升级。</span></button>
-      <button type="button" class="mainMenuBtn" data-home-pane="homeSettingsPane" onclick="activateHomePane(this,event)"><strong>设置</strong><span>调整显示、视角与操作说明。</span></button>
+      <button type="button" class="mainMenuBtn" data-home-pane="homeSettingsPane" onclick="activateHomePane(this,event)"><strong>设置</strong><span>调整视角、操作与音频。</span></button>
     </div>
   </section>
 
@@ -537,7 +537,7 @@ body::after{
           </div>
           <div class="modeCard" data-mode="level4">
             <strong>关卡 04 · 裂谷三线</strong>
-            三入口多线压迫，避免单一路线通吃全局。
+            三入口多线压迫，需要分线布防与火力转移。
             <span class="modeMeta" data-level-state>未解锁</span>
           </div>
           <div class="modeCard" data-mode="level5">
@@ -551,7 +551,7 @@ body::after{
         <div class="sectionHead">
           <div>
             <h2>选择出击塔组</h2>
-            <p>最多携带 10 种塔。塔组现在跟随地图选择放在开战前确认流程里。</p>
+            <p>最多携带 10 种塔。根据战区压力配置本次防线。</p>
           </div>
           <div class="loadoutCounter"><span class="selCount">0</span>/10</div>
         </div>
@@ -591,7 +591,7 @@ body::after{
         <div class="sectionHead">
           <div>
             <h2>选择出击塔组</h2>
-            <p>最多携带 10 种塔。无尽模式更强调长期覆盖和后期扩线。</p>
+            <p>最多携带 10 种塔。准备长期覆盖、多线扩张与后期补强。</p>
           </div>
           <div class="loadoutCounter"><span class="selCount">0</span>/10</div>
         </div>
@@ -614,7 +614,7 @@ body::after{
     <div class="homeNavBar">
       <div class="homeNavTitle">
         <h2>作战档案</h2>
-        <p>分为防御塔与怪物两类。速度类信息在怪物档案中只显示快慢描述。</p>
+        <p>防御塔与怪物资料分栏归档。怪物速度以作战评级标记。</p>
       </div>
       <button type="button" class="menuBtn" data-home-pane="homeMainPane" onclick="activateHomePane(this,event)">返回主界面</button>
     </div>
@@ -634,7 +634,7 @@ body::after{
     <div class="homeNavBar">
       <div class="homeNavTitle">
         <h2>设置</h2>
-        <p>这些设置也可以在暂停菜单中修改。</p>
+        <p>调整视角、操作提示与音频状态。</p>
       </div>
       <button type="button" class="menuBtn" data-home-pane="homeMainPane" onclick="activateHomePane(this,event)">返回主界面</button>
     </div>
@@ -648,7 +648,7 @@ body::after{
         <div class="settingsPanel">
           <div class="settingsCategory active" data-settings-panel="display">
             <h3>显示与视角</h3>
-            <p>设置页先保留最常用选项，避免把未来的音量、键位、画面选项全部塞进一个卡片。</p>
+            <p>选择适合当前战区的观察方式。</p>
             <div class="settingsRow">
               <div>
                 <strong>当前视角：<span id="homeSettingsViewMode">局部视角</span></strong>
@@ -666,7 +666,7 @@ body::after{
           </div>
           <div class="settingsCategory" data-settings-panel="controls">
             <h3>操作</h3>
-            <p>这里只显示当前版本的关键操作，后续接入改键时再扩展为可配置表。</p>
+            <p>掌握移动、暂停与退出指令。</p>
             <div class="settingsRow">
               <div>
                 <strong>移动与暂停</strong>
@@ -682,11 +682,11 @@ body::after{
           </div>
           <div class="settingsCategory" data-settings-panel="audio">
             <h3>音频</h3>
-            <p>音频资源尚未接入。这里先预留独立音量分类，避免未来和视角/操作设置混在一起。</p>
+            <p>当前为静默作战。</p>
             <div class="settingsRow">
               <div>
-                <strong>预留：主音量 / 音乐 / 效果音</strong>
-                <div class="settingsHint">接入音频后会拆成独立滑条，而不是一个总开关。</div>
+                <strong>静默模式</strong>
+                <div class="settingsHint">不会播放音乐或效果音。</div>
               </div>
             </div>
           </div>
@@ -1449,7 +1449,7 @@ function enemyArchiveDetailHtml(enemy){
     '<div class="archiveNodeTitle">特殊机制</div>',
     `<div class="archiveLevel">${enemySpecialText(enemy.id,enemy)}</div>`,
     '</div>',
-    '<div class="settingsHint">注：怪物档案不暴露具体速度数值，只显示慢/中速/快/极快等作战描述。</div>'
+    '<div class="settingsHint">速度评级：慢 / 中速 / 快 / 极快。</div>'
   ].join('');
 }
 function renderTowerArchive(){
