@@ -1504,6 +1504,17 @@ function enemyAttackText(id,e){
   if(id==='E5')return '低伤近战并持续孵化';
   return e.dmg?`近战 ${e.dmg} 伤害`:'特殊行动';
 }
+function enemyRoleText(id){
+  if(id==='E7')return '高速突破单位';
+  if(id==='E8')return '支援增幅单位';
+  if(id==='E10')return '召唤压制单位';
+  if(id==='E11')return '反无人机火力';
+  if(id==='E12')return '远程范围火力';
+  if(id==='E5')return '持续压力单位';
+  if(id==='E3')return '分裂消耗单位';
+  if(id==='E4'||id==='E6'||id==='E9')return '重型压制单位';
+  return '基础突进单位';
+}
 function enemySpecialText(id,e){
   const lines=[];
   if(e.burst)lines.push('周期性进入加速态');
@@ -1535,15 +1546,15 @@ function enemyArchiveDetailHtml(enemy){
     archiveIcon(ENEMY_ICONS[enemy.id]),
     '<div>',
     `<h3>${enemy.id} · ${enemy.name}</h3>`,
-    `<div>危险等级 ${enemy.danger}</div>`,
+    `<div>${enemyRoleText(enemy.id)}</div>`,
     '</div>',
     '</div>',
     `<div class="archiveIntro">${ENEMY_INTROS[enemy.id]||'暂无介绍'}</div>`,
     '<div class="archiveStatGrid">',
+    `<div class="archiveStat"><b>危险等级</b><span>${enemy.danger}</span></div>`,
     `<div class="archiveStat"><b>耐久</b><span>${enemy.hp} HP</span></div>`,
     `<div class="archiveStat"><b>移动</b><span>${enemySpeedLabel(enemy)}</span></div>`,
     `<div class="archiveStat"><b>攻击</b><span>${enemyAttackText(enemy.id,enemy)}</span></div>`,
-    `<div class="archiveStat"><b>威胁预算</b><span>${THREAT_COST[enemy.id]||'-'}</span></div>`,
     '</div>',
     '<div class="archiveLevels">',
     '<div class="archiveNodeTitle">特殊机制</div>',
@@ -1589,6 +1600,12 @@ function selectArchiveEnemy(id){
 function selectArchiveType(type){
   activeArchiveType=type==='enemy'?'enemy':'tower';
   renderTowerArchive();
+  const archivePane=document.getElementById('homeArchivePane');
+  if(archivePane&&archivePane.classList.contains('active')){
+    archivePane.scrollIntoView({block:'start'});
+  }
+  const selectPage=document.getElementById('selectPage');
+  if(selectPage)selectPage.scrollTop=0;
 }
 function towerMetaNodeCard(t){
   const node=META_NODES.find(n=>n.tower===t.id);
