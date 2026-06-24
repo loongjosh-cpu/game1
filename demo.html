@@ -148,10 +148,19 @@ canvas{display:block}
 .menuBtn{padding:8px 18px;border:1px solid #7ec8e3;border-radius:5px;background:#10243a;color:#7ec8e3;cursor:pointer;font-family:monospace}
 .menuBtn:hover{background:#1a3a59}
 .menuBtn:disabled{opacity:.4;cursor:not-allowed}
-.viewSettings{width:100%;border:1px solid #214057;border-radius:8px;background:#0f1926cc;padding:9px 12px;font-size:10px;color:#91a6b8}
-.viewSettingsTitle{color:#7ec8e3;margin-bottom:7px;font-size:12px}
-.viewSettingsRows{display:flex;flex-direction:column;gap:8px;align-items:stretch}
-.viewSettingRow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.settingsLayout{display:grid;grid-template-columns:190px 1fr;gap:12px}
+.settingsTabs{display:flex;flex-direction:column;gap:8px}
+.settingsTab{border:1px solid #24445b;border-radius:9px;background:#0d1826;color:#91a6b8;padding:10px 12px;text-align:left;cursor:pointer;font-family:monospace}
+.settingsTab.active{border-color:#7ec8e3;color:#dff7ff;background:#10243a;box-shadow:0 0 10px #7ec8e322}
+.settingsPanel{border-left:1px solid #214057;padding-left:14px;min-height:180px}
+.settingsPanel h3{color:#7ec8e3;font-size:14px;font-weight:400;margin-bottom:6px}
+.settingsPanel p{color:#8196a8;font-size:10px;line-height:1.6;margin-bottom:12px}
+.settingsCategory{display:none}
+.settingsCategory.active{display:block}
+.settingsRow{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #1d3348;padding:11px 0;font-size:11px;color:#a9bdc9}
+.settingsRow:first-of-type{border-top:0}
+.settingsRow strong{color:#dff7ff;font-weight:400}
+.settingsHint{color:#70889b;font-size:10px;line-height:1.5;margin-top:4px}
 .settingGroup{display:flex;gap:6px}
 .settingBtn{padding:5px 10px;border:1px solid #2a4a5a;border-radius:5px;background:#101f31;color:#9fb0bd;cursor:pointer;font-family:monospace;font-size:10px}
 .settingBtn:hover{border-color:#4d8aac;color:#dff7ff}
@@ -180,10 +189,21 @@ canvas{display:block}
 .metaNode .price{color:#ffdc67;margin:5px 0}
 .metaNode button{width:100%;padding:5px;border:1px solid #477b9b;background:#132b41;color:#bceaff;border-radius:4px;cursor:pointer;font-family:monospace}
 .metaNode button:disabled{cursor:not-allowed;color:#777;border-color:#3b4650}
-.towerArchive{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:8px;padding-bottom:30px}
-.archiveLevels{margin-top:6px;border-top:1px solid #25394b;padding-top:5px;color:#aaa}
-.archiveLevel{margin:3px 0}
-.archiveNode{margin-top:8px;padding-top:7px;border-top:1px solid #25394b}
+.archiveLayout{display:grid;grid-template-columns:260px 1fr;gap:12px;align-items:start}
+.archiveList{display:flex;flex-direction:column;gap:7px;position:sticky;top:18px}
+.archiveListBtn{border:1px solid #24445b;border-radius:9px;background:#0d1826;color:#91a6b8;padding:10px 12px;text-align:left;cursor:pointer;font-family:monospace}
+.archiveListBtn:hover{border-color:#4d8aac;color:#dff7ff}
+.archiveListBtn.active{border-color:#7ec8e3;background:#10243a;color:#dff7ff;box-shadow:0 0 10px #7ec8e322}
+.archiveListBtn strong{display:block;color:#7ec8e3;margin-bottom:3px}
+.archiveListBtn span{font-size:9px;color:#70889b}
+.archiveDetail{border:1px solid #29445d;background:#111b29;border-radius:10px;padding:14px;font-size:11px;line-height:1.6;min-height:360px}
+.archiveDetail h3{color:#7ec8e3;font-size:18px;font-weight:400;margin-bottom:6px}
+.archiveMeta{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 12px}
+.archivePill{border:1px solid #315878;border-radius:999px;background:#0d1826;color:#a9bdc9;padding:3px 8px;font-size:10px}
+.archiveLevels{margin-top:10px;border-top:1px solid #25394b;padding-top:8px;color:#aaa}
+.archiveLevel{margin:5px 0;padding:6px 8px;border:1px solid #1d3348;border-radius:6px;background:#0d1826}
+.archiveNode{margin-top:10px;padding:8px;border:1px solid #25394b;border-radius:7px;background:#0d1826}
+.archiveNodeTitle{color:#dff7ff;margin-bottom:4px}
 #gameOverPanel{display:none;position:fixed;inset:0;z-index:120;background:#07101acc;align-items:center;justify-content:center}
 .gameOverCard{width:min(420px,90vw);padding:25px;text-align:center;border:2px solid #e94560;border-radius:10px;background:#111b29;box-shadow:0 0 30px #e9456044}
 .gameOverCard h2{color:#e94560;font-size:28px;margin-bottom:12px}
@@ -194,14 +214,17 @@ canvas{display:block}
 .pauseCard{width:min(360px,88vw);padding:24px;text-align:center;border:2px solid #7ec8e3;border-radius:10px;background:#111b29;box-shadow:0 0 30px #397ca055}
 .pauseCard h2{color:#dff7ff;font-size:26px;font-weight:400;margin-bottom:8px}
 .pauseCard p{color:#8196a8;margin-bottom:16px}
-.pauseSettings{border:1px solid #29435a;border-radius:8px;background:#0c1724;padding:9px;margin:0 0 13px;text-align:left}
-.pauseSettings .viewSettingsTitle{margin-bottom:6px}
-.pauseSettings .viewSettingsRows{gap:7px}
+.pauseSettings{border:1px solid #29435a;border-radius:8px;background:#0c1724;padding:10px;margin:0 0 13px;text-align:left}
+.pauseSettings .settingsRow{border-top:0;padding:0}
+.pauseSettings .settingsHint{margin-top:6px}
 .pauseActions{display:flex;flex-direction:column;gap:9px}
 .pauseActions .danger{border-color:#9c3d50;color:#ff8ca1}
 @media(max-width:700px){.homeShell{width:100%}
 .homeHero{flex-direction:column;align-items:flex-start}
 .homeSummaryGrid,.mainMenuActions{grid-template-columns:1fr}
+.settingsLayout,.archiveLayout{grid-template-columns:1fr}
+.settingsPanel{border-left:0;border-top:1px solid #214057;padding-left:0;padding-top:12px}
+.archiveList{position:static}
 .homeSide,.modeSection,.loadoutSection{grid-column:1;position:static}
 .sectionHead,.loadoutHeader{flex-direction:column;align-items:flex-start}
 .towerGrid{grid-template-columns:repeat(2,1fr)}
@@ -234,9 +257,9 @@ canvas{display:block}
     </div>
     <div class="mainMenuActions">
       <button type="button" class="mainMenuBtn primary" data-home-pane="homeMapPane" onclick="activateHomePane(this,event)"><strong>开始作战</strong><span>选择关卡或无尽地图，并确认出击。</span></button>
-      <button type="button" class="mainMenuBtn" data-home-pane="homeLoadoutPane" onclick="activateHomePane(this,event)"><strong>塔组配置</strong><span>选择最多 10 种进入战斗的防御塔。</span></button>
-      <button type="button" class="mainMenuBtn" id="btnMeta"><strong>星核整备舱</strong><span>局外养成、永久升级与塔型档案。</span></button>
-      <button type="button" class="mainMenuBtn" data-home-pane="homeSettingsPane" onclick="activateHomePane(this,event)"><strong>设置</strong><span>切换局部视角与全局视角。</span></button>
+      <button type="button" class="mainMenuBtn" data-home-pane="homeArchivePane" onclick="activateHomePane(this,event)"><strong>塔库档案</strong><span>逐个查看防御塔定位、等级数据与养成入口。</span></button>
+      <button type="button" class="mainMenuBtn" id="btnMeta"><strong>星核整备舱</strong><span>消耗星核进行局外永久升级。</span></button>
+      <button type="button" class="mainMenuBtn" data-home-pane="homeSettingsPane" onclick="activateHomePane(this,event)"><strong>设置</strong><span>调整显示、视角与操作说明。</span></button>
     </div>
   </section>
 
@@ -277,29 +300,42 @@ canvas{display:block}
           </div>
         </div>
       </section>
+      <section class="homeSection">
+        <div class="sectionHead">
+          <div>
+            <h2>选择出击塔组</h2>
+            <p>最多携带 10 种塔。塔组现在跟随地图选择放在开战前确认流程里。</p>
+          </div>
+          <div class="loadoutCounter"><span id="selCount">0</span>/10</div>
+        </div>
+        <div class="towerGrid" id="towerGrid"></div>
+      </section>
       <section class="homeSection startDock">
         <div class="sectionHead">
           <div>
             <h2>确认出击</h2>
             <p id="modeHint">选择无尽模式一出击塔（最多10个）</p>
           </div>
-          <div class="loadoutCounter"><span id="selCount">0</span>/10</div>
+          <div class="loadoutCounter"><span id="homeStartTowerCount">0</span>/10</div>
         </div>
         <button type="button" id="btnStart" disabled>开始无尽模式一</button>
       </section>
     </div>
   </section>
 
-  <section class="homePane" id="homeLoadoutPane">
+  <section class="homePane" id="homeArchivePane">
     <div class="homeNavBar">
       <div class="homeNavTitle">
-        <h2>塔组配置</h2>
-        <p>最多携带 10 种塔，进入战斗后从下方建造栏部署。</p>
+        <h2>塔库档案</h2>
+        <p>一次只展开一个塔的详细数据。需要永久强化时，可从这里进入星核整备舱。</p>
       </div>
       <button type="button" class="menuBtn" data-home-pane="homeMainPane" onclick="activateHomePane(this,event)">返回主界面</button>
     </div>
     <section class="homeSection">
-      <div class="towerGrid" id="towerGrid"></div>
+      <div class="archiveLayout">
+        <div class="archiveList" id="towerArchiveList"></div>
+        <div class="archiveDetail" id="towerArchiveDetail"></div>
+      </div>
     </section>
   </section>
 
@@ -312,12 +348,56 @@ canvas{display:block}
       <button type="button" class="menuBtn" data-home-pane="homeMainPane" onclick="activateHomePane(this,event)">返回主界面</button>
     </div>
     <section class="homeSection">
-      <div class="viewSettings">
-        <div class="viewSettingsTitle">视角设置</div>
-        <div class="viewSettingsRows">
-          <div class="viewSettingRow">
-            <span>当前视角：<strong id="homeSettingsViewMode">局部视角</strong></span>
-            <button type="button" class="settingBtn" id="btnViewToggle" data-view-toggle onclick="ViewModeController.handleButton(this,event)">视角切换</button>
+      <div class="settingsLayout">
+        <div class="settingsTabs" aria-label="设置分类">
+          <button type="button" class="settingsTab active" data-settings-tab="display">显示与视角</button>
+          <button type="button" class="settingsTab" data-settings-tab="controls">操作</button>
+          <button type="button" class="settingsTab" data-settings-tab="audio">音频</button>
+        </div>
+        <div class="settingsPanel">
+          <div class="settingsCategory active" data-settings-panel="display">
+            <h3>显示与视角</h3>
+            <p>设置页先保留最常用选项，避免把未来的音量、键位、画面选项全部塞进一个卡片。</p>
+            <div class="settingsRow">
+              <div>
+                <strong>当前视角：<span id="homeSettingsViewMode">局部视角</span></strong>
+                <div class="settingsHint">全局视角适合看全局布防；局部视角适合大地图移动和细节操作。</div>
+              </div>
+              <button type="button" class="settingBtn" id="btnViewToggle" data-view-toggle onclick="ViewModeController.handleButton(this,event)">视角切换</button>
+            </div>
+            <div class="settingsRow">
+              <div>
+                <strong>小地图</strong>
+                <div class="settingsHint">小地图是局部视角的配套显示，不再作为独立开关。</div>
+              </div>
+              <span class="archivePill">自动</span>
+            </div>
+          </div>
+          <div class="settingsCategory" data-settings-panel="controls">
+            <h3>操作</h3>
+            <p>这里只显示当前版本的关键操作，后续接入改键时再扩展为可配置表。</p>
+            <div class="settingsRow">
+              <div>
+                <strong>移动与暂停</strong>
+                <div class="settingsHint">WASD 移动；右键移动飞船；空格暂停。</div>
+              </div>
+            </div>
+            <div class="settingsRow">
+              <div>
+                <strong>退出优先级</strong>
+                <div class="settingsHint">ESC 优先退出当前操作，没有可退出内容时打开暂停菜单。</div>
+              </div>
+            </div>
+          </div>
+          <div class="settingsCategory" data-settings-panel="audio">
+            <h3>音频</h3>
+            <p>音频资源尚未接入。这里先预留独立音量分类，避免未来和视角/操作设置混在一起。</p>
+            <div class="settingsRow">
+              <div>
+                <strong>预留：主音量 / 音乐 / 效果音</strong>
+                <div class="settingsHint">接入音频后会拆成独立滑条，而不是一个总开关。</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -329,18 +409,19 @@ canvas{display:block}
 <div class="metaHeader">
   <div>
     <h2>星核整备舱</h2>
-    <div class="sub">永久升级飞船与防御塔，并查阅全部塔型档案</div>
+    <div class="sub">消耗星核进行永久升级。塔的详细数值请进入塔库档案查看。</div>
   </div>
   <div>
     <span class="coreCount">星核 ◈ <span id="metaCoreCount">0</span></span>
+    <button class="menuBtn" id="btnMetaArchive">查看塔库档案</button>
     <button class="menuBtn" id="btnMetaBack">返回部署终端</button>
   </div>
 </div>
 <div class="metaBody">
   <h3>飞船系统</h3>
   <div class="metaGrid" id="shipMetaGrid"></div>
-  <h3>防御塔档案与养成</h3>
-  <div class="towerArchive" id="towerArchive"></div>
+  <h3>防御塔养成</h3>
+  <div class="metaGrid" id="towerMetaGrid"></div>
 </div>
 </div>
 <div class="page" id="gamePage" style="display:none;flex-direction:column">
@@ -401,12 +482,12 @@ canvas{display:block}
     <h2>游戏已暂停</h2>
     <p>Esc 或空格键可继续游戏</p>
     <div class="pauseSettings">
-      <div class="viewSettingsTitle">视角设置</div>
-      <div class="viewSettingsRows">
-        <div class="viewSettingRow">
-          <span>当前视角：<strong id="pauseViewMode">局部视角</strong></span>
-          <button type="button" class="settingBtn" id="btnPauseViewToggle" data-view-toggle onclick="ViewModeController.handleButton(this,event)">视角切换</button>
+      <div class="settingsRow">
+        <div>
+          <strong>当前视角：<span id="pauseViewMode">局部视角</span></strong>
+          <div class="settingsHint">暂停时也可以直接切换局部/全局视角。</div>
         </div>
+        <button type="button" class="settingBtn" id="btnPauseViewToggle" data-view-toggle onclick="ViewModeController.handleButton(this,event)">视角切换</button>
       </div>
     </div>
     <div class="pauseActions">
@@ -776,6 +857,15 @@ function bindViewSettingsUI(){
   if(bindViewSettingsUI._bound)return;
   bindViewSettingsUI._bound=true;
   ViewModeController.init();
+  document.querySelectorAll('[data-settings-tab]').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      const key=tab.dataset.settingsTab;
+      document.querySelectorAll('[data-settings-tab]').forEach(t=>t.classList.toggle('active',t===tab));
+      document.querySelectorAll('[data-settings-panel]').forEach(panel=>{
+        panel.classList.toggle('active',panel.dataset.settingsPanel===key);
+      });
+    });
+  });
 }
 function bindHomePaneNavigation(){
   if(bindHomePaneNavigation._bound)return;
@@ -879,19 +969,72 @@ function towerLevelText(t,u){
 function towerTypeName(t){
   return t.type==='path'?'路径塔':t.type==='block'?'阻挡塔':'无人机核心';
 }
-function towerArchiveCard(t){
+let activeArchiveTowerId=ALL_TOWERS[0]?.id||'';
+function towerArchiveListButton(t){
+  const active=t.id===activeArchiveTowerId?' active':'';
+  return [
+    `<button type="button" class="archiveListBtn${active}" data-archive-tower="${t.id}">`,
+    `<strong>${t.id} · ${t.name}</strong>`,
+    `<span>${towerTypeName(t)} · 建造 ${t.cost}⚡</span>`,
+    '</button>'
+  ].join('');
+}
+function towerArchiveDetailHtml(t){
   const node=META_NODES.find(n=>n.tower===t.id);
   const levels=t.upg
     .map((u,i)=>`<div class="archiveLevel">Lv${i+1}：${towerLevelText(t,u)}</div>`)
     .join('');
-  const nodeSection=node?nodeHtml(node):'<span style="color:#68798a">当前无局外养成节点</span>';
+  const nodeStateText=node
+    ? nodeState(node).owned?'已解锁':`未解锁 · ${node.cost} 星核`
+    : '当前无局外养成节点';
   return [
-    '<div class="archiveCard">',
-    `<h4>${t.id} · ${t.name}</h4>`,
-    `<div>${towerTypeName(t)} · 建造 ${t.cost}⚡</div>`,
+    `<h3>${t.id} · ${t.name}</h3>`,
+    '<div class="archiveMeta">',
+    `<span class="archivePill">${towerTypeName(t)}</span>`,
+    `<span class="archivePill">建造 ${t.cost}⚡</span>`,
+    `<span class="archivePill">${t.upg.length} 级</span>`,
+    '</div>',
     `<div>${t.desc}</div>`,
-    `<div class="archiveLevels">${levels}</div>`,
-    `<div class="archiveNode">${nodeSection}</div>`,
+    '<div class="archiveLevels">',
+    '<div class="archiveNodeTitle">等级数据</div>',
+    levels,
+    '</div>',
+    '<div class="archiveNode">',
+    '<div class="archiveNodeTitle">局外养成</div>',
+    `<div>${nodeStateText}</div>`,
+    node?`<button type="button" class="settingBtn" data-open-meta>进入星核整备舱</button>`:'',
+    '</div>'
+  ].join('');
+}
+function renderTowerArchive(){
+  const list=document.getElementById('towerArchiveList');
+  const detail=document.getElementById('towerArchiveDetail');
+  if(!list||!detail)return;
+  if(!ALL_TOWERS.some(t=>t.id===activeArchiveTowerId))activeArchiveTowerId=ALL_TOWERS[0]?.id||'';
+  const active=ALL_TOWERS.find(t=>t.id===activeArchiveTowerId)||ALL_TOWERS[0];
+  list.innerHTML=ALL_TOWERS.map(towerArchiveListButton).join('');
+  detail.innerHTML=active?towerArchiveDetailHtml(active):'<div class="settingsHint">暂无塔型数据</div>';
+  list.querySelectorAll('[data-archive-tower]').forEach(btn=>{
+    btn.onclick=()=>selectArchiveTower(btn.dataset.archiveTower);
+  });
+}
+function selectArchiveTower(id){
+  activeArchiveTowerId=id;
+  renderTowerArchive();
+}
+function towerMetaNodeCard(t){
+  const node=META_NODES.find(n=>n.tower===t.id);
+  if(!node)return [
+    '<div class="metaNode locked">',
+    `<h4>${t.id} · ${t.name}</h4>`,
+    '<div>当前无局外养成节点</div>',
+    '</div>'
+  ].join('');
+  return [
+    '<div class="archiveNode">',
+    `<div class="archiveNodeTitle">${t.id} · ${t.name}</div>`,
+    `<div>${towerTypeName(t)} · 建造 ${t.cost}⚡</div>`,
+    nodeHtml(node),
     '</div>'
   ].join('');
 }
@@ -902,13 +1045,15 @@ function bindMetaButtons(){
 }
 function renderMeta(){
   renderHome();
-  document.getElementById('shipMetaGrid').innerHTML=META_NODES
-    .filter(n=>n.group==='ship')
-    .map(nodeHtml)
-    .join('');
-  document.getElementById('towerArchive').innerHTML=ALL_TOWERS
-    .map(towerArchiveCard)
-    .join('');
+  const shipGrid=document.getElementById('shipMetaGrid');
+  if(shipGrid)shipGrid.innerHTML=META_NODES
+      .filter(n=>n.group==='ship')
+      .map(nodeHtml)
+      .join('');
+  const towerMetaGrid=document.getElementById('towerMetaGrid');
+  if(towerMetaGrid)towerMetaGrid.innerHTML=ALL_TOWERS
+      .map(towerMetaNodeCard)
+      .join('');
   bindMetaButtons();
 }
 function buyMeta(id){
@@ -927,6 +1072,7 @@ function modeLabel(){return document.querySelector(`[data-mode="${selectedMode}"
 function refreshStartButton(){
   const label=modeLabel();
   setText('selCount',selectedTowers.length);
+  setText('homeStartTowerCount',selectedTowers.length);
   setText('homeCurrentMode',label);
   setText('homeTowerCount',selectedTowers.length);
   const startBtn=document.getElementById('btnStart');
@@ -942,10 +1088,16 @@ function startButtonText(label){
 bindHomePaneNavigation();
 bindViewSettingsUI();
 const grid=document.getElementById('towerGrid');
-ALL_TOWERS.forEach((t,i)=>{
-  const card=createTowerSelectCard(t,i);
-  grid.appendChild(card);
-});
+if(grid){
+  ALL_TOWERS.forEach((t,i)=>{
+    const card=createTowerSelectCard(t,i);
+    grid.appendChild(card);
+  });
+  grid.addEventListener('wheel',e=>{
+    e.preventDefault();
+    document.getElementById('selectPage').scrollTop+=e.deltaY;
+  },{passive:false});
+}
 function createTowerSelectCard(t,i){
   const card=document.createElement('div');
   card.className='twCard';
@@ -970,10 +1122,6 @@ function toggleTowerSelection(card,i){
   }
   refreshStartButton();
 }
-grid.addEventListener('wheel',e=>{
-  e.preventDefault();
-  document.getElementById('selectPage').scrollTop+=e.deltaY;
-},{passive:false});
 document.querySelectorAll('[data-mode]').forEach(card=>card.addEventListener('click',()=>selectModeCard(card)));
 function selectModeCard(card){
   selectedMode=card.dataset.mode;
@@ -987,6 +1135,7 @@ function showHomePane(paneId='homeMainPane'){
   try{
     renderHome();
     refreshStartButton();
+    if(paneId==='homeArchivePane')renderTowerArchive();
   }catch(err){
     console.warn('主界面刷新失败，已保留页面切换结果',err);
   }
@@ -994,11 +1143,23 @@ function showHomePane(paneId='homeMainPane'){
 bindHomePaneNavigation();
 document.getElementById('btnMeta').onclick=showMetaPage;
 document.getElementById('btnMetaBack').onclick=showSelectPage;
+document.getElementById('btnMetaArchive').onclick=showArchivePage;
 document.getElementById('btnStart').addEventListener('click',startSelectedMode);
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('[data-open-meta]');
+  if(!btn)return;
+  e.preventDefault();
+  showMetaPage();
+});
 function showMetaPage(){
   hidePage('selectPage');
   document.getElementById('metaPage').style.display='flex';
   renderMeta();
+}
+function showArchivePage(){
+  hidePage('metaPage');
+  document.getElementById('selectPage').style.display='flex';
+  showHomePane('homeArchivePane');
 }
 function showSelectPage(){
   hidePage('metaPage');
