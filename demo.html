@@ -199,24 +199,24 @@ canvas{display:block}
 .archiveTab{border:1px solid #24445b;border-radius:999px;background:#0d1826;color:#91a6b8;padding:8px 14px;font-family:monospace;cursor:pointer}
 .archiveTab:hover{border-color:#4d8aac;color:#dff7ff}
 .archiveTab.active{border-color:#7ec8e3;background:#12304a;color:#dff7ff;box-shadow:0 0 12px #7ec8e326}
-.archiveLayout{display:grid;grid-template-columns:280px 1fr;gap:12px;align-items:start}
+.archiveLayout{display:grid;grid-template-columns:minmax(220px,260px) minmax(0,1fr);gap:16px;align-items:start}
 .archiveList{display:flex;flex-direction:column;gap:7px;position:sticky;top:18px}
 .archiveListBtn{border:1px solid #24445b;border-radius:9px;background:#0d1826;color:#91a6b8;padding:10px 12px;text-align:left;cursor:pointer;font-family:monospace;display:grid;grid-template-columns:34px 1fr;gap:9px;align-items:center}
 .archiveListBtn:hover{border-color:#4d8aac;color:#dff7ff}
 .archiveListBtn.active{border-color:#7ec8e3;background:#10243a;color:#dff7ff;box-shadow:0 0 10px #7ec8e322}
 .archiveListBtn strong{display:block;color:#7ec8e3;margin-bottom:3px}
 .archiveListBtn span{font-size:9px;color:#70889b}
-.archiveDetail{border:1px solid #29445d;background:#111b29;border-radius:10px;padding:14px;font-size:11px;line-height:1.6;min-height:360px}
+.archiveDetail{border:1px solid #29445d;background:#111b29;border-radius:12px;padding:18px;font-size:12px;line-height:1.7;min-height:420px}
 .archiveDetail h3{color:#7ec8e3;font-size:18px;font-weight:400;margin-bottom:6px}
 .archiveTitle{display:flex;gap:12px;align-items:center;margin-bottom:8px}
 .archiveTitle h3{margin-bottom:2px}
 .archiveIcon{width:32px;height:32px;border:1px solid #315878;border-radius:9px;background:radial-gradient(circle at 50% 40%,#1a4564,#0d1826 70%);display:inline-flex;align-items:center;justify-content:center;color:#dff7ff;font-size:17px;box-shadow:inset 0 0 10px #7ec8e31f,0 0 10px #7ec8e31a;flex:0 0 auto}
 .archiveDetail .archiveIcon{width:46px;height:46px;font-size:24px;border-radius:12px}
-.archiveIntro{border-left:2px solid #7ec8e3;padding:6px 10px;margin:8px 0 12px;background:#0d1826;color:#c5d7e2}
+.archiveIntro{border:1px solid #1d3348;border-left:3px solid #7ec8e3;border-radius:8px;padding:10px 12px;margin:10px 0 12px;background:#0d1826;color:#c5d7e2}
 .archiveMeta{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 12px}
 .archivePill{border:1px solid #315878;border-radius:999px;background:#0d1826;color:#a9bdc9;padding:3px 8px;font-size:10px}
-.archiveStatGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:10px 0}
-.archiveStat{border:1px solid #1d3348;border-radius:7px;background:#0d1826;padding:7px 8px}
+.archiveStatGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}
+.archiveStat{border:1px solid #1d3348;border-radius:8px;background:#0d1826;padding:9px 10px}
 .archiveStat b{display:block;color:#7ec8e3;font-weight:400;margin-bottom:2px}
 .archiveLevels{margin-top:10px;border-top:1px solid #25394b;padding-top:8px;color:#aaa}
 .archiveLevel{margin:5px 0;padding:6px 8px;border:1px solid #1d3348;border-radius:6px;background:#0d1826}
@@ -371,7 +371,7 @@ body::after{
 .settingsPanel h3{font-size:17px}
 .settingsPanel p,.settingsHint{font-size:12px}
 .settingsRow{font-size:13px;padding:14px 0}
-.archiveLayout{grid-template-columns:320px 1fr;gap:16px}
+.archiveLayout{grid-template-columns:minmax(240px,280px) minmax(0,1fr);gap:18px}
 .archiveListBtn{min-height:62px;grid-template-columns:42px 1fr;font-size:12px}
 .archiveListBtn span{font-size:11px}
 .archiveDetail{font-size:12px;line-height:1.7}
@@ -1450,7 +1450,6 @@ function towerArchiveListButton(t){
   ].join('');
 }
 function towerArchiveDetailHtml(t){
-  const node=META_NODES.find(n=>n.tower===t.id);
   const levels=t.upg
     .map((u,i)=>[
       '<div class="archiveLevel">',
@@ -1462,15 +1461,6 @@ function towerArchiveDetailHtml(t){
       '</div>'
     ].join(''))
     .join('');
-  const state=node?nodeState(node):null;
-  const nodeStateText=node
-    ? state.equipped?'已装备':state.owned?'已拥有 · 未装备':`未拥有 · ${node.cost} 星核`
-    : '当前无专精芯片';
-  const nodeButton=node
-    ? state.owned
-      ? '<button type="button" class="settingBtn" data-open-meta>进入星核整备舱</button>'
-      : '<button type="button" class="settingBtn" data-open-shop>进入专精商店</button>'
-    : '';
   return [
     '<div class="archiveTitle">',
     archiveIcon(TOWER_ICONS[t.id]),
@@ -1480,20 +1470,19 @@ function towerArchiveDetailHtml(t){
     '</div>',
     '</div>',
     `<div class="archiveIntro">${towerIntro(t)}</div>`,
-    '<div class="archiveMeta">',
-    `<span class="archivePill">建造 ${t.cost}⚡</span>`,
-    `<span class="archivePill">满级总投入 ${towerTotalCost(t)}⚡</span>`,
-    `<span class="archivePill">${t.upg.length} 级</span>`,
+    '<div class="archiveStatGrid">',
+    `<div class="archiveStat"><b>定位</b><span>${towerTypeName(t)}</span></div>`,
+    `<div class="archiveStat"><b>建造</b><span>${t.cost} 能量</span></div>`,
+    `<div class="archiveStat"><b>满级投入</b><span>${towerTotalCost(t)} 能量</span></div>`,
+    `<div class="archiveStat"><b>等级</b><span>${t.upg.length} 级</span></div>`,
     '</div>',
-    `<div>规则摘要：${t.desc}</div>`,
+    '<div class="archiveLevels">',
+    '<div class="archiveNodeTitle">规则摘要</div>',
+    `<div class="archiveLevel">${t.desc}</div>`,
+    '</div>',
     '<div class="archiveLevels">',
     '<div class="archiveNodeTitle">等级数据</div>',
     levels,
-    '</div>',
-    '<div class="archiveNode">',
-    '<div class="archiveNodeTitle">专精芯片</div>',
-    `<div>${nodeStateText}</div>`,
-    nodeButton,
     '</div>'
   ].join('');
 }
