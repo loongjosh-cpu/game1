@@ -288,6 +288,7 @@ body::after{
 }
 #selectPage h1{font-size:clamp(31px,4.2vw,56px);letter-spacing:1px;text-shadow:0 0 18px #7ec8e344}
 .homeShell{width:min(1220px,calc(100vw - 42px));margin:auto;padding:clamp(6px,1vh,14px) 0;transform:translateY(-8vh)}
+.homeShell.subPaneShell{transform:none;margin:0 auto}
 .homePane.active{animation:uiFade .18s ease-out}
 @keyframes uiFade{from{opacity:.45;transform:translateY(4px)}to{opacity:1;transform:none}}
 .homeHero,.homeSection{
@@ -1833,6 +1834,8 @@ function showHomePane(paneId='homeMainPane'){
   document.querySelectorAll('.homePane').forEach(p=>p.classList.toggle('active',p.id===paneId));
   ensureModeForPane(paneId);
   const selectPage=document.getElementById('selectPage');
+  const homeShell=document.querySelector('.homeShell');
+  if(homeShell)homeShell.classList.toggle('subPaneShell',paneId!=='homeMainPane');
   if(selectPage)selectPage.scrollTop=0;
   try{
     renderHome();
