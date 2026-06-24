@@ -595,6 +595,23 @@ const ALL_TOWERS=[...PATH_TOWERS,...BLOCK_TOWERS,...DRONE_TOWERS];
 
 const META_SAVE_KEY='r32-meta-v1';
 const DEFAULT_VIEW_SETTINGS={cameraMode:'local',miniMap:true};
+function safeStorageGet(key){
+  try{
+    return localStorage.getItem(key);
+  }catch(err){
+    console.warn('本地存储读取失败，使用默认数据',key,err);
+    return null;
+  }
+}
+function safeStorageSet(key,value){
+  try{
+    localStorage.setItem(key,value);
+    return true;
+  }catch(err){
+    console.warn('本地存储写入失败，本次设置仅在当前页面生效',key,err);
+    return false;
+  }
+}
 const META_NODES=[
   {id:'ship_speed_1',group:'ship',name:'推进器校准 I',cost:1,desc:'飞船速度 +50'},
   {id:'ship_speed_2',group:'ship',name:'推进器校准 II',cost:1,req:['ship_speed_1'],desc:'飞船速度再 +50'},
@@ -619,7 +636,7 @@ const META_NODES=[
 ];
 function loadMetaSave(){
   try{
-    const raw=JSON.parse(localStorage.getItem(META_SAVE_KEY)||'null');
+    const raw=JSON.parse(safeStorageGet(META_SAVE_KEY)||'null');
     return normalizeMetaSave(raw);
   }catch(err){
     console.warn('局外养成存档读取失败',err);
@@ -644,7 +661,7 @@ function normalizeMetaSave(raw){
   };
 }
 let metaSave=loadMetaSave(),gameInstance=null;
-function saveMeta(){localStorage.setItem(META_SAVE_KEY,JSON.stringify(metaSave))}
+function saveMeta(){safeStorageSet(META_SAVE_KEY,JSON.stringify(metaSave))}
 function viewSettings(){
   metaSave=normalizeMetaSave(metaSave);
   return metaSave.settings;
@@ -948,8 +965,12 @@ function showHomePane(paneId='homeMainPane'){
   document.querySelectorAll('.homePane').forEach(p=>p.classList.toggle('active',p.id===paneId));
   const selectPage=document.getElementById('selectPage');
   if(selectPage)selectPage.scrollTop=0;
-  renderHome();
-  refreshStartButton();
+  try{
+    renderHome();
+    refreshStartButton();
+  }catch(err){
+    console.warn('主界面刷新失败，已保留页面切换结果',err);
+  }
 }
 bindHomePaneNavigation();
 document.getElementById('btnMeta').onclick=showMetaPage;
@@ -1044,7 +1065,7 @@ try{
   console.warn('地图存档读取失败，使用内置地图',err);
 }
 function loadSavedEditorMap(){
-  const saved=JSON.parse(localStorage.getItem('r32-map')||'null');
+  const saved=JSON.parse(safeStorageGet('r32-map')||'null');
   const src=saved?.map||saved;
   const world=src?.worldSize||saved?.worldSize;
   if(!validSavedMap(src,world))return;
