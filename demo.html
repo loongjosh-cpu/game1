@@ -841,6 +841,7 @@ body::after{
 <script src="src/game/scene-setup.js"></script>
 <script src="src/game/minimap.js"></script>
 <script src="src/game/input-controller.js"></script>
+<script src="src/game/build-panel.js"></script>
 <script src="src/core/meta-store.js"></script>
 <script src="src/core/runtime-maps.js"></script>
 <script src="src/ui/view-settings.js"></script>
@@ -890,50 +891,9 @@ function launch(sel,mode='endless1'){
       this.initMiniMap();
       this.applyViewSettings();
     }
-    buildChoices(){return[...this.selTowers,SMALL_REACTOR]}
     smallReactorCount(){return this.reactors.filter(r=>this.reactorAlive(r)&&!r._isMainReactor).length}
     energyRate(){return this.reactors.reduce((sum,r)=>sum+(this.reactorAlive(r)?r._type.upg[r._lv||0].prod:0),0)}
     gainEnergy(v){this.en=Math.min(EN_CAP,this.en+v)}
-    rebuildPanel(){
-      const bp=document.getElementById('buildPanel');
-      bp.innerHTML='';
-      this.buildChoices().forEach((t,i)=>bp.appendChild(this.createBuildButton(t,i)));
-      this.updPanel();
-    }
-    createBuildButton(t,i){
-      const btn=document.createElement('button');
-      btn.className='build-btn';
-      btn.textContent=this.buildButtonText(t,i);
-      btn.title=t.name+' — '+t.desc;
-      btn.addEventListener('click',()=>this.selectBuildChoice(t,i));
-      return btn;
-    }
-    buildButtonText(t,i){
-      if(t===SMALL_REACTOR)return `R · ${t.name} ${this.smallReactorCount()}/${t.maxCount} ${t.cost}⚡`;
-      return (i+1)+' · '+t.name+' '+t.cost+'⚡';
-    }
-    selectBuildChoice(t,i){
-      this.sel=t;
-      this.updPanel();
-      this.scrollBtnIntoView(i);
-    }
-    updPanel(){
-      const bp=document.getElementById('buildPanel');
-      const choices=this.buildChoices();
-      bp.querySelectorAll('.build-btn').forEach((btn,i)=>this.updateBuildButton(btn,choices[i],i));
-      bp.style.display=this.bld?'flex':'none';
-    }
-    updateBuildButton(btn,t,i){
-      const atLimit=t===SMALL_REACTOR&&this.smallReactorCount()>=SMALL_REACTOR.maxCount;
-      const cant=this.en<t.cost||atLimit||this.channel;
-      btn.className='build-btn'+(this.sel===t?' active':cant?' cant':'');
-      if(t===SMALL_REACTOR)btn.textContent=this.buildButtonText(t,i);
-    }
-    scrollBtnIntoView(idx){
-      const bp=document.getElementById('buildPanel');
-      const btn=bp.children[idx];
-      if(btn)btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-    }
     placementPoint(x,y,td=this.sel){return td.type==='path'?snapToWallEdge(x,y,20):{x,y,snapped:false}}
     canPl(x,y){
       const td=this.sel;
@@ -2583,7 +2543,7 @@ function launch(sel,mode='endless1'){
     spawnE(si,type){const cfg=EC[type],[sx,sy]=MAP.spawns[si],e=this.physics.add.image(sx,sy,cfg.key).setDepth(6).setTint(cfg.color||0xffffff);this.enemies.add(e);e.body.enable=true;e._uid=++this.enemySeq;const sc=this.levelWave()?.scale??(1+(this.wave-1)*0.1);e._hp=Math.round(cfg.hp*sc);e._maxhp=e._hp;e._dmg=cfg.dmg;e._spd=cfg.spd;e._atk=cfg.atk;e._at=0;e._firstAttack=true;e._si=si;e._b1tgt=null;e._reactorTarget=null;e._droneTarget=null;e._type=type;e._bt=0;e._slow=0;e._slowT=0;e._state='path';e._hatch=cfg.hatch||0;e._hits=0;this.routeToReactor(e,false);e.body.setCircle(Math.min(16,e.width/2));e.body.setBounce(0);return e}
     gameOver(title='防线失守'){if(this.ended)return;this.ended=true;const completed=this.completedWaves??Math.max(0,this.wave-1),levelCleared=!!this.levelConfig&&completed>=this.levelConfig.waves.length,reward=this.levelConfig?(levelCleared?1:0):Math.floor(completed/5);metaSave.cores+=reward;metaSave.bestWave=Math.max(metaSave.bestWave,completed);if(levelCleared&&this.levelConfig?.id){metaSave.levelClears=metaSave.levelClears||{};metaSave.levelClears[this.levelConfig.id]=true}saveMeta();document.querySelector('#gameOverPanel h2').textContent=title;document.getElementById('resultWaves').textContent=completed;document.getElementById('resultReward').textContent=reward;document.getElementById('resultCores').textContent=metaSave.cores;document.getElementById('pausePanel').style.display='none';document.getElementById('gameOverPanel').style.display='flex';this.scene.pause()}
   }
-  Object.assign(GameScene.prototype,TextureFactoryMethods,SceneSetupMethods,MiniMapMethods,InputControllerMethods);
+  Object.assign(GameScene.prototype,TextureFactoryMethods,SceneSetupMethods,MiniMapMethods,InputControllerMethods,BuildPanelMethods);
   const game=new Phaser.Game({type:Phaser.AUTO,width:W,height:H,backgroundColor:'#0d1219',parent:'gamePage',scale:{mode:Phaser.Scale.ENVELOP,autoCenter:Phaser.Scale.CENTER_BOTH},physics:{default:'arcade',arcade:{gravity:{y:0}}},scene:GameScene});
   setTimeout(()=>document.querySelector('canvas')?.focus(),500);
   return game;
