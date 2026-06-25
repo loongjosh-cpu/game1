@@ -833,17 +833,17 @@ const PATH_TOWERS=[
     color:0x22cc66,desc:'基础单体',
     upg:[
       {l:1,d:5,i:1000,r:500},
-      {l:2,d:10,i:500,r:600,c:150},
-      {l:3,d:15,i:300,r:700,c:180}
+      {l:2,d:10,i:700,r:700,c:150},
+      {l:3,d:15,i:500,r:700,c:180}
     ]
   },
   {
     id:'P2',name:'电磁塔·阿尔法',type:'path',cost:100,range:500,dmg:5,intv:1800,
     color:0x2288ff,chain:true,desc:'主目标附近连锁',
     upg:[
-      {l:1,d:5,i:1800,r:500,targets:3,cr:100},
-      {l:2,d:7,i:1800,r:600,targets:4,cr:150,c:180},
-      {l:3,d:9,i:1200,r:700,targets:6,cr:250,c:280}
+      {l:1,d:5,i:1800,r:500,targets:3,cr:150},
+      {l:2,d:7,i:1800,r:650,targets:4,cr:150,c:180},
+      {l:3,d:9,i:1100,r:700,targets:6,cr:250,c:280}
     ]
   },
   {
@@ -860,16 +860,16 @@ const PATH_TOWERS=[
     color:0x88ddff,slow:0.4,desc:'减速40%·优先减速目标',
     upg:[
       {l:1,d:1,i:500,r:450,sl:0.4,n:2},
-      {l:2,d:2,i:300,r:650,sl:0.4,n:3,c:300}
+      {l:2,d:1,i:300,r:650,sl:0.4,n:3,c:300}
     ]
   },
   {
-    id:'P5',name:'线圈炮',type:'path',cost:150,range:900,dmg:15,intv:3000,
+    id:'P5',name:'线圈炮',type:'path',cost:150,range:900,dmg:24,intv:2500,
     color:0xffaa44,desc:'狙击',
     upg:[
-      {l:1,d:15,i:3000,r:900,focus:10},
-      {l:2,d:20,i:2500,r:950,focus:18,c:180},
-      {l:3,d:20,i:1200,r:950,focus:20,c:280}
+      {l:1,d:24,i:2500,r:900,focus:5},
+      {l:2,d:30,i:2100,r:950,focus:8,c:240},
+      {l:3,d:36,i:1500,r:1000,focus:10,c:400}
     ]
   },
   {
@@ -878,7 +878,7 @@ const PATH_TOWERS=[
     upg:[
       {l:1,d:0,i:1000,r:400,ps:2},
       {l:2,d:0,i:800,r:500,ps:3,c:200},
-      {l:3,d:0,i:500,r:650,ps:4,c:320}
+      {l:3,d:0,i:600,r:700,ps:3,c:220}
     ]
   },
   {
@@ -886,28 +886,28 @@ const PATH_TOWERS=[
     color:0xcc66ff,poisonBonus:5,desc:'优先收割中毒目标',
     upg:[
       {l:1,d:4,i:1000,r:500,pb:5,n:1},
-      {l:2,d:6,i:800,r:550,pb:8,n:1,c:200},
-      {l:3,d:6,i:800,r:550,pb:18,n:2,c:280}
+      {l:2,d:6,i:800,r:550,pb:12,n:1,c:200},
+      {l:3,d:6,i:800,r:550,pb:14,n:2,c:320}
     ]
   }
 ];
 
 const BLOCK_TOWERS=[
   {
-    id:'B1',name:'钢塔',type:'block',cost:300,range:1000,dmg:0,intv:0,
+    id:'B1',name:'钢塔',type:'block',cost:300,range:800,dmg:0,intv:0,
     color:0x8899aa,hp:300,danger:2,tSize:55,desc:'肉盾300HP',
     upg:[
-      {l:1,hp:300,r:1000,danger:2},
-      {l:2,hp:400,r:1100,danger:3,c:380}
+      {l:1,hp:300,r:800,danger:2},
+      {l:2,hp:400,r:900,danger:3,c:380}
     ]
   },
   {
-    id:'B2',name:'火焰塔',type:'block',cost:350,range:500,dmg:2,intv:300,
+    id:'B2',name:'火焰塔',type:'block',cost:350,range:400,dmg:2,intv:300,
     color:0xff6622,hp:50,danger:3,tSize:45,desc:'灼烧50HP',
     upg:[
-      {l:1,d:2,i:300,r:500,hp:50,danger:3},
-      {l:2,d:4,i:300,r:550,hp:120,danger:3,c:280},
-      {l:3,d:5,i:300,r:600,hp:120,danger:2,c:320}
+      {l:1,d:2,i:300,r:400,hp:50,danger:3},
+      {l:2,d:4,i:300,r:450,hp:120,danger:3,c:280},
+      {l:3,d:5,i:300,r:500,hp:120,danger:2,c:320}
     ]
   },
   {
@@ -916,7 +916,7 @@ const BLOCK_TOWERS=[
     upg:[
       {l:1,d:3,i:600,r:800,hp:150,danger:2},
       {l:2,d:5,i:600,r:800,hp:180,danger:2,c:130},
-      {l:3,d:8,i:300,r:800,hp:180,danger:2,c:240}
+      {l:3,d:8,i:400,r:800,hp:180,danger:2,c:260}
     ]
   },
   {
@@ -929,27 +929,27 @@ const BLOCK_TOWERS=[
     ]
   },
   {
-    id:'B5',name:'量子治疗塔',type:'block',cost:150,range:600,dmg:0,intv:1000,
+    id:'B5',name:'量子治疗塔',type:'block',cost:150,range:700,dmg:0,intv:1000,
     color:0x44dd88,hp:100,danger:3,tSize:45,heal:3,desc:'治疗3/s',
     upg:[
-      {l:1,hp:100,r:600,hl:3,danger:3},
-      {l:2,hp:100,r:650,hl:4,danger:2,c:480}
+      {l:1,hp:100,r:700,hl:3,danger:3},
+      {l:2,hp:100,r:850,hl:4,danger:2,c:420}
     ]
   },
   {
-    id:'B6',name:'毒塔·伽马',type:'block',cost:200,range:600,dmg:0,intv:1500,
-    color:0xaa44cc,hp:200,danger:2,tSize:45,poisonAura:1,desc:'全范围挂毒',
+    id:'B6',name:'毒塔·伽马',type:'block',cost:200,range:650,dmg:0,intv:2500,
+    color:0xaa44cc,hp:220,danger:2,tSize:45,poisonAura:1,desc:'全范围挂毒',
     upg:[
-      {l:1,hp:200,r:600,i:1500,pa:1,danger:2},
-      {l:2,hp:200,r:700,i:1100,pa:1,danger:2,c:380}
+      {l:1,hp:220,r:650,i:2500,pa:1,danger:2},
+      {l:2,hp:220,r:700,i:1600,pa:1,danger:2,c:280}
     ]
   },
   {
-    id:'B7',name:'末日脉冲',type:'block',cost:50,range:1500,dmg:0,intv:0,
+    id:'B7',name:'末日脉冲',type:'block',cost:50,range:1200,dmg:0,intv:0,
     color:0xff4444,hp:50,danger:1,tSize:35,boom:50,desc:'自爆50伤',
     upg:[
-      {l:1,hp:50,r:1500,bm:50,danger:1},
-      {l:2,hp:50,r:1500,bm:50,danger:3,c:50}
+      {l:1,hp:50,r:1200,bm:50,danger:1},
+      {l:2,hp:50,r:1200,bm:50,danger:3,c:50}
     ]
   }
 ];
@@ -957,12 +957,12 @@ const BLOCK_TOWERS=[
 const DRONE_TOWERS=[
   {
     id:'D1',name:'蜂群巢',type:'drone',cost:240,range:700,dmg:2,intv:700,
-    color:0xffcc44,maxDrones:15,droneCost:2,prod:5000,first:500,
+    color:0xffcc44,maxDrones:13,droneCost:2,prod:5000,first:500,
     desc:'蜂群迎击·耗能补员',
     upg:[
-      {l:1,d:2,i:700,r:700,md:15,hp:10,prod:5000},
-      {l:2,d:3,i:700,r:700,md:18,hp:12,prod:4000,c:180},
-      {l:3,d:4,i:700,r:700,md:24,hp:12,prod:3000,c:280}
+      {l:1,d:2,i:700,r:700,md:13,hp:10,coreHp:120,danger:1,prod:5000},
+      {l:2,d:3,i:700,r:700,md:16,hp:12,coreHp:150,danger:1,prod:4000,c:180},
+      {l:3,d:3,i:700,r:700,md:20,hp:12,coreHp:200,danger:1,prod:4000,c:280}
     ]
   },
   {
@@ -970,19 +970,19 @@ const DRONE_TOWERS=[
     color:0xff8844,maxDrones:7,droneCost:5,prod:12000,first:200,
     desc:'重装迎击·耗能补员',
     upg:[
-      {l:1,d:8,i:1100,r:500,md:7,hp:25,prod:12000},
-      {l:2,d:12,i:1100,r:600,md:9,hp:30,prod:11000,c:300},
-      {l:3,d:12,i:1100,r:600,md:12,hp:45,prod:8000,c:360}
+      {l:1,d:8,i:1100,r:500,md:7,hp:25,coreHp:180,danger:2,prod:12000},
+      {l:2,d:12,i:1100,r:600,md:8,hp:30,coreHp:220,danger:2,prod:11000,c:300},
+      {l:3,d:14,i:1100,r:600,md:10,hp:45,coreHp:280,danger:2,prod:9000,c:360}
     ]
   },
   {
-    id:'D3',name:'维修巢',type:'drone',cost:500,range:600,dmg:0,intv:1000,
+    id:'D3',name:'维修巢',type:'drone',cost:360,range:550,dmg:0,intv:1000,
     color:0x44ff88,maxDrones:5,droneCost:8,prod:20000,heal:2,
     desc:'纯维修·治疗消耗自身HP',
     upg:[
-      {l:1,d:0,i:1000,r:600,md:5,hp:50,prod:20000,hl:2},
-      {l:2,d:0,i:900,r:650,md:6,hp:50,prod:20000,hl:2,c:180},
-      {l:3,d:0,i:900,r:650,md:6,hp:50,prod:18000,hl:2.5,c:210}
+      {l:1,d:0,i:1000,r:550,md:5,hp:45,coreHp:160,danger:2,prod:20000,hl:2},
+      {l:2,d:0,i:900,r:600,md:6,hp:60,coreHp:200,danger:2,prod:20000,hl:2,c:240},
+      {l:3,d:0,i:900,r:600,md:6,hp:80,coreHp:240,danger:2,prod:18000,hl:2.5,c:280}
     ]
   }
 ];
@@ -1404,6 +1404,32 @@ const ENEMY_ICON_SPECS={
   enE1:{kind:'enemyLarge',glyph:'enemyLarge'},
   enE2:{kind:'enemySmall',glyph:'enemySmall'}
 };
+const ICON_GLYPH_DEFS={
+  core:[{type:'circle',cx:20,cy:20,r:8.4}],
+  cannon:[{type:'circle',cx:20,cy:20,r:7.6},{type:'line',x1:20,y1:20,x2:34.4,y2:20}],
+  bolt:[{type:'polyline',points:[[12,17],[19,17],[16,28.4],[28.4,19],[21,19]],useTowerColor:true}],
+  snow:[
+    {type:'line',x1:20,y1:20,x2:32.4,y2:20},{type:'line',x1:20,y1:20,x2:26.2,y2:30.7},{type:'line',x1:20,y1:20,x2:13.8,y2:30.7},
+    {type:'line',x1:20,y1:20,x2:7.6,y2:20},{type:'line',x1:20,y1:20,x2:13.8,y2:9.3},{type:'line',x1:20,y1:20,x2:26.2,y2:9.3},
+    {type:'circle',cx:20,cy:20,r:3.6}
+  ],
+  sniper:[{type:'polygon',points:[[20,8.4],[10,26.8],[30,26.8]]},{type:'line',x1:20,y1:16,x2:20,y2:27.6}],
+  poison:[{type:'circle',cx:20,cy:20,r:9,color:0xc96cff,cssColor:'#c96cff'},{type:'line',x1:10.4,y1:26.4,x2:29.6,y2:13.6,color:0x83ff9b,cssColor:'#83ff9b'}],
+  flame:[{type:'polygon',points:[[20,9],[11.2,29],[28.8,29]],color:0xffc066,cssColor:'#ffc066'},{type:'circle',cx:20,cy:21.6,r:5,color:0xffc066,cssColor:'#ffc066'}],
+  pulse:[{type:'circle',cx:20,cy:20,r:9,color:0xff6677,cssColor:'#ff6677'},{type:'line',x1:10,y1:20,x2:30,y2:20,color:0xff6677,cssColor:'#ff6677'},{type:'line',x1:20,y1:10,x2:20,y2:30,color:0xff6677,cssColor:'#ff6677'}],
+  drone:[{type:'polygon',points:[[20,9.6],[30.4,20],[20,30.4],[9.6,20]],useTowerColor:true},{type:'circle',cx:20,cy:20,r:3.6,useTowerColor:true}],
+  enemySmall:[
+    {type:'polygon',points:[[20,2.5],[37.5,20],[20,37.5],[2.5,20]],color:0xd066ff,cssColor:'#d066ff'},
+    {type:'circle',cx:20,cy:20,r:7.5,color:0xffd1dc,cssColor:'#ffd1dc'},
+    {type:'line',x1:20,y1:5,x2:20,y2:35,color:0xd066ff,cssColor:'#d066ff'}
+  ],
+  enemyLarge:[
+    {type:'polygon',points:[[20,3],[5,31],[35,31]],color:0xff4f6d,cssColor:'#ff4f6d'},
+    {type:'circle',cx:20,cy:20,r:8,color:0xffd1dc,cssColor:'#ffd1dc'},
+    {type:'line',x1:7,y1:21,x2:1,y2:15,color:0xff4f6d,cssColor:'#ff4f6d'},
+    {type:'line',x1:33,y1:21,x2:39,y2:15,color:0xff4f6d,cssColor:'#ff4f6d'}
+  ]
+};
 const TOWER_INTROS={
   P1:'可靠的基础单体火力，费用低，适合补线和处理漏怪。',
   P2:'连锁电磁塔，擅长在密集敌群中制造稳定多目标伤害。',
@@ -1450,21 +1476,29 @@ function iconClassSuffix(kind){
   return String(kind||'path').replace(/(^|-)([a-z])/g,(_,dash,ch)=>`${dash}${ch.toUpperCase()}`);
 }
 function archiveIconSvg(glyph){
+  const def=ICON_GLYPH_DEFS[glyph]||ICON_GLYPH_DEFS.core;
+  return `<svg viewBox="0 0 40 40" aria-hidden="true">${def.map(iconCommandSvg).join('')}</svg>`;
+}
+function iconCommandSvg(cmd){
   const stroke='currentColor';
   const fill='currentColor';
-  const common=`fill="none" stroke="${stroke}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"`;
-  const soft=`fill="${fill}" opacity=".18"`;
-  if(glyph==='cannon')return `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="18" cy="20" r="7.5" ${common}/><path d="M18 20h13" ${common}/><circle cx="18" cy="20" r="2.5" ${soft}/></svg>`;
-  if(glyph==='bolt')return `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M14 7h12l-6 11h9L14 34l4-13h-8z" ${common}/></svg>`;
-  if(glyph==='snow')return `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="3.6" ${common}/><path d="M20 7v26M9 13.5l22 13M31 13.5l-22 13" ${common}/></svg>`;
-  if(glyph==='sniper')return `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 6l12 26H8z" ${common}/><path d="M20 14v14" ${common}/></svg>`;
-  if(glyph==='poison')return `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="11" ${common}/><path d="M10 28L30 12" ${common}/></svg>`;
-  if(glyph==='flame')return `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5c8 9 11 15 8 22-2 5-6 8-8 8s-6-3-8-8c-2-6 1-10 5-14-.5 5 2 8 4 10 2-5 2-10-1-18z" ${common}/><circle cx="20" cy="25" r="5" ${common}/></svg>`;
-  if(glyph==='pulse')return `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="11" ${common}/><path d="M8 20h24M20 8v24" ${common}/></svg>`;
-  if(glyph==='drone')return `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 7l13 13-13 13L7 20z" ${common}/><circle cx="20" cy="20" r="4.2" ${common}/></svg>`;
-  if(glyph==='enemySmall')return `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 8l11 12-11 12L9 20z" ${common}/><path d="M14 20h12" ${common}/></svg>`;
-  if(glyph==='enemyLarge')return `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 7l14 26H6z" ${common}/><path d="M13 24h14" ${common}/></svg>`;
-  return `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="11" ${common}/><circle cx="20" cy="20" r="3.5" ${soft}/></svg>`;
+  const cmdStroke=cmd.cssColor||stroke;
+  const cmdFill=cmd.cssColor||fill;
+  const common=`fill="none" stroke="${cmdStroke}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"`;
+  if(cmd.type==='circle'){
+    return cmd.fill
+      ?`<circle cx="${cmd.cx}" cy="${cmd.cy}" r="${cmd.r}" fill="${cmdFill}" opacity="${cmd.opacity??.18}"/>`
+      :`<circle cx="${cmd.cx}" cy="${cmd.cy}" r="${cmd.r}" ${common}/>`;
+  }
+  if(cmd.type==='line')return `<path d="M${cmd.x1} ${cmd.y1}L${cmd.x2} ${cmd.y2}" ${common}/>`;
+  if(cmd.type==='polyline')return `<path d="${iconPointsToPath(cmd.points,false)}" ${common}/>`;
+  if(cmd.type==='polygon')return `<path d="${iconPointsToPath(cmd.points,true)}" ${common}/>`;
+  return '';
+}
+function iconPointsToPath(points,closed=false){
+  if(!points?.length)return '';
+  const [first,...rest]=points;
+  return `M${first[0]} ${first[1]}${rest.map(p=>`L${p[0]} ${p[1]}`).join('')}${closed?'Z':''}`;
 }
 function archiveIcon(spec){
   const icon=spec||{kind:'path',glyph:'core'};
@@ -2619,64 +2653,45 @@ function launch(sel,mode='endless1'){
   }
   function drawTowerGlyph(g,id,cx,cy,r,color){
     const glyph=towerIconSpec(id).glyph;
-    g.lineStyle(2,BLUEPRINT_ART.white,0.9);
-    g.fillStyle(color,0.28);
-    if(glyph==='cannon'){
-      g.strokeCircle(cx,cy,r*0.38);
-      g.lineBetween(cx,cy,cx+r*0.72,cy);
-      return;
-    }
-    if(glyph==='bolt'){
-      g.lineStyle(2,color,0.98);
-      g.beginPath();
-      g.moveTo(cx-r*0.4,cy-r*0.15);
-      g.lineTo(cx-r*0.05,cy-r*0.15);
-      g.lineTo(cx-r*0.2,cy+r*0.42);
-      g.lineTo(cx+r*0.42,cy-r*0.05);
-      g.lineTo(cx+r*0.05,cy-r*0.05);
-      g.strokePath();
-      return;
-    }
-    if(glyph==='snow'){
-      for(let i=0;i<6;i++){
-        const a=Math.PI*2*i/6;
-        g.lineBetween(cx,cy,cx+Math.cos(a)*r*0.62,cy+Math.sin(a)*r*0.62);
+    drawSharedIconGlyph(g,glyph,cx,cy,r,color);
+  }
+  function drawSharedIconGlyph(g,glyph,cx,cy,r,color){
+    const def=ICON_GLYPH_DEFS[glyph]||ICON_GLYPH_DEFS.core;
+    def.forEach(cmd=>drawSharedIconCommand(g,cmd,cx,cy,r,color));
+  }
+  function iconScalePoint(cx,cy,r,x,y){
+    const scale=r/20;
+    return {x:cx+(x-20)*scale,y:cy+(y-20)*scale};
+  }
+  function drawSharedIconCommand(g,cmd,cx,cy,r,color){
+    const strokeColor=cmd.useTowerColor?color:(cmd.color??BLUEPRINT_ART.white);
+    g.lineStyle(2,strokeColor,0.96);
+    g.fillStyle(strokeColor,0.22);
+    if(cmd.type==='circle'){
+      const p=iconScalePoint(cx,cy,r,cmd.cx,cmd.cy);
+      if(cmd.fill){
+        g.fillStyle(strokeColor,cmd.opacity??.18);
+        g.fillCircle(p.x,p.y,cmd.r*r/20);
+      }else{
+        g.strokeCircle(p.x,p.y,cmd.r*r/20);
       }
-      g.strokeCircle(cx,cy,r*0.18);
       return;
     }
-    if(glyph==='sniper'){
-      strokeTrianglePath(g,cx,cy-r*0.58,cx-r*0.5,cy+r*0.34,cx+r*0.5,cy+r*0.34);
-      g.lineBetween(cx,cy-r*0.2,cx,cy+r*0.38);
+    if(cmd.type==='line'){
+      const a=iconScalePoint(cx,cy,r,cmd.x1,cmd.y1);
+      const b=iconScalePoint(cx,cy,r,cmd.x2,cmd.y2);
+      g.lineBetween(a.x,a.y,b.x,b.y);
       return;
     }
-    if(glyph==='poison'){
-      g.lineStyle(2,0xc96cff,0.95);
-      g.strokeCircle(cx,cy,r*0.45);
-      g.lineStyle(2,0x83ff9b,0.88);
-      g.lineBetween(cx-r*0.48,cy+r*0.32,cx+r*0.48,cy-r*0.32);
-      return;
+    if(cmd.type==='polygon'||cmd.type==='polyline'){
+      const pts=cmd.points.map(p=>iconScalePoint(cx,cy,r,p[0],p[1]));
+      if(!pts.length)return;
+      g.beginPath();
+      g.moveTo(pts[0].x,pts[0].y);
+      for(let i=1;i<pts.length;i++)g.lineTo(pts[i].x,pts[i].y);
+      if(cmd.type==='polygon')g.closePath();
+      g.strokePath();
     }
-    if(glyph==='flame'){
-      g.lineStyle(2,0xffc066,0.95);
-      strokeTrianglePath(g,cx,cy-r*0.55,cx-r*0.44,cy+r*0.45,cx+r*0.44,cy+r*0.45);
-      g.strokeCircle(cx,cy+r*0.08,r*0.25);
-      return;
-    }
-    if(glyph==='pulse'){
-      g.lineStyle(2,0xff6677,0.95);
-      g.strokeCircle(cx,cy,r*0.45);
-      g.lineBetween(cx-r*0.5,cy,cx+r*0.5,cy);
-      g.lineBetween(cx,cy-r*0.5,cx,cy+r*0.5);
-      return;
-    }
-    if(glyph==='drone'){
-      g.lineStyle(2,color,0.98);
-      drawDiamond(g,cx,cy,r*0.52);
-      g.strokeCircle(cx,cy,r*0.18);
-      return;
-    }
-    g.strokeCircle(cx,cy,r*0.42);
   }
 
   class GameScene extends Phaser.Scene{
@@ -2775,31 +2790,14 @@ function launch(sel,mode='endless1'){
       const large=this.make.graphics({add:false});
       large.fillStyle(0x2a0812,0.92);
       large.fillCircle(20,20,18);
-      large.lineStyle(3,BLUEPRINT_ART.enemy,0.95);
-      strokeTrianglePath(large,20,3,5,31,35,31);
-      large.lineStyle(1,BLUEPRINT_ART.enemyCore,0.75);
-      large.strokeCircle(20,20,8);
-      large.lineStyle(2,BLUEPRINT_ART.enemy,0.75);
-      large.lineBetween(7,21,1,15);
-      large.lineBetween(33,21,39,15);
+      drawSharedIconGlyph(large,'enemyLarge',20,20,20,BLUEPRINT_ART.enemy);
       large.generateTexture('enE1',40,40);
       large.destroy();
 
       const small=this.make.graphics({add:false});
       small.fillStyle(0x21082e,0.92);
       small.fillCircle(16,16,14);
-      small.lineStyle(2,0xd066ff,0.96);
-      small.beginPath();
-      small.moveTo(16,2);
-      small.lineTo(30,16);
-      small.lineTo(16,30);
-      small.lineTo(2,16);
-      small.closePath();
-      small.strokePath();
-      small.lineStyle(1,BLUEPRINT_ART.enemyCore,0.72);
-      small.strokeCircle(16,16,6);
-      small.lineStyle(1,0xd066ff,0.8);
-      small.lineBetween(16,4,16,28);
+      drawSharedIconGlyph(small,'enemySmall',16,16,16,0xd066ff);
       small.generateTexture('enE2',32,32);
       small.destroy();
     }
@@ -3410,7 +3408,10 @@ function launch(sel,mode='endless1'){
 
     registerTowerByType(tw,td){
       if(td.type==='drone'){
+        const up=td.upg[0];
         tw._energySpend=true;
+        tw._hp=up.coreHp||120;
+        tw._maxhp=tw._hp;
         this.drones.add(tw);
         this.physics.add.existing(tw,true);
         this.spawnDrones(tw);
@@ -3794,6 +3795,8 @@ function launch(sel,mode='endless1'){
     }
 
     addDroneStats(td,up,add){
+      add('coreHp','核心HP',up.coreHp);
+      add('danger','危险',up.danger);
       add('capacity','无人机上限',up.md);
       add('production','生产间隔',`${(up.prod/1000).toFixed(0)}秒`);
       add('replacementCost','补员耗能',`${td.droneCost} / 架`);
@@ -3825,6 +3828,7 @@ function launch(sel,mode='endless1'){
         rows.splice(1,0,{key:'currentHp',label:'当前耐久',value:`${Math.ceil(tw._hp||0)} / ${tw._maxhp||up.hp}`})
       }
       if(td.type==='drone'){
+        rows.splice(1,0,{key:'coreHpNow',label:'核心耐久',value:`${Math.ceil(tw._hp||0)} / ${tw._maxhp||up.coreHp}`});
         rows.splice(1,0,{key:'currentUnits',label:'现有无人机',value:`${this.droneCount(tw)} / ${up.md}`})
       }
       return{tw,td,lv,up,nextLevel,nx,rows}
@@ -3954,6 +3958,7 @@ function launch(sel,mode='endless1'){
       this.en-=nxt.c;
       tw._lv=nl;
       this.applyTowerHpUpgrade(tw,td,lv,nxt);
+      this.applyDroneCoreHpUpgrade(tw,td,lv,nxt);
       this.applyDroneHpUpgrade(tw,td,nxt);
       this.refreshTowerRangeGraphic(tw,td,nxt);
       if(td.type==='reactor'&&tw._label)tw._label.setText(td.name+' Lv'+(nl+1));
@@ -3965,6 +3970,13 @@ function launch(sel,mode='endless1'){
       const oldHp=td.upg[lv].hp||0;
       tw._hp=Math.min((tw._hp||0)+(nxt.hp-oldHp),nxt.hp);
       tw._maxhp=nxt.hp
+    }
+
+    applyDroneCoreHpUpgrade(tw,td,lv,nxt){
+      if(td.type!=='drone'||!nxt.coreHp)return;
+      const oldHp=td.upg[lv].coreHp||tw._maxhp||nxt.coreHp;
+      tw._hp=Math.min((tw._hp||0)+(nxt.coreHp-oldHp),nxt.coreHp);
+      tw._maxhp=nxt.coreHp
     }
 
     applyDroneHpUpgrade(tw,td,nxt){
@@ -3988,6 +4000,13 @@ function launch(sel,mode='endless1'){
       const tw=this.selTw;
       if(!this.canSellTower(tw))return;
       this.gainEnergy(this.sellRefund(tw));
+      if(tw._type?.type==='drone'){
+        this.destroyDroneCore(tw);
+        this.selTw=null;
+        this.selectionGfx.clear();
+        this.updTwPanel();
+        return
+      }
       if(tw._rngGfx)tw._rngGfx.destroy();
       tw.destroy();
       this.selTw=null;
@@ -4013,8 +4032,39 @@ function launch(sel,mode='endless1'){
     rejoinPath(e){e._b1tgt=null;e._reactorTarget=null;e._state='path';e._at=0;e._firstAttack=true;this.routeToReactor(e,false)}
     destroyReactor(r){if(!r||!r.active||r._isMainReactor)return;if(this.selTw===r){this.selTw=null;this.selectionGfx.clear();this.updTwPanel()}if(r._label)r._label.destroy();r.destroy();this.enemies.children.iterate(e=>{if(e&&e.active&&e._reactorTarget===r)this.rejoinPath(e)});this.updPanel()}
     towerDanger(tw){if(tw._wreck&&tw._type.id==='B1')return (tw._lv||0)===0?3:2;const up=tw._type.upg[tw._lv||0];return up.danger??tw._type.danger??0}
-    chooseBlocker(e){const cfg=EC[e._type],held=e._b1tgt&&e._b1tgt.active&&e._b1tgt._hp>0?e._b1tgt:null;let best=held,bestDanger=held?this.towerDanger(held):-1,bestDist=held?Phaser.Math.Distance.Between(e.x,e.y,held.x,held.y):Infinity;this.blockers.children.iterate(tw=>{if(!tw||!tw.active||tw._hp<=0)return;const danger=this.towerDanger(tw),d=Phaser.Math.Distance.Between(e.x,e.y,tw.x,tw.y),range=tw._type.upg[tw._lv||0].r||tw._type.range;if(cfg.danger>danger||d>range)return;if(danger>bestDanger||(danger===bestDanger&&!held&&d<bestDist)){best=tw;bestDanger=danger;bestDist=d}});return best}
-    destroyB1(b1){const isSteel=b1._type.id==='B1';if(b1._type.id==='B7'){this.findTargets(b1.x,b1.y,sd(b1._type.range)).forEach(e=>this.damageEnemy(e,b1._type.boom||50))}if(isSteel&&!b1._wreck){b1._hp=200;b1._maxhp=200;b1._repair=0;b1._wreck=true;b1.setAlpha(0.4);b1.setTint(0x666666);this.time.delayedCall(20000,()=>{if(b1.active&&b1._wreck)this.reviveSteel(b1)})}else{if(this.selTw===b1){this.selTw=null;this.selectionGfx.clear();this.updTwPanel()}if(b1._rngGfx)b1._rngGfx.destroy();b1.destroy()}this.enemies.children.iterate(e=>{if(e&&e.active&&e._b1tgt===b1)this.rejoinPath(e)})}
+    considerEnemyBuildingTarget(e,cfg,tw,state){
+      if(!tw||!tw.active||tw._hp<=0)return state;
+      const danger=this.towerDanger(tw),d=Phaser.Math.Distance.Between(e.x,e.y,tw.x,tw.y),range=sd(tw._type.upg[tw._lv||0].r||tw._type.range);
+      if(cfg.danger>danger||d>range)return state;
+      if(danger>state.bestDanger||(danger===state.bestDanger&&!state.held&&d<state.bestDist)){
+        state.best=tw;
+        state.bestDanger=danger;
+        state.bestDist=d
+      }
+      return state
+    }
+    chooseBlocker(e){
+      const cfg=EC[e._type],held=e._b1tgt&&e._b1tgt.active&&e._b1tgt._hp>0?e._b1tgt:null;
+      const state={best:held,bestDanger:held?this.towerDanger(held):-1,bestDist:held?Phaser.Math.Distance.Between(e.x,e.y,held.x,held.y):Infinity,held};
+      this.blockers.children.iterate(tw=>this.considerEnemyBuildingTarget(e,cfg,tw,state));
+      this.drones.children.iterate(tw=>this.considerEnemyBuildingTarget(e,cfg,tw,state));
+      return state.best
+    }
+    destroyB1(b1){
+      if(b1._type?.type==='drone'){
+        this.destroyDroneCore(b1);
+        return
+      }
+      const isSteel=b1._type.id==='B1';if(b1._type.id==='B7'){this.findTargets(b1.x,b1.y,sd(b1._type.range)).forEach(e=>this.damageEnemy(e,b1._type.boom||50))}if(isSteel&&!b1._wreck){b1._hp=200;b1._maxhp=200;b1._repair=0;b1._wreck=true;b1.setAlpha(0.4);b1.setTint(0x666666);this.time.delayedCall(20000,()=>{if(b1.active&&b1._wreck)this.reviveSteel(b1)})}else{if(this.selTw===b1){this.selTw=null;this.selectionGfx.clear();this.updTwPanel()}if(b1._rngGfx)b1._rngGfx.destroy();b1.destroy()}this.enemies.children.iterate(e=>{if(e&&e.active&&e._b1tgt===b1)this.rejoinPath(e)})}
+    destroyDroneCore(core){
+      if(!core||!core.active)return;
+      this.droneHelpers.children.iterate(d=>{if(d&&d.active&&d._owner===core)this.destroyDrone(d)});
+      if(this.selTw===core){this.selTw=null;this.selectionGfx.clear();this.updTwPanel()}
+      if(core._rngGfx)core._rngGfx.destroy();
+      core.destroy();
+      this.enemies.children.iterate(e=>{if(e&&e.active&&e._b1tgt===core)this.rejoinPath(e)});
+      this.updPanel()
+    }
     reviveSteel(b1){if(!b1?.active)return;b1.clearTint();b1.setAlpha(1);b1._wreck=false;const up=b1._type.upg[b1._lv||0];b1._maxhp=up.hp;b1._hp=up.hp}
     healBlocker(tw,amount){if(!tw?.active||amount<=0)return 0;if(tw._wreck){if(!this.meta.b1Repair)return 0;const before=tw._repair||0;tw._repair=Math.min(200,before+amount);const applied=tw._repair-before;if(tw._repair>=200)this.reviveSteel(tw);return applied}const before=tw._hp;tw._hp=Math.min(tw._maxhp,tw._hp+amount);return tw._hp-before}
     killShip(){if(this.shipDead)return;this.cancelChannel();this.shipDead=true;this.shipMoveTarget=null;this.ship.setActive(false).setVisible(false);this.ship.body.enable=false;this.bld=false;this.ghost.setVisible(false);this.time.delayedCall(SHIP_RESPAWN,()=>{this.ship.setPosition(MAP.reactor.x,MAP.reactor.y);this.ship.body.enable=true;this.ship.setActive(true).setVisible(true);this.shipDead=false})}
@@ -4025,8 +4075,8 @@ function launch(sel,mode='endless1'){
     areaAttack(tw,up,color){const range=sd(up.r||tw._type.range),tgts=this.findTargets(tw.x,tw.y,range);this.flashArea(tw.x,tw.y,range,color);tgts.forEach(e=>this.damageEnemy(e,up.d||0))}
     enemyAttackReady(e,dt){e._at=(e._at||0)+dt;const delay=e._firstAttack?650:e._atk;if(e._at<delay)return false;e._at=0;e._firstAttack=false;return true}
     enemyAttackEffect(e,mainTarget=null){const cfg=EC[e._type];if(cfg.leechPct)e._hp=Math.min(e._maxhp,e._hp+e._maxhp*cfg.leechPct);else if(cfg.leech)e._hp=Math.min(e._maxhp,e._hp+cfg.leech);if(cfg.summonEvery&&++e._hits%cfg.summonEvery===0)this.spawnAt('E4',e.x+30,e.y,e._si,true);if(cfg.meleeSplash)this.enemySplash(e,mainTarget,e.x,e.y,e._dmg*cfg.meleeSplash,sd(cfg.meleeSplashRange||50),true)}
-    damageFriendly(t,dmg){if(!t||!t.active)return;if(t._owner){this.damageDrone(t,dmg);return}if(t._isReactor){t._hp=Math.max(0,t._hp-dmg);if(t._isMainReactor)this.rxHP=t._hp;this.tweens.add({targets:t,alpha:0.5,duration:100,yoyo:true});if(t._hp<=0){if(t._isMainReactor)this.gameOver();else this.destroyReactor(t)}return}if(t._type&&t._type.type==='block'){t._hp-=dmg;if(t._hp<=0)this.destroyB1(t)}}
-    enemySplash(e,mainTarget,x,y,dmg,range,includeDrones=false){this.flashArea(x,y,range,EC[e._type].color||0xff8844);this.blockers.children.iterate(t=>{if(t&&t.active&&t!==mainTarget&&Phaser.Math.Distance.Between(x,y,t.x,t.y)<=range)this.damageFriendly(t,dmg)});for(const r of this.reactors){if(r&&r.active&&r!==mainTarget&&Phaser.Math.Distance.Between(x,y,r.x,r.y)<=range)this.damageFriendly(r,dmg)}if(includeDrones)this.droneHelpers.children.iterate(d=>{if(d&&d.active&&d!==mainTarget&&Phaser.Math.Distance.Between(x,y,d.x,d.y)<=range)this.damageFriendly(d,dmg)})}
+    damageFriendly(t,dmg){if(!t||!t.active)return;if(t._owner){this.damageDrone(t,dmg);return}if(t._isReactor){t._hp=Math.max(0,t._hp-dmg);if(t._isMainReactor)this.rxHP=t._hp;this.tweens.add({targets:t,alpha:0.5,duration:100,yoyo:true});if(t._hp<=0){if(t._isMainReactor)this.gameOver();else this.destroyReactor(t)}return}if(t._type&&(t._type.type==='block'||t._type.type==='drone')){t._hp-=dmg;this.tweens.add({targets:t,alpha:0.5,duration:100,yoyo:true});if(t._hp<=0)this.destroyB1(t)}}
+    enemySplash(e,mainTarget,x,y,dmg,range,includeDrones=false){this.flashArea(x,y,range,EC[e._type].color||0xff8844);this.blockers.children.iterate(t=>{if(t&&t.active&&t!==mainTarget&&Phaser.Math.Distance.Between(x,y,t.x,t.y)<=range)this.damageFriendly(t,dmg)});this.drones.children.iterate(t=>{if(t&&t.active&&t!==mainTarget&&Phaser.Math.Distance.Between(x,y,t.x,t.y)<=range)this.damageFriendly(t,dmg)});for(const r of this.reactors){if(r&&r.active&&r!==mainTarget&&Phaser.Math.Distance.Between(x,y,r.x,r.y)<=range)this.damageFriendly(r,dmg)}if(includeDrones)this.droneHelpers.children.iterate(d=>{if(d&&d.active&&d!==mainTarget&&Phaser.Math.Distance.Between(x,y,d.x,d.y)<=range)this.damageFriendly(d,dmg)})}
     chooseDroneInRange(e,range){let best=null,bd=Infinity;this.droneHelpers.children.iterate(d=>{if(!d||!d.active||d._hp<=0)return;const dist=Phaser.Math.Distance.Between(e.x,e.y,d.x,d.y);if(dist<=range&&dist<bd){best=d;bd=dist}});return best}
     fireEnemyDart(e,tgt,speed,dmg){const p=this.add.image(e.x,e.y,'bolt').setDepth(8).setTint(EC[e._type].color||0x66d8ff).setScale(2.2),dist=Phaser.Math.Distance.Between(e.x,e.y,tgt.x,tgt.y),tx=tgt.x,ty=tgt.y;p.setRotation(Math.atan2(ty-e.y,tx-e.x));this.tweens.add({targets:p,x:tx,y:ty,duration:Math.max(80,dist/sd(speed||700)*1000),onComplete:()=>{p.destroy();if(tgt.active)this.damageDrone(tgt,dmg)}})}
     fireEnemyShell(e,tgt){const cfg=EC[e._type],p=this.add.image(e.x,e.y,'msl').setDepth(8).setTint(cfg.color||0xcc7744).setScale(1.5),tx=tgt.x,ty=tgt.y,dist=Phaser.Math.Distance.Between(e.x,e.y,tx,ty);p.setRotation(Math.atan2(ty-e.y,tx-e.x)+Math.PI/2);this.tweens.add({targets:p,x:tx,y:ty,duration:Math.max(120,dist/sd(cfg.shotSpeed||400)*1000),onComplete:()=>{p.destroy();if(tgt.active&&Phaser.Math.Distance.Between(tx,ty,tgt.x,tgt.y)<sd(60))this.damageFriendly(tgt,e._dmg);this.enemySplash(e,tgt,tx,ty,e._dmg*(cfg.splashRatio||0.5),sd(cfg.splash||100),false)}})}
@@ -4073,6 +4123,12 @@ function launch(sel,mode='endless1'){
         if(!this.canTowerHealTarget(tw,o))return;
         const dist=Phaser.Math.Distance.Between(tw.x,tw.y,o.x,o.y);
         const hpRatio=o._wreck?(o._repair||0)/200:o._hp/o._maxhp;
+        if(dist<=range&&hpRatio<ratio){hurt=o;ratio=hpRatio}
+      });
+      this.drones.children.iterate(o=>{
+        if(!this.canTowerHealTarget(tw,o))return;
+        const dist=Phaser.Math.Distance.Between(tw.x,tw.y,o.x,o.y);
+        const hpRatio=o._hp/o._maxhp;
         if(dist<=range&&hpRatio<ratio){hurt=o;ratio=hpRatio}
       });
       return hurt
@@ -4618,7 +4674,7 @@ function launch(sel,mode='endless1'){
 
     updateCombatDrone(d,core,td,range,dt){
       const oldTarget=d._target;
-      const valid=oldTarget&&oldTarget.active&&Phaser.Math.Distance.Between(core.x,core.y,oldTarget.x,oldTarget.y)<=range;
+      const valid=oldTarget&&oldTarget.active;
       let target=valid?oldTarget:null;
       if(!valid||(!d._engaged&&d._retargetT<=0)){
         target=this.chooseDroneTarget(d,core,range);
@@ -4775,6 +4831,7 @@ function launch(sel,mode='endless1'){
     renderOverlayBars(){
       this.overlay.clear();
       this.blockers.children.iterate(tw=>this.renderBlockerBar(tw));
+      this.drones.children.iterate(tw=>this.renderBlockerBar(tw));
       this.droneHelpers.children.iterate(d=>this.renderDroneBar(d));
       this.enemies.children.iterate(e=>this.renderEnemyBar(e));
       this.renderReactorBars()
