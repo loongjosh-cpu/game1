@@ -10,6 +10,7 @@ const META_NODES=[
   {id:'ship_multi_1',group:'ship',name:'多目标锁定 I',cost:2,desc:'导弹同时攻击 2 个目标'},
   {id:'ship_multi_2',group:'ship',name:'多目标锁定 II',cost:2,req:['ship_multi_1'],desc:'导弹同时攻击 3 个目标'},
   {id:'ship_blast',group:'ship',name:'爆裂弹头',cost:3,req:['ship_damage_2','ship_cd_2','ship_multi_2'],desc:'导弹命中造成半径100范围伤害'},
+  {id:'reactor_wave_supply',group:'ship',name:'反应炉补给协议',cost:1,desc:'前5波每成功守住一波，主反应炉额外产出120能量'},
   {id:'tower_p1',group:'tower',tower:'P1',name:'双管炮',cost:2,desc:'每次攻击有33%概率追加一发'},
   {id:'tower_p2',group:'tower',tower:'P2',name:'电磁停顿',cost:3,desc:'命中使敌人减速70%，持续0.5秒'},
   {id:'tower_p3',group:'tower',tower:'P3',name:'电磁残留',cost:4,desc:'攻击区域残留1.5秒，每0.3秒造成1伤害'},

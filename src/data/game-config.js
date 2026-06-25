@@ -11,6 +11,7 @@ const LOCAL_CAMERA_ZOOM=3.2,MINIMAP_REFRESH=120;
 const P3_SHELL_SPD=700,POISON_BOLT_SPD=520,RX_HP=200;
 
 const EN_START=200,EN_CAP=9999,PREP_TIME=10000,SHIP_RESPAWN=5000;
+const KILL_REWARD_MULT=3,REACTOR_WAVE_BONUS_LIMIT=5;
 
 const CLOSE_ATTACK_RANGE=60,PATH_SNAP_DISTANCE=120;
 
@@ -25,9 +26,9 @@ const MAIN_REACTOR={
   tSize:120,
   desc:'主目标 · 摧毁后游戏失败',
   upg:[
-    {l:1,hp:200,prod:5},
-    {l:2,hp:200,prod:7,c:100},
-    {l:3,hp:200,prod:9,c:100}
+    {l:1,hp:200,prod:4},
+    {l:2,hp:200,prod:5.5,c:100},
+    {l:3,hp:200,prod:7,c:100}
   ]
 };
 

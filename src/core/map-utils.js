@@ -55,8 +55,16 @@ function makeLevel(id,name,unitScale,paths,radius,reactor,extraWalls=[]){
     id,
     name,
     map:makeLevelMap(id,name,unitScale,cleanPaths,radius,reactor,extraWalls),
-    waves:LEVEL_TRIAL_1.waves
+    waves:cloneLevelWaves(LEVEL_WAVES[id]||LEVEL_TRIAL_1.waves)
   };
+}
+
+function cloneLevelWaves(waves=[]){
+  return waves.map(w=>({
+    ...w,
+    lanes:[...(w.lanes||[])],
+    roster:[...(w.roster||[])]
+  }))
 }
 
 function makeLevelMap(id,name,unitScale,paths,radius,reactor,extraWalls=[]){

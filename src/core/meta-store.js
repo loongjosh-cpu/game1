@@ -124,6 +124,8 @@ function metaEffects(){
     missileCd:8000-(hasMeta('ship_cd_1')?1000:0)-(hasMeta('ship_cd_2')?1000:0),
     missileTargets:1+(hasMeta('ship_multi_1')?1:0)+(hasMeta('ship_multi_2')?1:0),
     missileBlast:hasMeta('ship_blast'),
+    reactorWaveBonus:hasMeta('reactor_wave_supply')?120:0,
+    reactorWaveBonusLimit:REACTOR_WAVE_BONUS_LIMIT,
     p1Double:hasMeta('tower_p1'),
     p2Stop:hasMeta('tower_p2'),
     p3Residual:hasMeta('tower_p3'),

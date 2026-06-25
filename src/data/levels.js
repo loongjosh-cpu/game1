@@ -80,6 +80,69 @@ const TRIAL_1_WAVES=[
   }
 ];
 
+const LEVEL_WAVES={
+  level1:[
+    {scale:1.0,lanes:[0],roster:['E1','E1','E1','E1','E2','E1']},
+    {scale:1.1,lanes:[0],roster:['E1','E2','E1','E1','E2','E1','E1']},
+    {scale:1.2,lanes:[0],roster:['E1','E1','E2','E7','E1','E2','E1']},
+    {scale:1.3,lanes:[0],roster:['E1','E3','E1','E2','E1','E3','E1']},
+    {scale:1.45,lanes:[0],roster:['E2','E7','E1','E3','E1','E7','E2','E1']},
+    {scale:1.6,lanes:[0],roster:['E4','E1','E2','E3','E7','E1','E4']},
+    {scale:1.75,lanes:[0],roster:['E3','E4','E7','E1','E8','E2','E3','E1']},
+    {scale:1.9,lanes:[0],roster:['E5','E1','E2','E7','E3','E4','E1','E7']},
+    {scale:2.1,lanes:[0],roster:['E6','E1','E7','E4','E2','E3','E8','E1']},
+    {scale:2.3,lanes:[0],roster:['E6','E7','E4','E3','E12','E1','E8','E7','E4']}
+  ],
+  level2:[
+    {scale:1.0,lanes:[0,1],roster:['E1','E1','E2','E1','E1','E2']},
+    {scale:1.15,lanes:[0,0,1,1],roster:['E1','E2','E1','E7','E1','E2','E1']},
+    {scale:1.3,lanes:[0,1],roster:['E1','E3','E1','E2','E7','E1','E3']},
+    {scale:1.45,lanes:[0,1,1,0],roster:['E4','E1','E2','E7','E1','E3','E2']},
+    {scale:1.65,lanes:[0,1],roster:['E7','E3','E1','E8','E2','E7','E4','E1']},
+    {scale:1.85,lanes:[0,1,0,1],roster:['E4','E3','E7','E2','E4','E8','E1','E7']},
+    {scale:2.05,lanes:[0,1],roster:['E6','E1','E7','E4','E3','E2','E8','E7']},
+    {scale:2.25,lanes:[0,0,1,1],roster:['E5','E7','E3','E4','E11','E2','E7','E4','E1']},
+    {scale:2.45,lanes:[0,1],roster:['E6','E12','E4','E7','E8','E3','E11','E2','E4']},
+    {scale:2.65,lanes:[0,1,0,1],roster:['E9','E6','E12','E7','E4','E11','E8','E3','E7','E4']}
+  ],
+  level3:[
+    {scale:1.1,lanes:[0,1],roster:['E1','E1','E2','E1','E2','E1','E1']},
+    {scale:1.25,lanes:[0,1],roster:['E2','E7','E1','E1','E3','E2','E1']},
+    {scale:1.4,lanes:[0,0,1,1],roster:['E3','E1','E7','E2','E1','E3','E1','E2']},
+    {scale:1.6,lanes:[0,1],roster:['E4','E2','E7','E3','E1','E8','E1','E7']},
+    {scale:1.8,lanes:[0,1,1,0],roster:['E8','E7','E4','E3','E2','E7','E4','E1']},
+    {scale:2.0,lanes:[0,1],roster:['E6','E1','E4','E7','E3','E8','E2','E7','E4']},
+    {scale:2.2,lanes:[0,0,1,1],roster:['E11','E7','E4','E3','E8','E6','E2','E7','E1']},
+    {scale:2.45,lanes:[0,1],roster:['E5','E11','E7','E4','E3','E12','E8','E2','E7']},
+    {scale:2.7,lanes:[0,1,0,1],roster:['E6','E12','E11','E4','E7','E8','E3','E10','E2']},
+    {scale:2.95,lanes:[0,1],roster:['E9','E12','E11','E6','E4','E7','E10','E8','E3','E12']}
+  ],
+  level4:[
+    {scale:1.2,lanes:[0,1],roster:['E1','E2','E1','E7','E1','E2','E1']},
+    {scale:1.4,lanes:[0,2,1],roster:['E1','E3','E2','E7','E1','E3','E2','E1']},
+    {scale:1.6,lanes:[0,1,2],roster:['E4','E1','E7','E3','E2','E8','E1','E7']},
+    {scale:1.8,lanes:[2,0,1],roster:['E8','E7','E4','E3','E2','E7','E4','E1','E3']},
+    {scale:2.0,lanes:[0,1,2],roster:['E6','E4','E7','E3','E8','E2','E7','E4','E1']},
+    {scale:2.2,lanes:[0,2,1,2],roster:['E11','E7','E4','E6','E3','E8','E2','E7','E4','E12']},
+    {scale:2.45,lanes:[0,1,2],roster:['E5','E11','E7','E4','E3','E12','E8','E6','E2','E7']},
+    {scale:2.75,lanes:[2,1,0,1],roster:['E6','E12','E11','E4','E7','E8','E10','E3','E12','E4']},
+    {scale:3.05,lanes:[0,1,2],roster:['E9','E12','E11','E6','E4','E7','E5','E10','E8','E12','E4']},
+    {scale:3.35,lanes:[0,1,2,0,2,1],roster:['E9','E12','E11','E6','E4','E7','E5','E10','E8','E12','E9','E6']}
+  ],
+  level5:[
+    {scale:1.2,lanes:[0,1,2,3],roster:['E1','E2','E7','E1','E3','E2','E1','E7']},
+    {scale:1.45,lanes:[0,2,1,3],roster:['E3','E1','E7','E4','E2','E3','E1','E8']},
+    {scale:1.7,lanes:[0,1,2,3],roster:['E4','E7','E8','E3','E2','E7','E4','E1','E3']},
+    {scale:1.95,lanes:[3,1,0,2],roster:['E6','E4','E7','E3','E8','E2','E7','E4','E1']},
+    {scale:2.2,lanes:[0,1,2,3],roster:['E11','E7','E4','E6','E3','E8','E2','E12','E7','E4']},
+    {scale:2.5,lanes:[0,2,1,3],roster:['E5','E11','E7','E4','E3','E12','E8','E6','E2','E7']},
+    {scale:2.8,lanes:[0,1,2,3],roster:['E6','E12','E11','E4','E7','E8','E10','E3','E12','E4','E7']},
+    {scale:3.15,lanes:[3,2,1,0],roster:['E9','E12','E11','E6','E4','E7','E5','E10','E8','E12','E4']},
+    {scale:3.5,lanes:[0,1,2,3,1,2],roster:['E6','E12','E11','E4','E7','E5','E10','E8','E3','E12','E9','E6','E4']},
+    {scale:3.9,lanes:[0,1,2,3],roster:['E9','E12','E11','E6','E4','E7','E5','E10','E8','E12','E9','E6','E4','E7','E11']}
+  ]
+};
+
 const LEVEL_TRIAL_1={
   id:'trial1',
   name:'关卡试验1',
