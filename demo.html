@@ -846,6 +846,8 @@ body::after{
 <script src="src/game/tower-panel.js"></script>
 <script src="src/game/drone-controller.js"></script>
 <script src="src/game/combat-utils.js"></script>
+<script src="src/game/tower-combat.js"></script>
+<script src="src/game/projectile-controller.js"></script>
 <script src="src/core/meta-store.js"></script>
 <script src="src/core/runtime-maps.js"></script>
 <script src="src/ui/view-settings.js"></script>
@@ -946,150 +948,6 @@ function launch(sel,mode='endless1'){
     reviveSteel(b1){if(!b1?.active)return;b1.clearTint();b1.setAlpha(1);b1._wreck=false;const up=b1._type.upg[b1._lv||0];b1._maxhp=up.hp;b1._hp=up.hp}
     healBlocker(tw,amount){if(!tw?.active||amount<=0)return 0;if(tw._wreck){if(!this.meta.b1Repair)return 0;const before=tw._repair||0;tw._repair=Math.min(200,before+amount);const applied=tw._repair-before;if(tw._repair>=200)this.reviveSteel(tw);return applied}const before=tw._hp;tw._hp=Math.min(tw._maxhp,tw._hp+amount);return tw._hp-before}
     killShip(){if(this.shipDead)return;this.cancelChannel();this.shipDead=true;this.shipMoveTarget=null;this.ship.setActive(false).setVisible(false);this.ship.body.enable=false;this.bld=false;this.ghost.setVisible(false);this.time.delayedCall(SHIP_RESPAWN,()=>{this.ship.setPosition(MAP.reactor.x,MAP.reactor.y);this.ship.body.enable=true;this.ship.setActive(true).setVisible(true);this.shipDead=false})}
-    runTower(td,tw,dt){
-      if(tw._wreck)return;
-      const up=td.upg[tw._lv||0],range=sd(up.r||td.range);
-      tw._at=(tw._at||0)+dt;
-      this.updateTowerPassive(td,tw,dt);
-      if(td.heal){this.runHealTower(tw,up,range);return}
-      if(this.towerCannotAttack(td,up))return;
-
-      const interval=up.i||1000;
-      if(tw._at<interval)return;
-      const targets=this.findTargets(tw.x,tw.y,range);
-      if(!targets.length)return;
-      tw._at=0;
-      if(this.runSpecialTowerAttack(td,tw,up,range,targets))return;
-      this.runBasicTowerAttack(td,tw,up,targets)
-    }
-
-    updateTowerPassive(td,tw,dt){
-      if(td.id!=='B4'||!this.meta.b4Shield)return;
-      tw._shieldClock=(tw._shieldClock||0)+dt;
-      while(tw._shieldClock>=10000){
-        tw._shieldClock-=10000;
-        tw._shield=Math.min(5,(tw._shield||0)+1)
-      }
-    }
-
-    runHealTower(tw,up,range){
-      if(tw._at<1000)return;
-      tw._at=0;
-      const hurt=this.findHealTarget(tw,range);
-      if(hurt)this.healBlocker(hurt,up.hl||3)
-    }
-
-    findHealTarget(tw,range){
-      let hurt=null,ratio=1;
-      this.blockers.children.iterate(o=>{
-        if(!this.canTowerHealTarget(tw,o))return;
-        const dist=Phaser.Math.Distance.Between(tw.x,tw.y,o.x,o.y);
-        const hpRatio=o._wreck?(o._repair||0)/200:o._hp/o._maxhp;
-        if(dist<=range&&hpRatio<ratio){hurt=o;ratio=hpRatio}
-      });
-      this.drones.children.iterate(o=>{
-        if(!this.canTowerHealTarget(tw,o))return;
-        const dist=Phaser.Math.Distance.Between(tw.x,tw.y,o.x,o.y);
-        const hpRatio=o._hp/o._maxhp;
-        if(dist<=range&&hpRatio<ratio){hurt=o;ratio=hpRatio}
-      });
-      return hurt
-    }
-
-    canTowerHealTarget(tw,target){
-      if(!target||!target.active||target===tw)return false;
-      if(target._wreck&&!this.meta.b1Repair)return false;
-      if(target._type.id==='B5')return false;
-      return target._wreck||target._hp<target._maxhp
-    }
-
-    towerCannotAttack(td,up){
-      if(td.id==='B1'||td.id==='B7')return true;
-      return !up.d&&!td.poisonAura&&td.id!=='P6'
-    }
-
-    runSpecialTowerAttack(td,tw,up,range,targets){
-      if(td.poisonAura){this.runPoisonAuraTower(tw,up,range,targets);return true}
-      if(td.id==='P6'){this.runPoisonAlphaTower(tw,up,targets);return true}
-      if(td.id==='B2'){this.areaAttack(tw,up,0xff7733);return true}
-      if(td.id==='B4'){this.areaAttack(tw,up,0x66ccff);return true}
-      if(td.id==='P4'){this.runCondenseTower(td,tw,up,targets);return true}
-      if(td.id==='P7'){this.runPoisonBetaTower(td,tw,up,targets);return true}
-      if(td.chain&&up.targets){this.fireElectricChain(tw,targets,up);return true}
-      return false
-    }
-
-    runPoisonAuraTower(tw,up,range,targets){
-      this.flashPoisonAura(tw.x,tw.y,range,targets);
-      targets.forEach(e=>this.applyPoison(e,up.pa||1))
-    }
-
-    runPoisonAlphaTower(tw,up,targets){
-      if((tw._lv||0)>=2){
-        targets.sort((a,b)=>((a._poisons?.length||0)>0)-((b._poisons?.length||0)>0))
-      }
-      targets.slice(0,up.ps||2).forEach(e=>this.firePoisonBolt(tw.x,tw.y,e,1))
-    }
-
-    runCondenseTower(td,tw,up,targets){
-      targets.sort((a,b)=>(b._slowT>0)-(a._slowT>0));
-      const count=up.n||1,slow=this.meta.p4Slow?0.5:(up.sl||td.slow);
-      targets.slice(0,count).forEach(e=>{
-        this.fireBolt(tw.x,tw.y,e,up.d||0,{slow,duration:2000})
-      })
-    }
-
-    runPoisonBetaTower(td,tw,up,targets){
-      tw._metaShots++;
-      targets.sort((a,b)=>((b._poisons?.length||0)>0)-((a._poisons?.length||0)>0));
-      targets.slice(0,up.n||1).forEach(target=>{
-        let dmg=up.d||0;
-        if(target._poisons?.length)dmg+=up.pb||td.poisonBonus||5;
-        this.fireBolt(tw.x,tw.y,target,dmg);
-        if(this.meta.p7Poison&&tw._metaShots%3===0)this.applyPoison(target,1)
-      })
-    }
-
-    runBasicTowerAttack(td,tw,up,targets){
-      if(td.id==='P5')targets.sort((a,b)=>(EC[b._type].danger-EC[a._type].danger));
-      const target=targets[0];
-      tw._metaShots++;
-      const dmg=this.basicTowerDamage(td,tw,up,target);
-      if(td.id==='P3'&&td.splash&&up.s){
-        this.fireP3Shell(tw.x,tw.y,target,dmg,sd(up.s))
-      }else if(td.splash&&up.s){
-        this.applyInstantSplash(targets,target,dmg,sd(up.s))
-      }else{
-        this.fireBasicBolt(td,tw,target,dmg)
-      }
-      if(td.id==='B3'&&this.meta.b3Leech)this.healBlocker(tw,2)
-    }
-
-    basicTowerDamage(td,tw,up,target){
-      let dmg=up.d||0;
-      if(td.id!=='P5')return dmg;
-      if(tw._focusTarget===target){
-        tw._focus=(tw._focus||0)+(up.focus||10)+(this.meta.p5Focus&&tw._metaShots%2===0?1:0)
-      }else{
-        tw._focusTarget=target;
-        tw._focus=0
-      }
-      return dmg+tw._focus
-    }
-
-    applyInstantSplash(targets,target,dmg,radius){
-      targets
-        .filter(e=>Phaser.Math.Distance.Between(target.x,target.y,e.x,e.y)<=radius)
-        .forEach(e=>this.damageEnemy(e,dmg))
-    }
-
-    fireBasicBolt(td,tw,target,dmg){
-      this.fireBolt(tw.x,tw.y,target,dmg);
-      if(td.id==='P1'&&this.meta.p1Double&&Math.random()<0.33){
-        this.fireBolt(tw.x,tw.y,target,dmg)
-      }
-    }
-
     update(t,dt){
       if(this.isPaused||!dt)return;this.gainEnergy(this.energyRate()*dt/1000);
       this.updateShip(dt);
@@ -1620,19 +1478,6 @@ function launch(sel,mode='endless1'){
       }
     }
 
-    updateProjectiles(dt){
-      this.missiles.children.iterate(m=>{
-        if(!m||!m.active||!m._t||!m._t.active){if(m&&m.active)m.destroy();return}
-        this.physics.moveToObject(m,m._t,sd(MSL_SPD))
-      });
-      this.bolts.children.iterate(b=>{
-        if(!b||!b.active||!b._t||!b._t.active){if(b&&b.active)b.destroy();return}
-        this.physics.moveToObject(b,b._t,sd(500))
-      });
-      this.updateP3Shells(dt);
-      this.updatePoisonBolts(dt)
-    }
-
     updateWaves(dt){
       if(!this.wActive){
         this.prepTimer=Math.max(0,this.prepTimer-dt);
@@ -1715,16 +1560,6 @@ function launch(sel,mode='endless1'){
       this.updUpgradeHint()
     }
 
-    buildCurvePath(x1,y1,x2,y2){const wp=astar(gridPF,x1,y1,x2,y2);const p=new Phaser.Curves.Path(wp[0][0],wp[0][1]);for(let i=1;i<wp.length;i++)p.lineTo(wp[i][0],wp[i][1]);return p}
-    fireMsl(x,y,tgt){const m=this.physics.add.image(x,y,'msl').setDepth(8);this.missiles.add(m);m._t=tgt;m._dmg=this.meta.missileDamage;this.physics.add.overlap(m,this.enemies,(a,b)=>{if(!a.active||!b.active)return;const hitX=b.x,hitY=b.y,dmg=a._dmg;a.destroy();if(this.meta.missileBlast){const radius=sd(100);this.flashArea(hitX,hitY,radius,0xffdd66);this.findTargets(hitX,hitY,radius).forEach(e=>this.damageEnemy(e,dmg))}else this.damageEnemy(b,dmg)})}
-    fireP3Shell(x,y,tgt,dmg,radius){const s=this.add.image(x,y,'msl').setDepth(8).setTint(0x88ddff).setScale(1.35);this.p3Shells.add(s);s._destX=tgt.x;s._destY=tgt.y;s._dmg=dmg;s._radius=radius;s._residual=this.meta.p3Residual;s.setRotation(Math.atan2(s._destY-y,s._destX-x)+Math.PI/2)}
-    updateP3Shells(dt){this.p3Shells.children.iterate(s=>{if(!s||!s.active)return;const dx=s._destX-s.x,dy=s._destY-s.y,dist=Math.hypot(dx,dy),step=sd(P3_SHELL_SPD)*dt/1000;if(dist>step){s.x+=dx/dist*step;s.y+=dy/dist*step;return}const x=s._destX,y=s._destY,dmg=s._dmg,radius=s._radius,residual=s._residual;s.destroy();this.flashArea(x,y,radius,0x88ccff);this.findTargets(x,y,radius).forEach(e=>this.damageEnemy(e,dmg));if(residual)this.createResidual(x,y)})}
-    firePoisonBolt(x,y,tgt,layers=1){const b=this.add.image(x,y,'bolt').setDepth(8).setTint(0xc96cff).setScale(2.4);this.poisonBolts.add(b);b._t=tgt;b._layers=layers}
-    updatePoisonBolts(dt){this.poisonBolts.children.iterate(b=>{if(!b||!b.active)return;const tgt=b._t;if(!tgt||!tgt.active){b.destroy();return}const dx=tgt.x-b.x,dy=tgt.y-b.y,dist=Math.hypot(dx,dy),step=sd(POISON_BOLT_SPD)*dt/1000;b.setRotation(Math.atan2(dy,dx));if(dist>step){b.x+=dx/dist*step;b.y+=dy/dist*step;return}const x=tgt.x,y=tgt.y,layers=b._layers;b.destroy();this.applyPoison(tgt,layers);this.flashArea(x,y,22,0xaa44ff)})}
-    fireBolt(x,y,tgt,dmg,effect=null){const b=this.physics.add.image(x,y,'bolt').setDepth(7);this.bolts.add(b);b._t=tgt;b._dmg=dmg;b._effect=effect;this.physics.add.overlap(b,this.enemies,(a,c)=>{if(!a.active||!c.active||c!==a._t)return;c._hp-=a._dmg;if(a._effect?.slow){c._slow=Math.max(c._slow||0,a._effect.slow);c._slowT=Math.max(c._slowT||0,a._effect.duration||2000)}a.destroy();if(c._hp<=0)this.killE(c)})}
-    drawElectricLinks(g,links){g.clear();links.forEach(link=>{const dx=link.x2-link.x1,dy=link.y2-link.y1,len=Math.hypot(dx,dy),steps=Math.max(3,Math.ceil(len/38)),nx=len?-dy/len:0,ny=len?dx/len:0,pts=[{x:link.x1,y:link.y1}];for(let i=1;i<steps;i++){const t=i/steps,offset=Phaser.Math.Between(-9,9);pts.push({x:link.x1+dx*t+nx*offset,y:link.y1+dy*t+ny*offset})}pts.push({x:link.x2,y:link.y2});for(const style of [[7,0x2288ff,0.25],[2,0xd8f7ff,1]]){g.lineStyle(style[0],style[1],style[2]);g.beginPath();g.moveTo(pts[0].x,pts[0].y);for(let i=1;i<pts.length;i++)g.lineTo(pts[i].x,pts[i].y);g.strokePath()}})}
-    flashElectricChain(links){const g=this.add.graphics().setDepth(17);const flash=()=>{if(g.active){g.setVisible(true);this.drawElectricLinks(g,links)}};flash();this.time.delayedCall(45,()=>{if(g.active)g.setVisible(false)});this.time.delayedCall(80,flash);this.time.delayedCall(130,()=>{if(g.active)g.destroy()})}
-    fireElectricChain(tw,tgts,up){const main=tgts[0],near=this.findTargets(main.x,main.y,sd(up.cr||100)).filter(e=>e!==main).slice(0,Math.max(0,(up.targets||1)-1)),targets=[main,...near],links=[{x1:tw.x,y1:tw.y,x2:main.x,y2:main.y},...near.map(e=>({x1:main.x,y1:main.y,x2:e.x,y2:e.y}))];this.flashElectricChain(links);targets.forEach(e=>{this.damageEnemy(e,up.d||0);if(this.meta.p2Stop&&e.active){e._slow=Math.max(e._slow||0,0.7);e._slowT=Math.max(e._slowT||0,500)}})}
     spawnAt(type,x,y,si=0,summoned=false){const e=this.spawnE(si,type);e.setPosition(x,y);e._summoned=summoned;this.rejoinPath(e);return e}
     killE(e){if(!e||!e.active)return;const cfg=EC[e._type],x=e.x,y=e.y,si=e._si,summoned=e._summoned;if(!summoned)this.gainEnergy(cfg.danger);const ex=this.add.image(x,y,'msl').setDepth(9).setTint(cfg.color||0xff8844).setScale(3);this.tweens.add({targets:ex,alpha:0,scaleX:6,scaleY:6,duration:200,onComplete:()=>ex.destroy()});e.destroy();if(cfg.split){this.spawnAt('E1',x-18,y,si,true);this.spawnAt('E1',x+18,y,si,true)}}
     wavePool(){const pool=['E1'];if(this.wave>=2)pool.push('E2');if(this.wave>=3)pool.push('E3');if(this.wave>=4)pool.push('E4','E7');if(this.wave>=5)pool.push('E8');if(this.wave>=6)pool.push('E5','E6');if(this.wave>=7)pool.push('E11');if(this.wave>=8)pool.push('E9','E10');if(this.wave>=9)pool.push('E12');return pool}
@@ -1734,7 +1569,7 @@ function launch(sel,mode='endless1'){
     spawnE(si,type){const cfg=EC[type],[sx,sy]=MAP.spawns[si],e=this.physics.add.image(sx,sy,cfg.key).setDepth(6).setTint(cfg.color||0xffffff);this.enemies.add(e);e.body.enable=true;e._uid=++this.enemySeq;const sc=this.levelWave()?.scale??(1+(this.wave-1)*0.1);e._hp=Math.round(cfg.hp*sc);e._maxhp=e._hp;e._dmg=cfg.dmg;e._spd=cfg.spd;e._atk=cfg.atk;e._at=0;e._firstAttack=true;e._si=si;e._b1tgt=null;e._reactorTarget=null;e._droneTarget=null;e._type=type;e._bt=0;e._slow=0;e._slowT=0;e._state='path';e._hatch=cfg.hatch||0;e._hits=0;this.routeToReactor(e,false);e.body.setCircle(Math.min(16,e.width/2));e.body.setBounce(0);return e}
     gameOver(title='防线失守'){if(this.ended)return;this.ended=true;const completed=this.completedWaves??Math.max(0,this.wave-1),levelCleared=!!this.levelConfig&&completed>=this.levelConfig.waves.length,reward=this.levelConfig?(levelCleared?1:0):Math.floor(completed/5);metaSave.cores+=reward;metaSave.bestWave=Math.max(metaSave.bestWave,completed);if(levelCleared&&this.levelConfig?.id){metaSave.levelClears=metaSave.levelClears||{};metaSave.levelClears[this.levelConfig.id]=true}saveMeta();document.querySelector('#gameOverPanel h2').textContent=title;document.getElementById('resultWaves').textContent=completed;document.getElementById('resultReward').textContent=reward;document.getElementById('resultCores').textContent=metaSave.cores;document.getElementById('pausePanel').style.display='none';document.getElementById('gameOverPanel').style.display='flex';this.scene.pause()}
   }
-  Object.assign(GameScene.prototype,TextureFactoryMethods,SceneSetupMethods,MiniMapMethods,InputControllerMethods,BuildPanelMethods,PlacementControllerMethods,TowerPanelMethods,DroneControllerMethods,CombatUtilMethods);
+  Object.assign(GameScene.prototype,TextureFactoryMethods,SceneSetupMethods,MiniMapMethods,InputControllerMethods,BuildPanelMethods,PlacementControllerMethods,TowerPanelMethods,DroneControllerMethods,CombatUtilMethods,TowerCombatMethods,ProjectileControllerMethods);
   const game=new Phaser.Game({type:Phaser.AUTO,width:W,height:H,backgroundColor:'#0d1219',parent:'gamePage',scale:{mode:Phaser.Scale.ENVELOP,autoCenter:Phaser.Scale.CENTER_BOTH},physics:{default:'arcade',arcade:{gravity:{y:0}}},scene:GameScene});
   setTimeout(()=>document.querySelector('canvas')?.focus(),500);
   return game;
