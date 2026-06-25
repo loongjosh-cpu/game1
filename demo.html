@@ -840,6 +840,7 @@ body::after{
 <script src="src/render/texture-factory.js"></script>
 <script src="src/game/scene-setup.js"></script>
 <script src="src/game/minimap.js"></script>
+<script src="src/game/input-controller.js"></script>
 <script src="src/core/meta-store.js"></script>
 <script src="src/core/runtime-maps.js"></script>
 <script src="src/ui/view-settings.js"></script>
@@ -889,81 +890,6 @@ function launch(sel,mode='endless1'){
       this.initMiniMap();
       this.applyViewSettings();
     }
-    setupInputHandlers(){
-      this.keys=this.input.keyboard.addKeys({up:'W',down:'S',left:'A',right:'D'});
-      this.input.keyboard.addCapture('SPACE,ESC,V');
-      this.bindKeyboardShortcuts();
-      this.bindTowerHotkeys();
-      this.bindWheelSelection();
-      this.bindPointerControls();
-    }
-    bindKeyboardShortcuts(){
-      this.input.keyboard.on('keydown-SPACE',event=>{
-        if(!event.repeat)this.togglePause();
-      });
-      this.input.keyboard.on('keydown-B',()=>this.tglBld());
-      this.input.keyboard.on('keydown-R',()=>this.selectSmallReactor());
-      this.input.keyboard.on('keydown-V',()=>this.upgradeTower());
-      this.input.keyboard.on('keydown-U',()=>this.upgradeTower());
-      this.input.keyboard.on('keydown-X',()=>this.sellTower());
-      this.input.keyboard.on('keydown-ESC',event=>{
-        if(!event.repeat)this.handleEscape();
-      });
-    }
-    selectSmallReactor(){
-      if(this.channel)return;
-      this.sel=SMALL_REACTOR;
-      this.bld=true;
-      this.selTw=null;
-      this.updPanel();
-    }
-    bindTowerHotkeys(){
-      const kNames=['ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN','EIGHT','NINE','ZERO'];
-      for(let i=0;i<10;i++){
-        const idx=i;
-        this.input.keyboard.on('keydown-'+kNames[i],()=>this.selectTowerByHotkey(idx));
-      }
-    }
-    selectTowerByHotkey(idx){
-      if(idx>=selIds.length)return;
-      this.sel=selIds[idx];
-      this.updPanel();
-      this.scrollBtnIntoView(idx);
-    }
-    bindWheelSelection(){
-      this.input.on('wheel',(p,g,dx,dy)=>this.cycleBuildChoice(dy));
-    }
-    cycleBuildChoice(dy){
-      const choices=this.buildChoices();
-      if(!this.bld||!choices.length)return;
-      const cur=Math.max(0,choices.indexOf(this.sel));
-      const dir=dy>0?1:-1;
-      const next=Math.max(0,Math.min(choices.length-1,cur+dir));
-      this.sel=choices[next];
-      this.updPanel();
-      this.scrollBtnIntoView(next);
-    }
-    bindPointerControls(){
-      this.game.canvas.addEventListener('contextmenu',e=>e.preventDefault());
-      this.input.mouse.disableContextMenu();
-      this.input.on('pointerdown',p=>this.handlePointerDown(p));
-      this.input.on('pointerup',()=>this._buildLatch=false);
-    }
-    handlePointerDown(p){
-      if(this.shipDead||this.isPaused)return;
-      if(p.rightButtonDown())this.shipMoveTarget={x:p.worldX,y:p.worldY};
-    }
-    bindTowerPanelButtons(){
-      document.getElementById('btnUpgrade').addEventListener('click',event=>{
-        event.preventDefault();
-        event.stopPropagation();
-        this.upgradeTower();
-      });
-      document.getElementById('btnDroneEnergy').onclick=()=>this.toggleDroneEnergy();
-      document.getElementById('btnSell').onclick=()=>this.sellTower();
-      document.getElementById('btnCloseTw').onclick=()=>this.clearSelectionAndBuildMode();
-    }
-
     buildChoices(){return[...this.selTowers,SMALL_REACTOR]}
     smallReactorCount(){return this.reactors.filter(r=>this.reactorAlive(r)&&!r._isMainReactor).length}
     energyRate(){return this.reactors.reduce((sum,r)=>sum+(this.reactorAlive(r)?r._type.upg[r._lv||0].prod:0),0)}
@@ -1007,50 +933,6 @@ function launch(sel,mode='endless1'){
       const bp=document.getElementById('buildPanel');
       const btn=bp.children[idx];
       if(btn)btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-    }
-    togglePause(force){
-      if(this.ended)return;
-      this.isPaused=typeof force==='boolean'?force:!this.isPaused;
-      if(this.isPaused)this.enterPause();
-      else this.leavePause();
-    }
-    enterPause(){
-      this.physics.world.pause();
-      this.time.paused=true;
-      this.tweens.pauseAll();
-      syncViewSettingsUI();
-      this.updateMiniMap(0,true);
-      document.getElementById('pausePanel').style.display='flex';
-      document.getElementById('hudPhase').textContent='已暂停 · Esc继续';
-    }
-    leavePause(){
-      this.physics.world.resume();
-      this.time.paused=false;
-      this.tweens.resumeAll();
-      document.getElementById('pausePanel').style.display='none';
-    }
-    handleEscape(){
-      if(this.isPaused){this.togglePause(false);return}
-      if(this.channel){this.cancelChannel();return}
-      if(this.bld||this.selTw){this.clearSelectionAndBuildMode();return}
-      this.togglePause(true);
-    }
-    clearSelectionAndBuildMode(){
-      this.bld=false;
-      this.selTw=null;
-      this.ghost.setVisible(false);
-      this.ghostRng.clear();
-      this.selectionGfx.clear();
-      this.updPanel();
-      this.updTwPanel();
-    }
-    tglBld(){
-      if(this.isPaused||this.channel)return;
-      this.bld=!this.bld;
-      this.selTw=null;
-      this.selectionGfx.clear();
-      this.updPanel();
-      if(!this.bld)this.ghost.setVisible(false);
     }
     placementPoint(x,y,td=this.sel){return td.type==='path'?snapToWallEdge(x,y,20):{x,y,snapped:false}}
     canPl(x,y){
@@ -2701,7 +2583,7 @@ function launch(sel,mode='endless1'){
     spawnE(si,type){const cfg=EC[type],[sx,sy]=MAP.spawns[si],e=this.physics.add.image(sx,sy,cfg.key).setDepth(6).setTint(cfg.color||0xffffff);this.enemies.add(e);e.body.enable=true;e._uid=++this.enemySeq;const sc=this.levelWave()?.scale??(1+(this.wave-1)*0.1);e._hp=Math.round(cfg.hp*sc);e._maxhp=e._hp;e._dmg=cfg.dmg;e._spd=cfg.spd;e._atk=cfg.atk;e._at=0;e._firstAttack=true;e._si=si;e._b1tgt=null;e._reactorTarget=null;e._droneTarget=null;e._type=type;e._bt=0;e._slow=0;e._slowT=0;e._state='path';e._hatch=cfg.hatch||0;e._hits=0;this.routeToReactor(e,false);e.body.setCircle(Math.min(16,e.width/2));e.body.setBounce(0);return e}
     gameOver(title='防线失守'){if(this.ended)return;this.ended=true;const completed=this.completedWaves??Math.max(0,this.wave-1),levelCleared=!!this.levelConfig&&completed>=this.levelConfig.waves.length,reward=this.levelConfig?(levelCleared?1:0):Math.floor(completed/5);metaSave.cores+=reward;metaSave.bestWave=Math.max(metaSave.bestWave,completed);if(levelCleared&&this.levelConfig?.id){metaSave.levelClears=metaSave.levelClears||{};metaSave.levelClears[this.levelConfig.id]=true}saveMeta();document.querySelector('#gameOverPanel h2').textContent=title;document.getElementById('resultWaves').textContent=completed;document.getElementById('resultReward').textContent=reward;document.getElementById('resultCores').textContent=metaSave.cores;document.getElementById('pausePanel').style.display='none';document.getElementById('gameOverPanel').style.display='flex';this.scene.pause()}
   }
-  Object.assign(GameScene.prototype,TextureFactoryMethods,SceneSetupMethods,MiniMapMethods);
+  Object.assign(GameScene.prototype,TextureFactoryMethods,SceneSetupMethods,MiniMapMethods,InputControllerMethods);
   const game=new Phaser.Game({type:Phaser.AUTO,width:W,height:H,backgroundColor:'#0d1219',parent:'gamePage',scale:{mode:Phaser.Scale.ENVELOP,autoCenter:Phaser.Scale.CENTER_BOTH},physics:{default:'arcade',arcade:{gravity:{y:0}}},scene:GameScene});
   setTimeout(()=>document.querySelector('canvas')?.focus(),500);
   return game;

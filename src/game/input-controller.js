@@ -1,0 +1,120 @@
+const InputControllerMethods={
+  setupInputHandlers(){
+    this.keys=this.input.keyboard.addKeys({up:'W',down:'S',left:'A',right:'D'});
+    this.input.keyboard.addCapture('SPACE,ESC,V');
+    this.bindKeyboardShortcuts();
+    this.bindTowerHotkeys();
+    this.bindWheelSelection();
+    this.bindPointerControls();
+  },
+  bindKeyboardShortcuts(){
+    this.input.keyboard.on('keydown-SPACE',event=>{
+      if(!event.repeat)this.togglePause();
+    });
+    this.input.keyboard.on('keydown-B',()=>this.tglBld());
+    this.input.keyboard.on('keydown-R',()=>this.selectSmallReactor());
+    this.input.keyboard.on('keydown-V',()=>this.upgradeTower());
+    this.input.keyboard.on('keydown-U',()=>this.upgradeTower());
+    this.input.keyboard.on('keydown-X',()=>this.sellTower());
+    this.input.keyboard.on('keydown-ESC',event=>{
+      if(!event.repeat)this.handleEscape();
+    });
+  },
+  selectSmallReactor(){
+    if(this.channel)return;
+    this.sel=SMALL_REACTOR;
+    this.bld=true;
+    this.selTw=null;
+    this.updPanel();
+  },
+  bindTowerHotkeys(){
+    const kNames=['ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN','EIGHT','NINE','ZERO'];
+    for(let i=0;i<10;i++){
+      const idx=i;
+      this.input.keyboard.on('keydown-'+kNames[i],()=>this.selectTowerByHotkey(idx));
+    }
+  },
+  selectTowerByHotkey(idx){
+    if(idx>=selIds.length)return;
+    this.sel=selIds[idx];
+    this.updPanel();
+    this.scrollBtnIntoView(idx);
+  },
+  bindWheelSelection(){
+    this.input.on('wheel',(p,g,dx,dy)=>this.cycleBuildChoice(dy));
+  },
+  cycleBuildChoice(dy){
+    const choices=this.buildChoices();
+    if(!this.bld||!choices.length)return;
+    const cur=Math.max(0,choices.indexOf(this.sel));
+    const dir=dy>0?1:-1;
+    const next=Math.max(0,Math.min(choices.length-1,cur+dir));
+    this.sel=choices[next];
+    this.updPanel();
+    this.scrollBtnIntoView(next);
+  },
+  bindPointerControls(){
+    this.game.canvas.addEventListener('contextmenu',e=>e.preventDefault());
+    this.input.mouse.disableContextMenu();
+    this.input.on('pointerdown',p=>this.handlePointerDown(p));
+    this.input.on('pointerup',()=>this._buildLatch=false);
+  },
+  handlePointerDown(p){
+    if(this.shipDead||this.isPaused)return;
+    if(p.rightButtonDown())this.shipMoveTarget={x:p.worldX,y:p.worldY};
+  },
+  bindTowerPanelButtons(){
+    document.getElementById('btnUpgrade').addEventListener('click',event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      this.upgradeTower();
+    });
+    document.getElementById('btnDroneEnergy').onclick=()=>this.toggleDroneEnergy();
+    document.getElementById('btnSell').onclick=()=>this.sellTower();
+    document.getElementById('btnCloseTw').onclick=()=>this.clearSelectionAndBuildMode();
+  },
+  togglePause(force){
+    if(this.ended)return;
+    this.isPaused=typeof force==='boolean'?force:!this.isPaused;
+    if(this.isPaused)this.enterPause();
+    else this.leavePause();
+  },
+  enterPause(){
+    this.physics.world.pause();
+    this.time.paused=true;
+    this.tweens.pauseAll();
+    syncViewSettingsUI();
+    this.updateMiniMap(0,true);
+    document.getElementById('pausePanel').style.display='flex';
+    document.getElementById('hudPhase').textContent='已暂停 · Esc继续';
+  },
+  leavePause(){
+    this.physics.world.resume();
+    this.time.paused=false;
+    this.tweens.resumeAll();
+    document.getElementById('pausePanel').style.display='none';
+  },
+  handleEscape(){
+    if(this.isPaused){this.togglePause(false);return}
+    if(this.channel){this.cancelChannel();return}
+    if(this.bld||this.selTw){this.clearSelectionAndBuildMode();return}
+    this.togglePause(true);
+  },
+  clearSelectionAndBuildMode(){
+    this.bld=false;
+    this.selTw=null;
+    this.ghost.setVisible(false);
+    this.ghostRng.clear();
+    this.selectionGfx.clear();
+    this.updPanel();
+    this.updTwPanel();
+  },
+  tglBld(){
+    if(this.isPaused||this.channel)return;
+    this.bld=!this.bld;
+    this.selTw=null;
+    this.selectionGfx.clear();
+    this.updPanel();
+    if(!this.bld)this.ghost.setVisible(false);
+  }
+};
