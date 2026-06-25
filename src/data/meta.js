@@ -1,0 +1,22 @@
+const META_NODES=[
+  {id:'ship_speed_1',group:'ship',name:'推进器校准 I',cost:1,desc:'飞船速度 +50'},
+  {id:'ship_speed_2',group:'ship',name:'推进器校准 II',cost:1,req:['ship_speed_1'],desc:'飞船速度再 +50'},
+  {id:'ship_speed_3',group:'ship',name:'推进器增压 I',cost:2,req:['ship_speed_2'],desc:'飞船速度 +10%'},
+  {id:'ship_speed_4',group:'ship',name:'推进器增压 II',cost:2,req:['ship_speed_3'],desc:'飞船速度再 +10%'},
+  {id:'ship_damage_1',group:'ship',name:'导弹弹头 I',cost:1,desc:'飞船导弹伤害 +5'},
+  {id:'ship_damage_2',group:'ship',name:'导弹弹头 II',cost:2,req:['ship_damage_1'],desc:'飞船导弹伤害再 +8'},
+  {id:'ship_cd_1',group:'ship',name:'装填优化 I',cost:1,desc:'飞船导弹间隔 -1秒'},
+  {id:'ship_cd_2',group:'ship',name:'装填优化 II',cost:1,req:['ship_cd_1'],desc:'飞船导弹间隔再 -1秒'},
+  {id:'ship_multi_1',group:'ship',name:'多目标锁定 I',cost:2,desc:'导弹同时攻击 2 个目标'},
+  {id:'ship_multi_2',group:'ship',name:'多目标锁定 II',cost:2,req:['ship_multi_1'],desc:'导弹同时攻击 3 个目标'},
+  {id:'ship_blast',group:'ship',name:'爆裂弹头',cost:3,req:['ship_damage_2','ship_cd_2','ship_multi_2'],desc:'导弹命中造成半径100范围伤害'},
+  {id:'tower_p1',group:'tower',tower:'P1',name:'双管炮',cost:2,desc:'每次攻击有33%概率追加一发'},
+  {id:'tower_p2',group:'tower',tower:'P2',name:'电磁停顿',cost:3,desc:'命中使敌人减速70%，持续0.5秒'},
+  {id:'tower_p3',group:'tower',tower:'P3',name:'电磁残留',cost:4,desc:'攻击区域残留1.5秒，每0.3秒造成1伤害'},
+  {id:'tower_p4',group:'tower',tower:'P4',name:'低温强化',cost:3,desc:'减速效果由40%提高至50%'},
+  {id:'tower_p5',group:'tower',tower:'P5',name:'聚焦校准',cost:2,desc:'每第二次攻击额外增加1层专注'},
+  {id:'tower_p7',group:'tower',tower:'P7',name:'毒性弹头',cost:4,desc:'每第三次攻击额外挂1层毒'},
+  {id:'tower_b1',group:'tower',tower:'B1',name:'可维修残骸',cost:2,desc:'钢塔残骸可被B5与D3维修'},
+  {id:'tower_b3',group:'tower',tower:'B3',name:'吸血弹头',cost:5,desc:'每次攻击恢复自身2HP'},
+  {id:'tower_b4',group:'tower',tower:'B4',name:'过载护盾',cost:3,desc:'每10秒获得1层护盾，最多5层；消耗1层将单次伤害限制为10'}
+];
