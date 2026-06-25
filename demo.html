@@ -850,15 +850,6 @@ function activeGameScene(){
 function eventElement(e){
   return e?.target instanceof Element?e.target:e?.target?.parentElement||null;
 }
-function bindArchiveTabs(){
-  if(bindArchiveTabs._bound)return;
-  bindArchiveTabs._bound=true;
-  document.querySelectorAll('[data-archive-type]').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      selectArchiveType(btn.dataset.archiveType);
-    });
-  });
-}
 initHomeUi();
 initPageFlow();
 

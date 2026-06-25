@@ -288,3 +288,13 @@ function selectArchiveType(type){
   const selectPage=document.getElementById('selectPage');
   if(selectPage)selectPage.scrollTop=0;
 }
+
+function bindArchiveTabs(){
+  if(bindArchiveTabs._bound)return;
+  bindArchiveTabs._bound=true;
+  document.querySelectorAll('[data-archive-type]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      selectArchiveType(btn.dataset.archiveType);
+    });
+  });
+}
