@@ -127,5 +127,10 @@ const TowerCombatMethods={
     if(td.id==='P1'&&this.meta.p1Double&&Math.random()<0.33){
       this.fireBolt(tw.x,tw.y,target,dmg)
     }
+  },
+  updateTowers(dt){
+    this.fxLine.clear();
+    this.towers.children.iterate(tw=>{if(tw&&tw.active&&tw._type)this.runTower(tw._type,tw,dt)});
+    this.blockers.children.iterate(tw=>{if(tw&&tw.active&&tw._type)this.runTower(tw._type,tw,dt)})
   }
 };

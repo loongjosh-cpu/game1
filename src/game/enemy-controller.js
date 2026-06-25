@@ -258,5 +258,18 @@ const EnemyControllerMethods={
   levelWave(){return this.levelConfig?.waves?.[this.wave-1]||null},
   startWave(){this.wActive=true;const lw=this.levelWave();this._waveRoster=lw?lw.roster.slice():this.buildWaveRoster();this.wC=this._waveRoster.length;this.wS=0;this._spawnOffset=Phaser.Math.Between(0,MAP.spawns.length-1);this._wt=this.time.addEvent({delay:500,loop:true,callback:()=>{if(this.wS>=this.wC){this._wt.remove();return}const lanes=lw?.lanes,laneRaw=lanes?lanes[this.wS%lanes.length]:(this._spawnOffset+this.wS),si=((laneRaw%MAP.spawns.length)+MAP.spawns.length)%MAP.spawns.length,ty=this._waveRoster[this.wS]||'E1';this.spawnE(si,ty);this.wS++}})},
   spawnE(si,type){const cfg=EC[type],[sx,sy]=MAP.spawns[si],e=this.physics.add.image(sx,sy,cfg.key).setDepth(6).setTint(cfg.color||0xffffff);this.enemies.add(e);e.body.enable=true;e._uid=++this.enemySeq;const sc=this.levelWave()?.scale??(1+(this.wave-1)*0.1);e._hp=Math.round(cfg.hp*sc);e._maxhp=e._hp;e._dmg=cfg.dmg;e._spd=cfg.spd;e._atk=cfg.atk;e._at=0;e._firstAttack=true;e._si=si;e._b1tgt=null;e._reactorTarget=null;e._droneTarget=null;e._type=type;e._bt=0;e._slow=0;e._slowT=0;e._state='path';e._hatch=cfg.hatch||0;e._hits=0;this.routeToReactor(e,false);e.body.setCircle(Math.min(16,e.width/2));e.body.setBounce(0);return e},
-  gameOver(title='防线失守'){if(this.ended)return;this.ended=true;const completed=this.completedWaves??Math.max(0,this.wave-1),levelCleared=!!this.levelConfig&&completed>=this.levelConfig.waves.length,reward=this.levelConfig?(levelCleared?1:0):Math.floor(completed/5);metaSave.cores+=reward;metaSave.bestWave=Math.max(metaSave.bestWave,completed);if(levelCleared&&this.levelConfig?.id){metaSave.levelClears=metaSave.levelClears||{};metaSave.levelClears[this.levelConfig.id]=true}saveMeta();document.querySelector('#gameOverPanel h2').textContent=title;document.getElementById('resultWaves').textContent=completed;document.getElementById('resultReward').textContent=reward;document.getElementById('resultCores').textContent=metaSave.cores;document.getElementById('pausePanel').style.display='none';document.getElementById('gameOverPanel').style.display='flex';this.scene.pause()}
+  gameOver(title='防线失守'){if(this.ended)return;this.ended=true;const completed=this.completedWaves??Math.max(0,this.wave-1),levelCleared=!!this.levelConfig&&completed>=this.levelConfig.waves.length,reward=this.levelConfig?(levelCleared?1:0):Math.floor(completed/5);metaSave.cores+=reward;metaSave.bestWave=Math.max(metaSave.bestWave,completed);if(levelCleared&&this.levelConfig?.id){metaSave.levelClears=metaSave.levelClears||{};metaSave.levelClears[this.levelConfig.id]=true}saveMeta();document.querySelector('#gameOverPanel h2').textContent=title;document.getElementById('resultWaves').textContent=completed;document.getElementById('resultReward').textContent=reward;document.getElementById('resultCores').textContent=metaSave.cores;document.getElementById('pausePanel').style.display='none';document.getElementById('gameOverPanel').style.display='flex';this.scene.pause()},
+  updateWaves(dt){
+    if(!this.wActive){
+      this.prepTimer=Math.max(0,this.prepTimer-dt);
+      if(this.prepTimer<=0)this.startWave();
+      return
+    }
+    if(this.wS<this.wC||this.enemies.countActive()!==0)return;
+    this.wActive=false;
+    this.completedWaves++;
+    if(this.levelConfig&&this.completedWaves>=this.levelConfig.waves.length){this.gameOver('关卡完成');return}
+    this.wave++;
+    this.prepTimer=PREP_TIME
+  }
 };
