@@ -1,0 +1,2 @@
+initHomeUi();
+initPageFlow();
