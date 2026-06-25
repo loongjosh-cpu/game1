@@ -849,6 +849,8 @@ body::after{
 <script src="src/game/tower-combat.js"></script>
 <script src="src/game/projectile-controller.js"></script>
 <script src="src/game/enemy-controller.js"></script>
+<script src="src/game/player-runtime.js"></script>
+<script src="src/game/hud-overlay.js"></script>
 <script src="src/core/meta-store.js"></script>
 <script src="src/core/runtime-maps.js"></script>
 <script src="src/ui/view-settings.js"></script>
@@ -929,86 +931,6 @@ function launch(sel,mode='endless1'){
       this.renderOverlayBars();
       this.updateHud(t,dt);
       this.updateMiniMap(dt);
-    }
-
-    updateShip(dt){
-      let vx=0,vy=0;
-      if(!this.shipDead){
-        if(this.keys.left.isDown)vx=-1;
-        if(this.keys.right.isDown)vx=1;
-        if(this.keys.up.isDown)vy=-1;
-        if(this.keys.down.isDown)vy=1;
-        if(vx||vy)this.shipMoveTarget=null;
-        else if(this.shipMoveTarget){
-          const dx=this.shipMoveTarget.x-this.ship.x,dy=this.shipMoveTarget.y-this.ship.y,dd=Math.hypot(dx,dy);
-          if(dd>25){vx=dx/dd;vy=dy/dd}else this.shipMoveTarget=null
-        }
-        if(vx&&vy&&Math.abs(vx)===1&&Math.abs(vy)===1){vx*=0.707;vy*=0.707}
-        this.ship.setVelocity(vx*sd(this.meta.shipSpeed),vy*sd(this.meta.shipSpeed));
-        if(vx||vy)this.ship.setRotation(Math.atan2(vy,vx)+Math.PI/2)
-      }
-      this.rng.setPosition(this.ship.x,this.ship.y).setVisible(!this.shipDead)
-    }
-
-    drawReactorDistancePreview(){
-      const minR=sd(REACTOR_MIN_DISTANCE);
-      this.ghostRng.lineStyle(2,0xff5566,0.28);
-      for(const reactor of this.reactors){
-        if(!this.reactorAlive(reactor))continue;
-        for(let a=0;a<Math.PI*2;a+=0.16){
-          this.ghostRng.lineBetween(
-            reactor.x+Math.cos(a)*minR,
-            reactor.y+Math.sin(a)*minR,
-            reactor.x+Math.cos(a+0.08)*minR,
-            reactor.y+Math.sin(a+0.08)*minR
-          )
-        }
-      }
-    }
-
-    drawBuildRangePreview(wx,wy,ok){
-      const r=sd(this.sel.range);
-      this.ghostRng.lineStyle(2.5,ok?0x44ff88:0xff4444,0.6);
-      for(let a=0;a<Math.PI*2;a+=0.4){
-        this.ghostRng.lineBetween(
-          wx+Math.cos(a)*r,
-          wy+Math.sin(a)*r,
-          wx+Math.cos(a+0.2)*r,
-          wy+Math.sin(a+0.2)*r
-        )
-      }
-    }
-
-    updateBuildGhost(t){
-      this.ghostRng.clear();
-      if(!this.bld||this.shipDead){this.ghost.setVisible(false);return}
-      const rawX=this.input.activePointer.worldX,rawY=this.input.activePointer.worldY;
-      const point=this.placementPoint(rawX,rawY),wx=point.x,wy=point.y;
-      const d=Phaser.Math.Distance.Between(this.ship.x,this.ship.y,wx,wy),shipRange=sd(SHIP_RNG);
-      const ok=d<=shipRange&&this.canPl(wx,wy)&&this.en>=this.sel.cost;
-      this.ghost.setVisible(d<=shipRange);
-      this.ghost.setPosition(wx,wy);
-      this.ghost.setTexture('gh'+this.sel.id);
-      this.ghost.setAlpha(ok?0.7+Math.sin(t*0.005)*0.2:0.3);
-      if(point.snapped){
-        this.ghostRng.fillStyle(0x44aaff,0.18);
-        this.ghostRng.fillCircle(wx,wy,sd(24))
-      }
-      if(this.sel===SMALL_REACTOR)this.drawReactorDistancePreview();
-      if(this.sel.range)this.drawBuildRangePreview(wx,wy,ok);
-      if(this.input.activePointer.isDown&&!this._buildLatch&&ok){this._buildLatch=true;this.startBuild(wx,wy)}
-    }
-
-    updateShipMissiles(dt){
-      if(this.shipDead)return;
-      this.mslTmr+=dt;
-      if(this.mslTmr<this.meta.missileCd)return;
-      const targets=this.findTargets(this.ship.x,this.ship.y,sd(SHIP_RNG))
-        .sort((a,b)=>(EC[b._type].danger-EC[a._type].danger)||Phaser.Math.Distance.Between(this.ship.x,this.ship.y,a.x,a.y)-Phaser.Math.Distance.Between(this.ship.x,this.ship.y,b.x,b.y))
-        .slice(0,this.meta.missileTargets);
-      if(!targets.length)return;
-      targets.forEach(tgt=>this.fireMsl(this.ship.x,this.ship.y,tgt));
-      this.mslTmr=0
     }
 
     updateTowers(dt){
@@ -1227,76 +1149,8 @@ function launch(sel,mode='endless1'){
       this.prepTimer=PREP_TIME
     }
 
-    drawMiniBar(g,x,y,width,height,pct,color,bg=0x333333){
-      const clamped=Phaser.Math.Clamp(pct,0,1);
-      g.fillStyle(bg);g.fillRect(x,y,width,height);
-      g.fillStyle(color);g.fillRect(x,y,width*clamped,height)
-    }
-
-    renderBlockerBar(tw){
-      if(!tw||!tw.active||!Number.isFinite(tw._hp)||!tw._maxhp)return;
-      const forceShow=!!tw._wreck;
-      if(!forceShow&&tw._hp>=tw._maxhp)return;
-      const pct=tw._hp/tw._maxhp,x=tw.x-25,y=tw.y-tw._size/2-10;
-      const color=tw._wreck?0xb8b8b8:(pct>0.5?0x8899aa:0xe94560);
-      this.drawMiniBar(this.overlay,x,y,50,4,pct,color);
-      if(!tw._wreck)return;
-      this.overlay.lineStyle(1,0xffffff,0.25);
-      this.overlay.strokeRect(x,y,50,4);
-      if(!this.meta.b1Repair)return;
-      this.drawMiniBar(this.overlay,x,y+6,50,3,(tw._repair||0)/200,0x44dd88,0x1b2a24)
-    }
-
-    renderDroneBar(d){
-      if(!d||!d.active||d._hp>=d._maxhp)return;
-      const pct=Math.max(0,d._hp/d._maxhp);
-      this.drawMiniBar(this.overlay,d.x-12,d.y-16,24,3,pct,pct>0.5?0x22cc66:pct>0.25?0xddcc44:0xe94560)
-    }
-
-    renderEnemyBar(e){
-      if(!e||!e.active)return;
-      const pct=Math.max(0,e._hp/e._maxhp);
-      this.drawMiniBar(this.overlay,e.x-15,e.y-28,30,4,pct,pct>0.5?0x22cc66:pct>0.25?0xddcc44:0xe94560)
-    }
-
-    renderReactorBars(){
-      this.rxBar.clear();
-      for(const r of this.reactors){
-        if(!this.reactorAlive(r))continue;
-        const pct=Math.max(0,r._hp/r._maxhp),w=r._isMainReactor?100:60,h=r._isMainReactor?8:6,x=r.x-w/2,y=r.y-r._size/2-20;
-        this.drawMiniBar(this.rxBar,x,y,w,h,pct,pct>0.5?0x22cc66:pct>0.25?0xddcc44:0xe94560);
-        this.rxBar.lineStyle(1,0xffffff,0.3);
-        this.rxBar.strokeRect(x,y,w,h)
-      }
-    }
-
-    renderOverlayBars(){
-      this.overlay.clear();
-      this.blockers.children.iterate(tw=>this.renderBlockerBar(tw));
-      this.drones.children.iterate(tw=>this.renderBlockerBar(tw));
-      this.droneHelpers.children.iterate(d=>this.renderDroneBar(d));
-      this.enemies.children.iterate(e=>this.renderEnemyBar(e));
-      this.renderReactorBars()
-    }
-
-    updateHud(t,dt){
-      const phase=this.wActive?'战斗中':`准备 ${(this.prepTimer/1000).toFixed(1)}s`;
-      document.getElementById('hudPhase').textContent=phase;
-      this.spawnMarkers.forEach((m,i)=>m.setAlpha(this.wActive?0.35:0.45+0.45*Math.sin(t*0.006+i)));
-      document.getElementById('hudEnergy').textContent=Math.floor(this.en);
-      document.getElementById('hudIncome').textContent=this.energyRate();
-      document.getElementById('hudReactor').textContent=Math.ceil(this.rxHP);
-      document.getElementById('hudSmallReactors').textContent=this.smallReactorCount()+'/'+SMALL_REACTOR.maxCount;
-      document.getElementById('hudWave').textContent=this.wave;
-      document.getElementById('hudEnemies').textContent=this.enemies.countActive();
-      document.getElementById('hudTowers').textContent=this.towers.countActive()+this.blockers.countActive()+this.drones.countActive();
-      if(Math.floor(t/500)!==Math.floor((t-dt)/500))document.getElementById('hudFps').textContent=Math.round(this.game.loop.actualFps);
-      this.updTwPanel();
-      this.updUpgradeHint()
-    }
-
   }
-  Object.assign(GameScene.prototype,TextureFactoryMethods,SceneSetupMethods,MiniMapMethods,InputControllerMethods,BuildPanelMethods,PlacementControllerMethods,TowerPanelMethods,DroneControllerMethods,CombatUtilMethods,TowerCombatMethods,ProjectileControllerMethods,EnemyControllerMethods);
+  Object.assign(GameScene.prototype,TextureFactoryMethods,SceneSetupMethods,MiniMapMethods,InputControllerMethods,BuildPanelMethods,PlacementControllerMethods,TowerPanelMethods,DroneControllerMethods,CombatUtilMethods,TowerCombatMethods,ProjectileControllerMethods,EnemyControllerMethods,PlayerRuntimeMethods,HudOverlayMethods);
   const game=new Phaser.Game({type:Phaser.AUTO,width:W,height:H,backgroundColor:'#0d1219',parent:'gamePage',scale:{mode:Phaser.Scale.ENVELOP,autoCenter:Phaser.Scale.CENTER_BOTH},physics:{default:'arcade',arcade:{gravity:{y:0}}},scene:GameScene});
   setTimeout(()=>document.querySelector('canvas')?.focus(),500);
   return game;
