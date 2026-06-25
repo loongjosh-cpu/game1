@@ -4,6 +4,7 @@ const SceneSetupMethods={
     this.selTowers=ctx.selIds||[];
     this.mode=ctx.mode||'endless1';
     this.levelConfig=ctx.levelConfig||null;
+    this.gridPF=ctx.gridPF||[];
     this.meta=metaEffects();
     this.ended=false;
     this.completedWaves=0;
