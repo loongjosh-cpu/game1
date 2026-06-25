@@ -1,7 +1,11 @@
+@media(max-width:1120px){.metaSystem{grid-template-columns:180px minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}
+.metaDetailPanel{grid-column:1 / -1;max-height:34vh}
+.metaGrid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+}
 @media(max-width:700px){.homeShell{width:100%}
 .homeHero{flex-direction:column;align-items:flex-start}
 .homeSummaryGrid,.mainMenuActions{grid-template-columns:1fr}
-.settingsLayout,.archiveLayout{grid-template-columns:1fr}
+.settingsLayout,.archiveLayout,.metaSystem{grid-template-columns:1fr}
 .archiveLayout{grid-template-rows:minmax(150px,35%) minmax(0,1fr)}
 .settingsPanel{border-left:0;border-top:1px solid #214057;padding-left:0;padding-top:12px}
 .archiveList{position:static}
@@ -9,7 +13,11 @@
 .sectionHead,.loadoutHeader{flex-direction:column;align-items:flex-start}
 .towerGrid{grid-template-columns:repeat(2,1fr)}
 .modeGrid{grid-template-columns:1fr}
-.metaHeader{align-items:flex-start}
+.metaHeader{align-items:flex-start;flex-direction:column}
+.metaRail{flex-direction:row;overflow-x:auto}
+.metaRailBtn{min-width:190px}
+.metaDetailPanel{grid-column:auto;max-height:none}
+.metaGrid{grid-template-columns:1fr}
 #hud{right:12px}
 #miniMapWrap{width:178px;top:86px}
 #miniMap{width:160px;height:102px}

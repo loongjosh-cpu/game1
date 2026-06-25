@@ -231,11 +231,27 @@
     <button class="menuBtn" id="btnMetaBack">返回部署终端</button>
   </div>
 </div>
-<div class="metaBody">
-  <h3>飞船芯片</h3>
-  <div class="metaGrid" id="shipMetaGrid"></div>
-  <h3>防御塔芯片</h3>
-  <div class="metaGrid" id="towerMetaGrid"></div>
+<div class="metaBody metaSystem">
+  <aside class="metaRail" aria-label="整备分类">
+    <button type="button" class="metaRailBtn active" data-meta-screen="equip" data-meta-group="ship">
+      <strong>舰载系统</strong><span>飞船与反应炉芯片</span>
+    </button>
+    <button type="button" class="metaRailBtn" data-meta-screen="equip" data-meta-group="tower">
+      <strong>防御塔</strong><span>塔专精芯片</span>
+    </button>
+  </aside>
+  <section class="metaWorkspace">
+    <div class="metaSectionHead">
+      <div>
+        <h3 id="metaEquipTitle">舰载系统</h3>
+        <p id="metaEquipHint">选择芯片查看装备状态与前置条件。</p>
+      </div>
+      <span class="metaBadge" id="metaEquipSummary">0 已装备</span>
+    </div>
+    <div class="metaGrid active" id="shipMetaGrid" data-meta-group-panel="ship"></div>
+    <div class="metaGrid" id="towerMetaGrid" data-meta-group-panel="tower"></div>
+  </section>
+  <aside class="metaDetailPanel" id="metaEquipDetail"></aside>
 </div>
 </div>
 <div class="page" id="shopPage">
@@ -250,11 +266,27 @@
     <button class="menuBtn" id="btnShopBack">返回部署终端</button>
   </div>
 </div>
-<div class="metaBody">
-  <h3>飞船专精</h3>
-  <div class="metaGrid" id="shopShipGrid"></div>
-  <h3>防御塔专精</h3>
-  <div class="metaGrid" id="shopTowerGrid"></div>
+<div class="metaBody metaSystem">
+  <aside class="metaRail" aria-label="商店分类">
+    <button type="button" class="metaRailBtn active" data-meta-screen="shop" data-meta-group="ship">
+      <strong>舰载系统</strong><span>飞船与反应炉芯片</span>
+    </button>
+    <button type="button" class="metaRailBtn" data-meta-screen="shop" data-meta-group="tower">
+      <strong>防御塔</strong><span>塔专精芯片</span>
+    </button>
+  </aside>
+  <section class="metaWorkspace">
+    <div class="metaSectionHead">
+      <div>
+        <h3 id="metaShopTitle">舰载系统</h3>
+        <p id="metaShopHint">购买芯片后，需要进入整备舱装备才会生效。</p>
+      </div>
+      <span class="metaBadge" id="metaShopSummary">0 可购买</span>
+    </div>
+    <div class="metaGrid active" id="shopShipGrid" data-meta-group-panel="ship"></div>
+    <div class="metaGrid" id="shopTowerGrid" data-meta-group-panel="tower"></div>
+  </section>
+  <aside class="metaDetailPanel" id="metaShopDetail"></aside>
 </div>
 </div>
 <div class="page" id="gamePage" style="display:none;flex-direction:column">
