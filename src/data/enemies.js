@@ -25,13 +25,21 @@ const EC={
   E12:{
     name:'棘炮兽',hp:220,spd:120,dmg:18,atk:1800,key:'enE1',
     danger:2,color:0xcc7744,rangeAtk:650,shotSpeed:400,splash:100,splashRatio:0.5
+  },
+  E13:{
+    name:'裂爆虫',hp:60,spd:360,dmg:24,atk:1000,key:'enE2',
+    danger:2,color:0xff3355,selfDestruct:true,selfRange:80
+  },
+  E14:{
+    name:'裂变母巢',hp:300,spd:140,dmg:2,atk:1200,key:'enE2',
+    danger:3,color:0xb06cff,summons:[{type:'E4',interval:7000},{type:'E13',interval:9000}]
   }
 };
 
 const THREAT_COST={
   E1:1,E2:1,E3:3,E4:3,E5:7,E6:6,
-  E7:2,E8:3,E9:5,E10:7,E11:2,E12:5
+  E7:2,E8:3,E9:5,E10:7,E11:2,E12:5,E13:3,E14:8
 };
 
-const SPECIAL_ENEMY=new Set(['E5','E8','E10']);
-const DIRECT_ENEMY=new Set(['E1','E2','E7']);
+const SPECIAL_ENEMY=new Set(['E5','E8','E10','E14']);
+const DIRECT_ENEMY=new Set(['E1','E2','E7','E13']);

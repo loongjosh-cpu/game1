@@ -6,6 +6,17 @@ const CombatUtilMethods={
   areaAttack(tw,up,color){const range=sd(up.r||tw._type.range),tgts=this.findTargets(tw.x,tw.y,range);this.flashArea(tw.x,tw.y,range,color);tgts.forEach(e=>this.damageEnemy(e,up.d||0))},
   enemyAttackReady(e,dt){e._at=(e._at||0)+dt;const delay=e._firstAttack?650:e._atk;if(e._at<delay)return false;e._at=0;e._firstAttack=false;return true},
   enemyAttackEffect(e,mainTarget=null){const cfg=EC[e._type];if(cfg.leechPct)e._hp=Math.min(e._maxhp,e._hp+e._maxhp*cfg.leechPct);else if(cfg.leech)e._hp=Math.min(e._maxhp,e._hp+cfg.leech);if(cfg.summonEvery&&++e._hits%cfg.summonEvery===0)this.spawnAt('E4',e.x+30,e.y,e._si,true);if(cfg.meleeSplash)this.enemySplash(e,mainTarget,e.x,e.y,e._dmg*cfg.meleeSplash,sd(cfg.meleeSplashRange||50),true)},
+  enemySelfDestruct(e,mainTarget=null){
+    if(!e||!e.active||e._detonating)return;
+    e._detonating=true;
+    const cfg=EC[e._type],range=sd(cfg.selfRange||80),dmg=e._dmg,x=e.x,y=e.y;
+    this.flashArea(x,y,range,cfg.color||0xff3355);
+    if(mainTarget&&mainTarget.active)this.damageFriendly(mainTarget,dmg);
+    this.enemySplash(e,mainTarget,x,y,dmg,range,true);
+    const ex=this.add.image(x,y,'msl').setDepth(17).setTint(cfg.color||0xff3355).setScale(3.2);
+    this.tweens.add({targets:ex,alpha:0,scaleX:7,scaleY:7,duration:220,onComplete:()=>ex.destroy()});
+    e.destroy()
+  },
   damageFriendly(t,dmg){if(!t||!t.active)return;if(t._owner){this.damageDrone(t,dmg);return}if(t._isReactor){t._hp=Math.max(0,t._hp-dmg);if(t._isMainReactor)this.rxHP=t._hp;this.tweens.add({targets:t,alpha:0.5,duration:100,yoyo:true});if(t._hp<=0){if(t._isMainReactor)this.gameOver();else this.destroyReactor(t)}return}if(t._type&&(t._type.type==='block'||t._type.type==='drone')){t._hp-=dmg;this.tweens.add({targets:t,alpha:0.5,duration:100,yoyo:true});if(t._hp<=0)this.destroyB1(t)}},
   enemySplash(e,mainTarget,x,y,dmg,range,includeDrones=false){this.flashArea(x,y,range,EC[e._type].color||0xff8844);this.blockers.children.iterate(t=>{if(t&&t.active&&t!==mainTarget&&Phaser.Math.Distance.Between(x,y,t.x,t.y)<=range)this.damageFriendly(t,dmg)});this.drones.children.iterate(t=>{if(t&&t.active&&t!==mainTarget&&Phaser.Math.Distance.Between(x,y,t.x,t.y)<=range)this.damageFriendly(t,dmg)});for(const r of this.reactors){if(r&&r.active&&r!==mainTarget&&Phaser.Math.Distance.Between(x,y,r.x,r.y)<=range)this.damageFriendly(r,dmg)}if(includeDrones)this.droneHelpers.children.iterate(d=>{if(d&&d.active&&d!==mainTarget&&Phaser.Math.Distance.Between(x,y,d.x,d.y)<=range)this.damageFriendly(d,dmg)})},
   chooseDroneInRange(e,range){let best=null,bd=Infinity;this.droneHelpers.children.iterate(d=>{if(!d||!d.active||d._hp<=0)return;const dist=Phaser.Math.Distance.Between(e.x,e.y,d.x,d.y);if(dist<=range&&dist<bd){best=d;bd=dist}});return best},

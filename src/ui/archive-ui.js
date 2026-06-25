@@ -156,6 +156,8 @@ function enemySpeedLabel(e){
 function enemyAttackText(id,e){
   if(id==='E11')return '远程晶针，优先无人机';
   if(id==='E12')return '远程棘刺炮弹，落点范围伤害';
+  if(id==='E13')return '接近目标后立即自爆';
+  if(id==='E14')return '低伤近战并双线召唤';
   if(id==='E9')return '近战重击，周围附带伤害';
   if(id==='E10')return '近战攻击并周期召唤';
   if(id==='E5')return '低伤近战并持续孵化';
@@ -168,6 +170,8 @@ function enemyRoleText(id){
   if(id==='E10')return '召唤压制单位';
   if(id==='E11')return '反无人机火力';
   if(id==='E12')return '远程范围火力';
+  if(id==='E13')return '高速自爆单位';
+  if(id==='E14')return '高压召唤母体';
   if(id==='E5')return '持续压力单位';
   if(id==='E3')return '分裂消耗单位';
   if(id==='E4'||id==='E6'||id==='E9')return '重型压制单位';
@@ -185,6 +189,8 @@ function enemySpecialText(id,e){
   if(e.summonEvery)lines.push('每2次攻击生成1只嗜血兽');
   if(e.droneRange)lines.push('射程内优先锁定无人机');
   if(e.rangeAtk)lines.push('远程炮弹抵达落点后结算范围伤害');
+  if(e.selfDestruct)lines.push('接近目标后立即自爆；被击杀不会爆炸');
+  if(e.summons)lines.push('周期性召唤嗜血兽与裂爆虫');
   return lines.join('；')||'无特殊机制';
 }
 

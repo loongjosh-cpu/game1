@@ -13,6 +13,10 @@ const EnemyCombatMethods={
     const dist=Phaser.Math.Distance.Between(e.x,e.y,droneTarget.x,droneTarget.y);
     if(dist<=sd(CLOSE_ATTACK_RANGE)){
       this.stopEnemyAndFace(e,droneTarget);
+      if(cfg.selfDestruct){
+        this.enemySelfDestruct(e,droneTarget);
+        return true
+      }
       if(this.enemyAttackReady(e,dt)){
         this.damageDrone(droneTarget,e._dmg);
         this.enemyAttackEffect(e,droneTarget)
@@ -38,6 +42,10 @@ const EnemyCombatMethods={
     if(dist>stop)return false;
 
     this.stopEnemyAndFace(e,target);
+    if(cfg.selfDestruct){
+      this.enemySelfDestruct(e,target);
+      return true
+    }
     if(this.enemyAttackReady(e,dt))this.enemyHitBlocker(e,target);
     return true
   },
@@ -74,6 +82,10 @@ const EnemyCombatMethods={
     const stop=reactor._size/2+20;
     if(dist<stop){
       this.moveEnemy(e,0,0,55);
+      if(cfg.selfDestruct){
+        this.enemySelfDestruct(e,reactor);
+        return true
+      }
       if(this.enemyAttackReady(e,dt))this.enemyHitReactor(e,reactor);
       return true
     }

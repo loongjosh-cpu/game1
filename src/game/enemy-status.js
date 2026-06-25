@@ -27,6 +27,21 @@ const EnemyStatusMethods={
         )
       }
     }
+    if(e._summonTimers?.length){
+      for(const s of e._summonTimers){
+        s.left-=dt;
+        if(s.left<=0){
+          s.left+=s.interval;
+          this.spawnAt(
+            s.type,
+            e.x+Phaser.Math.Between(-28,28),
+            e.y+Phaser.Math.Between(-28,28),
+            e._si,
+            true
+          )
+        }
+      }
+    }
     if(e._poisons?.length){
       for(const p of e._poisons){
         p.left-=dt;
