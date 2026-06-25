@@ -215,8 +215,6 @@ const EnemyControllerMethods={
       if(this.enemyAttackReady(e,dt))this.fireEnemyShell(e,reactor);
       return true
     }
-    if(e._route&&e._routeI<e._route.length)return false;
-
     const dist=Phaser.Math.Distance.Between(e.x,e.y,reactor.x,reactor.y);
     const stop=reactor._size/2+20;
     if(dist<stop){
@@ -224,6 +222,7 @@ const EnemyControllerMethods={
       if(this.enemyAttackReady(e,dt))this.enemyHitReactor(e,reactor);
       return true
     }
+    if(e._route&&e._routeI<e._route.length)return false;
     this.routeToReactor(e,true);
     return false
   },
