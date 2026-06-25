@@ -1,0 +1,80 @@
+#gamePage{display:none}
+#hud{position:fixed;top:10px;left:12px;right:282px;z-index:10;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}
+.hud-item{background:#101c2ae8;color:#7ec8e3;padding:5px 10px;border-radius:6px;font-size:11px;border:1px solid #214057;white-space:nowrap;box-shadow:0 0 10px #07111c55}
+.hud-item span{color:#fff}
+#buildPanel{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:20;display:none;gap:6px;overflow-x:auto;max-width:min(920px,92vw);padding:8px;border:1px solid #214057;border-radius:10px;background:#07111ccc;box-shadow:0 0 16px #07111c99;scrollbar-width:none}
+#buildPanel::-webkit-scrollbar{display:none}
+.build-btn{
+  padding:6px 12px;
+  border:2px solid #2a4a5a;
+  border-radius:6px;
+  background:#16213e;
+  color:#ccc;
+  cursor:pointer;
+  font-size:10px;
+  font-family:monospace;
+  white-space:nowrap;
+  flex-shrink:0;
+  min-width:112px;
+  text-align:center;
+}
+.build-btn:hover{background:#1a3050;color:#fff}
+.build-btn.active{border-color:#7ec8e3;color:#dff7ff;background:#0f3460;box-shadow:0 0 10px #7ec8e344}
+.build-btn.cant{border-color:#4a1525;color:#884;opacity:0.6}
+#twPanel{
+  position:fixed;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:21;
+  display:none;
+  background:#16213eee;
+  border:1px solid #0f3460;
+  border-radius:8px;
+  padding:11px;
+  width:260px;
+  color:#ccc;
+  font-size:10px;
+  line-height:1.5;
+  box-shadow:0 0 16px #07111c88;
+}
+.twPanelHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+#twPanel h3{color:#7ec8e3;font-size:13px;font-weight:400}
+.panelClose{width:24px;height:24px;border:1px solid #29435a;border-radius:5px;background:#0d1826;color:#8196a8;cursor:pointer;font-family:monospace}
+.panelClose:hover{border-color:#7ec8e3;color:#dff7ff}
+.tw-section{border-top:1px solid #29435a;padding-top:5px;margin-top:5px}
+.tw-row{display:flex;justify-content:space-between;gap:8px}
+.tw-row .v{color:#fff;text-align:right}
+.tw-preview{margin-top:6px;padding:6px;background:#0d1826;border:1px solid #315878;border-radius:4px}
+.tw-preview-title{color:#7ec8e3;margin-bottom:3px}
+.tw-next{color:#44ff88}
+.tw-max{color:#778899;text-align:center}
+#twPanel button{padding:5px 10px;border:1px solid #0f3460;border-radius:4px;background:#16213e;color:#ccc;cursor:pointer;font-size:10px;width:100%;margin-top:5px;font-family:monospace}
+#twPanel button.upg{border-color:#7ec8e3;color:#7ec8e3}
+#twPanel button.drone-energy.on{border-color:#44cc88;color:#67efa4}
+#twPanel button.drone-energy.off{border-color:#bb713f;color:#f0a36f}
+#twPanel button.sell{border-color:#8b2040;color:#e84a60}
+#twPanel button.cant{opacity:0.55}
+#twPanel .key{background:#0f3460;padding:1px 4px;border-radius:2px;font-size:8px;margin-left:3px}
+.tw-action-hint{min-height:15px;margin-top:4px;color:#e9b75f;text-align:center}
+.tw-action-hint.ok{color:#75e6ff}
+#channelPanel{
+  position:fixed;
+  left:50%;
+  bottom:76px;
+  transform:translateX(-50%);
+  z-index:24;
+  display:none;
+  width:min(360px,72vw);
+  padding:8px 10px;
+  border:1px solid #7ec8e3;
+  border-radius:6px;
+  background:#101b29ee;
+  box-shadow:0 0 14px #7ec8e344;
+  color:#d9f4ff;
+  font-size:10px;
+}
+.channelHead{display:flex;justify-content:space-between;margin-bottom:5px}
+.channelTrack{height:9px;border:1px solid #34566e;background:#08121c;border-radius:5px;overflow:hidden}
+.channelFill{height:100%;width:0;background:linear-gradient(90deg,#238ab1,#75e6ff)}
+.channelHint{margin-top:4px;color:#8299aa;text-align:center}

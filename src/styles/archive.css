@@ -1,0 +1,43 @@
+.archiveTabs{display:flex;gap:8px;margin-bottom:12px;border-bottom:1px solid #214057;padding-bottom:10px}
+.archiveTab{border:1px solid #24445b;border-radius:999px;background:#0d1826;color:#91a6b8;padding:8px 14px;font-family:monospace;cursor:pointer}
+.archiveTab:hover{border-color:#4d8aac;color:#dff7ff}
+.archiveTab.active{border-color:#7ec8e3;background:#12304a;color:#dff7ff;box-shadow:0 0 12px #7ec8e326}
+.archivePage.active{display:flex;flex-direction:column;height:calc(100vh - 68px);max-height:calc(100vh - 68px);overflow:hidden}
+.archivePage .homeNavBar{flex:0 0 auto}
+.archivePage .homeSection{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.archivePage .archiveTabs{flex:0 0 auto}
+.archiveLayout{display:grid;grid-template-columns:minmax(220px,260px) minmax(0,1fr);gap:16px;align-items:stretch;flex:1 1 auto;min-height:0;overflow:hidden}
+.archiveList{display:flex;flex-direction:column;gap:7px;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:4px}
+.archiveList,.archiveDetail{scrollbar-width:thin;scrollbar-color:#315878 #0d1826}
+.archiveList::-webkit-scrollbar,.archiveDetail::-webkit-scrollbar{width:8px}
+.archiveList::-webkit-scrollbar-track,.archiveDetail::-webkit-scrollbar-track{background:#0d1826;border-radius:999px}
+.archiveList::-webkit-scrollbar-thumb,.archiveDetail::-webkit-scrollbar-thumb{background:#315878;border-radius:999px}
+.archiveListBtn{border:1px solid #24445b;border-radius:9px;background:#0d1826;color:#91a6b8;padding:10px 12px;text-align:left;cursor:pointer;font-family:monospace;display:grid;grid-template-columns:34px 1fr;gap:9px;align-items:center}
+.archiveListBtn:hover{border-color:#4d8aac;color:#dff7ff}
+.archiveListBtn.active{border-color:#7ec8e3;background:#10243a;color:#dff7ff;box-shadow:0 0 10px #7ec8e322}
+.archiveListBtn strong{display:block;color:#7ec8e3;margin-bottom:3px}
+.archiveListBtn span{font-size:9px;color:#70889b}
+.archiveDetail{border:1px solid #29445d;background:#111b29;border-radius:12px;padding:18px;font-size:12px;line-height:1.7;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.archiveDetail h3{color:#7ec8e3;font-size:18px;font-weight:400;margin-bottom:6px}
+.archiveTitle{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.archiveTitle h3{margin-bottom:2px}
+.archiveIcon{width:32px;height:32px;border:1px solid #315878;border-radius:9px;background:radial-gradient(circle at 50% 40%,#1a4564,#0d1826 70%);display:inline-flex;align-items:center;justify-content:center;color:#dff7ff;font-size:17px;box-shadow:inset 0 0 10px #7ec8e31f,0 0 10px #7ec8e31a;flex:0 0 auto;overflow:hidden}
+.archiveIcon svg{width:78%;height:78%;display:block;overflow:visible}
+.archiveIconPath{border-radius:50%}
+.archiveIconBlock{border-radius:8px}
+.archiveIconDrone{border-radius:50%;background:radial-gradient(circle at 50% 40%,#19365a,#0d1826 72%)}
+.archiveIconEnemyLarge{border-radius:10px;background:radial-gradient(circle at 50% 40%,#3a2330,#0d1826 72%);color:#ffd3dd}
+.archiveIconEnemySmall{border-radius:50%;background:radial-gradient(circle at 50% 40%,#263a58,#0d1826 72%);color:#d7eeff}
+.archiveDetail .archiveIcon{width:46px;height:46px;font-size:24px;border-radius:12px}
+.archiveIntro{border:1px solid #1d3348;border-left:3px solid #7ec8e3;border-radius:8px;padding:10px 12px;margin:10px 0 12px;background:#0d1826;color:#c5d7e2}
+.archiveMeta{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 12px}
+.archivePill{border:1px solid #315878;border-radius:999px;background:#0d1826;color:#a9bdc9;padding:3px 8px;font-size:10px}
+.archiveStatGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}
+.archiveStat{border:1px solid #1d3348;border-radius:8px;background:#0d1826;padding:9px 10px}
+.archiveStat b{display:block;color:#7ec8e3;font-weight:400;margin-bottom:2px}
+.archiveLevels{margin-top:10px;border-top:1px solid #25394b;padding-top:8px;color:#aaa}
+.archiveLevel{margin:5px 0;padding:6px 8px;border:1px solid #1d3348;border-radius:6px;background:#0d1826}
+.archiveLevelHead{display:flex;justify-content:space-between;gap:10px;color:#dff7ff;margin-bottom:2px}
+.archiveCost{color:#ffdc67;white-space:nowrap}
+.archiveNode{margin-top:10px;padding:8px;border:1px solid #25394b;border-radius:7px;background:#0d1826}
+.archiveNodeTitle{color:#dff7ff;margin-bottom:4px}

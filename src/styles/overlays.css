@@ -1,0 +1,15 @@
+#gameOverPanel{display:none;position:fixed;inset:0;z-index:120;background:#07101acc;align-items:center;justify-content:center}
+.gameOverCard{width:min(420px,90vw);padding:25px;text-align:center;border:2px solid #e94560;border-radius:10px;background:#111b29;box-shadow:0 0 30px #e9456044}
+.gameOverCard h2{color:#e94560;font-size:28px;margin-bottom:12px}
+.gameOverCard p{margin:7px;color:#aaa}
+.gameOverCard strong{color:#fff}
+.gameOverCard .reward{color:#ffdc67;font-size:16px}
+#pausePanel{display:none;position:fixed;inset:0;z-index:115;background:#050811bb;align-items:center;justify-content:center}
+.pauseCard{width:min(360px,88vw);padding:24px;text-align:center;border:2px solid #7ec8e3;border-radius:10px;background:#111b29;box-shadow:0 0 30px #397ca055}
+.pauseCard h2{color:#dff7ff;font-size:26px;font-weight:400;margin-bottom:8px}
+.pauseCard p{color:#8196a8;margin-bottom:16px}
+.pauseSettings{border:1px solid #29435a;border-radius:8px;background:#0c1724;padding:10px;margin:0 0 13px;text-align:left}
+.pauseSettings .settingsRow{border-top:0;padding:0}
+.pauseSettings .settingsHint{margin-top:6px}
+.pauseActions{display:flex;flex-direction:column;gap:9px}
+.pauseActions .danger{border-color:#9c3d50;color:#ff8ca1}

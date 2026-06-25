@@ -1,0 +1,22 @@
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#0d1219;font-family:monospace;color:#ccc}
+canvas{display:block}
+.page{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;overflow-y:auto}
+#selectPage{z-index:100;padding:20px}
+#selectPage h1{color:#7ec8e3;font-size:22px;margin:10px 0;font-weight:400}
+#selectPage .sub{color:#888;font-size:11px;margin-bottom:12px}
+.towerGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:900px;width:100%;margin-bottom:12px}
+.twCard{border:2px solid #1a2a3a;border-radius:8px;padding:10px;text-align:center;cursor:pointer;transition:all 0.15s;background:#111a28;font-size:10px;line-height:1.4}
+.twCard:hover{border-color:#3a5a7a}
+.twCard.selected{border-color:#7ec8e3;background:#16213e;box-shadow:0 0 8px #7ec8e333}
+.twCard .tname{color:#7ec8e3;font-size:12px;font-weight:700;margin-bottom:4px}
+.twCard .tcost{color:#ddcc44;font-size:11px}
+.twCard .tstat{color:#aaa;margin:2px 0}
+.twCard .ttype{font-size:9px;padding:1px 6px;border-radius:3px;display:inline-block;margin-bottom:4px}
+.type-path{background:#1a3a20;color:#44ff88}
+.type-block{background:#1a2a30;color:#8899aa}
+.type-drone{background:#1a1a40;color:#6688ff}
+.counter{color:#7ec8e3;font-size:13px;margin:8px 0}
+.btnStartMode{width:100%;padding:10px 18px;background:#0f3460;border:2px solid #7ec8e3;color:#7ec8e3;border-radius:6px;cursor:pointer;font-size:14px;font-family:monospace;margin-top:4px}
+.btnStartMode:hover{background:#1a4a7a}
+.btnStartMode:disabled{border-color:#2a3a4a;color:#555;cursor:not-allowed}

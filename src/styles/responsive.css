@@ -1,0 +1,18 @@
+@media(max-width:700px){.homeShell{width:100%}
+.homeHero{flex-direction:column;align-items:flex-start}
+.homeSummaryGrid,.mainMenuActions{grid-template-columns:1fr}
+.settingsLayout,.archiveLayout{grid-template-columns:1fr}
+.archiveLayout{grid-template-rows:minmax(150px,35%) minmax(0,1fr)}
+.settingsPanel{border-left:0;border-top:1px solid #214057;padding-left:0;padding-top:12px}
+.archiveList{position:static}
+.homeSide,.modeSection,.loadoutSection{grid-column:1;position:static}
+.sectionHead,.loadoutHeader{flex-direction:column;align-items:flex-start}
+.towerGrid{grid-template-columns:repeat(2,1fr)}
+.modeGrid{grid-template-columns:1fr}
+.metaHeader{align-items:flex-start}
+#hud{right:12px}
+#miniMapWrap{width:178px;top:86px}
+#miniMap{width:160px;height:102px}
+#controlHints{display:none}
+}
+@media(max-height:760px){.homeShell{transform:none;margin:0 auto auto}}
