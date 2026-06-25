@@ -1,8 +1,9 @@
 const SceneSetupMethods={
   initSceneState(){
-    this.selTowers=selIds;
-    this.mode=mode;
-    this.levelConfig=levelConfig;
+    const ctx=this.launchContext||{};
+    this.selTowers=ctx.selIds||[];
+    this.mode=ctx.mode||'endless1';
+    this.levelConfig=ctx.levelConfig||null;
     this.meta=metaEffects();
     this.ended=false;
     this.completedWaves=0;
@@ -123,7 +124,7 @@ const SceneSetupMethods={
     this.prepTimer=PREP_TIME;
     this.mslTmr=0;
     this.bld=false;
-    this.sel=selIds[0];
+    this.sel=this.selTowers[0];
     this.selTw=null;
     this.channel=null;
     this.shipDead=false;

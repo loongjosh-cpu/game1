@@ -35,8 +35,8 @@ const InputControllerMethods={
     }
   },
   selectTowerByHotkey(idx){
-    if(idx>=selIds.length)return;
-    this.sel=selIds[idx];
+    if(idx>=this.selTowers.length)return;
+    this.sel=this.selTowers[idx];
     this.updPanel();
     this.scrollBtnIntoView(idx);
   },

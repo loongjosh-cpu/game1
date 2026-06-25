@@ -863,7 +863,10 @@ function launch(sel,mode='endless1'){
   const enemyWaypoints=nav.enemyWaypoints;
   const gridPF=nav.gridPF;
   class GameScene extends Phaser.Scene{
-    constructor(){super('Game')}
+    constructor(){
+      super('Game');
+      this.launchContext={selIds,mode,levelConfig};
+    }
     preload(){
       genTwTex(this);
       this.createShipTexture();
