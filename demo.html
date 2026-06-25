@@ -218,7 +218,13 @@ canvas{display:block}
 .archiveDetail h3{color:#7ec8e3;font-size:18px;font-weight:400;margin-bottom:6px}
 .archiveTitle{display:flex;gap:12px;align-items:center;margin-bottom:8px}
 .archiveTitle h3{margin-bottom:2px}
-.archiveIcon{width:32px;height:32px;border:1px solid #315878;border-radius:9px;background:radial-gradient(circle at 50% 40%,#1a4564,#0d1826 70%);display:inline-flex;align-items:center;justify-content:center;color:#dff7ff;font-size:17px;box-shadow:inset 0 0 10px #7ec8e31f,0 0 10px #7ec8e31a;flex:0 0 auto}
+.archiveIcon{width:32px;height:32px;border:1px solid #315878;border-radius:9px;background:radial-gradient(circle at 50% 40%,#1a4564,#0d1826 70%);display:inline-flex;align-items:center;justify-content:center;color:#dff7ff;font-size:17px;box-shadow:inset 0 0 10px #7ec8e31f,0 0 10px #7ec8e31a;flex:0 0 auto;overflow:hidden}
+.archiveIcon svg{width:78%;height:78%;display:block;overflow:visible}
+.archiveIconPath{border-radius:50%}
+.archiveIconBlock{border-radius:8px}
+.archiveIconDrone{border-radius:50%;background:radial-gradient(circle at 50% 40%,#19365a,#0d1826 72%)}
+.archiveIconEnemyLarge{border-radius:10px;background:radial-gradient(circle at 50% 40%,#3a2330,#0d1826 72%);color:#ffd3dd}
+.archiveIconEnemySmall{border-radius:50%;background:radial-gradient(circle at 50% 40%,#263a58,#0d1826 72%);color:#d7eeff}
 .archiveDetail .archiveIcon{width:46px;height:46px;font-size:24px;border-radius:12px}
 .archiveIntro{border:1px solid #1d3348;border-left:3px solid #7ec8e3;border-radius:8px;padding:10px 12px;margin:10px 0 12px;background:#0d1826;color:#c5d7e2}
 .archiveMeta{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 12px}
@@ -1389,14 +1395,14 @@ function towerLevelText(t,u){
 function towerTypeName(t){
   return t.type==='path'?'路径塔':t.type==='block'?'阻挡塔':'无人机核心';
 }
-const TOWER_ICONS={
-  P1:'◎',P2:'⌁',P3:'✦',P4:'❄',P5:'◈',P6:'☣',P7:'◇',
-  B1:'▣',B2:'♨',B3:'⬢',B4:'ϟ',B5:'✚',B6:'☢',B7:'✹',
-  D1:'✣',D2:'◆',D3:'✚'
+const TOWER_ICON_SPECS={
+  P1:{glyph:'cannon'},P2:{glyph:'bolt'},P3:{glyph:'bolt'},P4:{glyph:'snow'},P5:{glyph:'sniper'},P6:{glyph:'poison'},P7:{glyph:'poison'},
+  B1:{glyph:'core'},B2:{glyph:'flame'},B3:{glyph:'core'},B4:{glyph:'bolt'},B5:{glyph:'core'},B6:{glyph:'poison'},B7:{glyph:'pulse'},
+  D1:{glyph:'drone'},D2:{glyph:'drone'},D3:{glyph:'drone'}
 };
-const ENEMY_ICONS={
-  E1:'◇',E2:'⇢',E3:'裂',E4:'血',E5:'巢',E6:'甲',
-  E7:'»',E8:'增',E9:'震',E10:'召',E11:'翼',E12:'棘'
+const ENEMY_ICON_SPECS={
+  enE1:{kind:'enemyLarge',glyph:'enemyLarge'},
+  enE2:{kind:'enemySmall',glyph:'enemySmall'}
 };
 const TOWER_INTROS={
   P1:'可靠的基础单体火力，费用低，适合补线和处理漏怪。',
@@ -1431,8 +1437,45 @@ const ENEMY_INTROS={
   E11:'远程支援小怪，优先清理射程内无人机，削弱无人机防线。',
   E12:'远程炮击怪，炮弹落点造成建筑范围伤害，威胁密集阵地。'
 };
-function archiveIcon(symbol){
-  return `<span class="archiveIcon">${symbol||'?'}</span>`;
+function towerIconSpec(id){
+  const tower=ALL_TOWERS.find(t=>t.id===id);
+  const kind=tower?.type==='block'?'block':tower?.type==='drone'?'drone':'path';
+  return {kind,glyph:'core',...(TOWER_ICON_SPECS[id]||{})};
+}
+function enemyIconSpec(enemy){
+  const key=enemy?.key||'enE1';
+  return ENEMY_ICON_SPECS[key]||ENEMY_ICON_SPECS.enE1;
+}
+function iconClassSuffix(kind){
+  return String(kind||'path').replace(/(^|-)([a-z])/g,(_,dash,ch)=>`${dash}${ch.toUpperCase()}`);
+}
+function archiveIconSvg(glyph){
+  const stroke='currentColor';
+  const fill='currentColor';
+  const common=`fill="none" stroke="${stroke}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"`;
+  const soft=`fill="${fill}" opacity=".18"`;
+  if(glyph==='cannon')return `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="18" cy="20" r="7.5" ${common}/><path d="M18 20h13" ${common}/><circle cx="18" cy="20" r="2.5" ${soft}/></svg>`;
+  if(glyph==='bolt')return `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M14 7h12l-6 11h9L14 34l4-13h-8z" ${common}/></svg>`;
+  if(glyph==='snow')return `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="3.6" ${common}/><path d="M20 7v26M9 13.5l22 13M31 13.5l-22 13" ${common}/></svg>`;
+  if(glyph==='sniper')return `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 6l12 26H8z" ${common}/><path d="M20 14v14" ${common}/></svg>`;
+  if(glyph==='poison')return `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="11" ${common}/><path d="M10 28L30 12" ${common}/></svg>`;
+  if(glyph==='flame')return `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5c8 9 11 15 8 22-2 5-6 8-8 8s-6-3-8-8c-2-6 1-10 5-14-.5 5 2 8 4 10 2-5 2-10-1-18z" ${common}/><circle cx="20" cy="25" r="5" ${common}/></svg>`;
+  if(glyph==='pulse')return `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="11" ${common}/><path d="M8 20h24M20 8v24" ${common}/></svg>`;
+  if(glyph==='drone')return `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 7l13 13-13 13L7 20z" ${common}/><circle cx="20" cy="20" r="4.2" ${common}/></svg>`;
+  if(glyph==='enemySmall')return `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 8l11 12-11 12L9 20z" ${common}/><path d="M14 20h12" ${common}/></svg>`;
+  if(glyph==='enemyLarge')return `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 7l14 26H6z" ${common}/><path d="M13 24h14" ${common}/></svg>`;
+  return `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="11" ${common}/><circle cx="20" cy="20" r="3.5" ${soft}/></svg>`;
+}
+function archiveIcon(spec){
+  const icon=spec||{kind:'path',glyph:'core'};
+  const className=`archiveIcon archiveIcon${iconClassSuffix(icon.kind)}`;
+  return `<span class="${className}">${archiveIconSvg(icon.glyph)}</span>`;
+}
+function towerArchiveIcon(t){
+  return archiveIcon(towerIconSpec(t.id));
+}
+function enemyArchiveIcon(enemy){
+  return archiveIcon(enemyIconSpec(enemy));
 }
 function towerIntro(t){
   return TOWER_INTROS[t.id]||t.desc||'暂无介绍';
@@ -1451,7 +1494,7 @@ function towerArchiveListButton(t){
   const active=t.id===activeArchiveTowerId?' active':'';
   return [
     `<button type="button" class="archiveListBtn${active}" data-archive-tower="${t.id}">`,
-    archiveIcon(TOWER_ICONS[t.id]),
+    towerArchiveIcon(t),
     '<span>',
     `<strong>${t.id} · ${t.name}</strong>`,
     `<span>${towerTypeName(t)} · ${towerIntro(t)}</span>`,
@@ -1473,7 +1516,7 @@ function towerArchiveDetailHtml(t){
     .join('');
   return [
     '<div class="archiveTitle">',
-    archiveIcon(TOWER_ICONS[t.id]),
+    towerArchiveIcon(t),
     '<div>',
     `<h3>${t.id} · ${t.name}</h3>`,
     `<div>${towerTypeName(t)}</div>`,
@@ -1542,7 +1585,7 @@ function enemyArchiveListButton(enemy){
   const active=enemy.id===activeArchiveEnemyId?' active':'';
   return [
     `<button type="button" class="archiveListBtn${active}" data-archive-enemy="${enemy.id}">`,
-    archiveIcon(ENEMY_ICONS[enemy.id]),
+    enemyArchiveIcon(enemy),
     '<span>',
     `<strong>${enemy.id} · ${enemy.name}</strong>`,
     `<span>移动${enemySpeedLabel(enemy)} · 危险 ${enemy.danger} · ${ENEMY_INTROS[enemy.id]||'暂无介绍'}</span>`,
@@ -1553,7 +1596,7 @@ function enemyArchiveListButton(enemy){
 function enemyArchiveDetailHtml(enemy){
   return [
     '<div class="archiveTitle">',
-    archiveIcon(ENEMY_ICONS[enemy.id]),
+    enemyArchiveIcon(enemy),
     '<div>',
     `<h3>${enemy.id} · ${enemy.name}</h3>`,
     `<div>${enemyRoleText(enemy.id)}</div>`,
@@ -2575,14 +2618,15 @@ function launch(sel,mode='endless1'){
     g.strokePath();
   }
   function drawTowerGlyph(g,id,cx,cy,r,color){
+    const glyph=towerIconSpec(id).glyph;
     g.lineStyle(2,BLUEPRINT_ART.white,0.9);
     g.fillStyle(color,0.28);
-    if(id==='P1'){
+    if(glyph==='cannon'){
       g.strokeCircle(cx,cy,r*0.38);
       g.lineBetween(cx,cy,cx+r*0.72,cy);
       return;
     }
-    if(id==='P2'||id==='P3'||id==='B4'){
+    if(glyph==='bolt'){
       g.lineStyle(2,color,0.98);
       g.beginPath();
       g.moveTo(cx-r*0.4,cy-r*0.15);
@@ -2593,7 +2637,7 @@ function launch(sel,mode='endless1'){
       g.strokePath();
       return;
     }
-    if(id==='P4'){
+    if(glyph==='snow'){
       for(let i=0;i<6;i++){
         const a=Math.PI*2*i/6;
         g.lineBetween(cx,cy,cx+Math.cos(a)*r*0.62,cy+Math.sin(a)*r*0.62);
@@ -2601,32 +2645,32 @@ function launch(sel,mode='endless1'){
       g.strokeCircle(cx,cy,r*0.18);
       return;
     }
-    if(id==='P5'){
+    if(glyph==='sniper'){
       strokeTrianglePath(g,cx,cy-r*0.58,cx-r*0.5,cy+r*0.34,cx+r*0.5,cy+r*0.34);
       g.lineBetween(cx,cy-r*0.2,cx,cy+r*0.38);
       return;
     }
-    if(id==='P6'||id==='P7'||id==='B6'){
+    if(glyph==='poison'){
       g.lineStyle(2,0xc96cff,0.95);
       g.strokeCircle(cx,cy,r*0.45);
       g.lineStyle(2,0x83ff9b,0.88);
       g.lineBetween(cx-r*0.48,cy+r*0.32,cx+r*0.48,cy-r*0.32);
       return;
     }
-    if(id==='B2'){
+    if(glyph==='flame'){
       g.lineStyle(2,0xffc066,0.95);
       strokeTrianglePath(g,cx,cy-r*0.55,cx-r*0.44,cy+r*0.45,cx+r*0.44,cy+r*0.45);
       g.strokeCircle(cx,cy+r*0.08,r*0.25);
       return;
     }
-    if(id==='B7'){
+    if(glyph==='pulse'){
       g.lineStyle(2,0xff6677,0.95);
       g.strokeCircle(cx,cy,r*0.45);
       g.lineBetween(cx-r*0.5,cy,cx+r*0.5,cy);
       g.lineBetween(cx,cy-r*0.5,cx,cy+r*0.5);
       return;
     }
-    if(id==='D1'||id==='D2'||id==='D3'){
+    if(glyph==='drone'){
       g.lineStyle(2,color,0.98);
       drawDiamond(g,cx,cy,r*0.52);
       g.strokeCircle(cx,cy,r*0.18);
