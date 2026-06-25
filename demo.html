@@ -834,6 +834,7 @@ body::after{
 <script src="src/data/levels.js"></script>
 <script src="src/core/map-utils.js"></script>
 <script src="src/core/pathfinding.js"></script>
+<script src="src/core/game-instance.js"></script>
 <script src="src/ui/archive-ui.js"></script>
 <script src="src/render/blueprint-art.js"></script>
 <script src="src/core/meta-store.js"></script>
@@ -843,13 +844,6 @@ body::after{
 <script src="src/ui/home-ui.js"></script>
 <script src="src/ui/page-flow.js"></script>
 <script>
-let gameInstance=null;
-function activeGameScene(){
-  return gameInstance?.scene?.getScene?.('Game')||gameInstance?.scene?.scenes?.[0]||null;
-}
-function eventElement(e){
-  return e?.target instanceof Element?e.target:e?.target?.parentElement||null;
-}
 initHomeUi();
 initPageFlow();
 
