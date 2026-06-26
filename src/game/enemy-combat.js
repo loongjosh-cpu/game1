@@ -1,6 +1,7 @@
 const EnemyCombatMethods={
   handleEnemyDroneCombat(e,cfg,dt){
     if(cfg.droneRange){
+      if(e._b1tgt&&this.enemyCanBeTauntedBy(e,cfg,e._b1tgt))return false;
       const target=this.chooseDroneInRange(e,sd(cfg.droneRange));
       if(target&&this.enemyAttackReady(e,dt)){
         this.fireEnemyDart(e,target,cfg.shotSpeed||700,e._dmg)
