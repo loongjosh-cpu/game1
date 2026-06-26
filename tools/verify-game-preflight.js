@@ -149,6 +149,52 @@ function validateMeta(data, issues) {
     assert(finiteNumber(node.cost), `${node.id}: missing cost`, issues);
     if (node.tower) assert(towerIds.has(node.tower), `${node.id}: references missing tower ${node.tower}`, issues);
   }
+  validateMetaEffectsCoverage(nodes, issues);
+}
+
+function listJsFiles(dir) {
+  const out = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const file = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) out.push(...listJsFiles(file));
+    else if (entry.isFile() && file.endsWith('.js')) out.push(file);
+  }
+  return out;
+}
+
+function validateMetaEffectsCoverage(nodes, issues) {
+  const store = read('src/core/meta-store.js');
+  const hasMetaIds = new Set([...store.matchAll(/hasMeta\('([^']+)'\)/g)].map(m => m[1]));
+  for (const node of nodes) {
+    assert(hasMetaIds.has(node.id), `${node.id}: defined in META_NODES but not read by metaEffects`, issues);
+  }
+  const effectBody = extractFunctionReturnObject(store, 'metaEffects');
+  const effectKeys = [...effectBody.matchAll(/^\s*([a-zA-Z0-9_]+):/gm)].map(m => m[1]);
+  const gameSource = listJsFiles('src')
+    .filter(file => !file.endsWith('core/meta-store.js'))
+    .map(file => read(file))
+    .join('\n');
+  for (const key of effectKeys) {
+    assert(new RegExp(`meta\\.${key}\\b`).test(gameSource), `meta effect ${key} is returned but never used`, issues);
+  }
+}
+
+function extractFunctionReturnObject(source, functionName) {
+  const start = source.indexOf(`function ${functionName}(`);
+  if (start < 0) return '';
+  const ret = source.indexOf('return {', start);
+  if (ret < 0) return '';
+  const open = source.indexOf('{', ret);
+  let depth = 0;
+  for (let i = open; i < source.length; i++) {
+    const ch = source[i];
+    if (ch === '{') depth++;
+    if (ch === '}') {
+      depth--;
+      if (depth === 0) return source.slice(open + 1, i);
+    }
+  }
+  return '';
 }
 
 function pointValid(point) {
@@ -188,9 +234,195 @@ function validateLevels(data, issues) {
 
 function validateGddSync(data, issues) {
   const gdd = read('GDD.md');
-  const b3 = data.ALL_TOWERS.find(t => t.id === 'B3');
-  const b3Rows = gdd.split(/\r?\n/).filter(line => /^\| B3 \| Lv\d+ \|/.test(line));
-  assert(b3Rows.length === b3.upg.length, `GDD/code mismatch: B3 has ${b3.upg.length} code levels but ${b3Rows.length} GDD level rows`, issues);
+  const parsed = parseGddTables(gdd);
+  validateGddTowerTable(data, parsed.pathTowers, 'path', issues);
+  validateGddTowerTable(data, parsed.blockTowers, 'block', issues);
+  validateGddTowerTable(data, parsed.droneTowers, 'drone', issues);
+  validateGddEnemyTable(data, parsed.enemies, issues);
+}
+
+function tableCells(line) {
+  return line.split('|').slice(1, -1).map(cell => cell.trim());
+}
+
+function numericCell(value) {
+  if (value === undefined || value === null) return null;
+  const text = String(value).replace(/,/g, '');
+  if (/^[-—–]$/.test(text)) return null;
+  const match = text.match(/-?\d+(?:\.\d+)?/);
+  return match ? Number(match[0]) : null;
+}
+
+function secondsToMs(value) {
+  const seconds = numericCell(value);
+  return seconds === null ? null : Math.round(seconds * 1000);
+}
+
+function parseTargetCell(value) {
+  const text = String(value || '');
+  const out = {};
+  const total = text.match(/总(\d+)目标/);
+  const branch = text.match(/分叉(\d+)/);
+  const aoe = text.match(/AOE(\d+)/i);
+  const simple = text.match(/^(\d+)$/);
+  if (total) out.targets = Number(total[1]);
+  if (branch) out.cr = Number(branch[1]);
+  if (aoe) out.s = Number(aoe[1]);
+  if (simple) out.n = Number(simple[1]);
+  return out;
+}
+
+function parseDamageIntervalCell(value) {
+  const text = String(value || '');
+  if (!text.includes('/')) return { damage: numericCell(text), interval: null };
+  return {
+    damage: numericCell(text),
+    interval: secondsToMs(text.split('/').pop())
+  };
+}
+
+function parseGddTables(gdd) {
+  const parsed = { pathTowers: {}, blockTowers: {}, droneTowers: {}, enemies: {} };
+  for (const line of gdd.split(/\r?\n/)) {
+    if (!/^\| [PBDE]\d+ /.test(line)) continue;
+    const cells = tableCells(line);
+    const id = cells[0];
+    if (/^P\d+$/.test(id) && /^Lv\d+/.test(cells[1])) {
+      const level = numericCell(cells[1]);
+      const targets = parseTargetCell(cells[4]);
+      const row = {
+        level,
+        d: numericCell(cells[2]),
+        i: secondsToMs(cells[3]),
+        r: numericCell(cells[5]),
+        c: numericCell(cells[7]),
+        ...targets
+      };
+      if (id === 'P6' && targets.n !== undefined) row.ps = targets.n;
+      if (id === 'P7' && targets.n !== undefined) row.n = targets.n;
+      parsed.pathTowers[id] = parsed.pathTowers[id] || [];
+      parsed.pathTowers[id][level - 1] = row;
+      continue;
+    }
+    if (/^B\d+$/.test(id) && /^Lv\d+/.test(cells[1])) {
+      const level = numericCell(cells[1]);
+      const damage = parseDamageIntervalCell(cells[4]);
+      const row = {
+        level,
+        hp: numericCell(cells[2]),
+        danger: numericCell(cells[3]),
+        d: damage.damage,
+        i: damage.interval,
+        r: numericCell(cells[6]),
+        c: numericCell(cells[7])
+      };
+      if (/^治/.test(cells[4])) {
+        row.hl = numericCell(cells[4]);
+        row.d = null;
+      }
+      if (/^毒/.test(cells[4])) {
+        row.d = null;
+      }
+      if (id === 'B7') {
+        row.bm = numericCell(cells[4]);
+        row.d = null;
+        row.i = null;
+      }
+      parsed.blockTowers[id] = parsed.blockTowers[id] || [];
+      parsed.blockTowers[id][level - 1] = row;
+      continue;
+    }
+    if (/^D\d+$/.test(id) && /^Lv\d+/.test(cells[1])) {
+      const level = numericCell(cells[1]);
+      const row = {
+        level,
+        coreHp: numericCell(cells[2]),
+        danger: numericCell(cells[3]),
+        md: numericCell(cells[4]),
+        hp: numericCell(cells[5]),
+        d: numericCell(cells[6]),
+        i: secondsToMs(cells[7]),
+        r: numericCell(cells[8]),
+        prod: secondsToMs(cells[9]),
+        c: numericCell(cells[11])
+      };
+      if (id === 'D3') {
+        row.hl = numericCell(cells[6]);
+        row.d = 0;
+      }
+      parsed.droneTowers[id] = parsed.droneTowers[id] || [];
+      parsed.droneTowers[id][level - 1] = row;
+      continue;
+    }
+    if (/^E\d+$/.test(id)) {
+      parsed.enemies[id] = {
+        hp: numericCell(cells[2]),
+        spd: numericCell(cells[3]),
+        dmg: numericCell(cells[4]),
+        atk: secondsToMs(cells[5]),
+        danger: numericCell(cells[7])
+      };
+    }
+  }
+  return parsed;
+}
+
+function compareField(label, actual, expected, issues) {
+  if (expected === null || expected === undefined || Number.isNaN(expected)) return;
+  if (actual !== expected) issues.push(`${label}: code ${actual} != GDD ${expected}`);
+}
+
+function validateGddTowerTable(data, table, type, issues) {
+  const towers = (data.ALL_TOWERS || []).filter(t => t.type === type);
+  for (const tower of towers) {
+    const rows = table[tower.id] || [];
+    assert(rows.length === tower.upg.length, `GDD/code mismatch: ${tower.id} has ${tower.upg.length} code levels but ${rows.length} GDD level rows`, issues);
+    tower.upg.forEach((up, idx) => {
+      const row = rows[idx];
+      if (!row) return;
+      const label = `${tower.id} Lv${idx + 1}`;
+      compareField(`${label} range`, up.r, row.r, issues);
+      compareField(`${label} upgrade cost`, idx === 0 ? null : up.c, row.c, issues);
+      if (type === 'path') {
+        compareField(`${label} damage`, up.d, row.d, issues);
+        compareField(`${label} interval`, up.i, row.i, issues);
+        compareField(`${label} targets`, up.targets, row.targets, issues);
+        compareField(`${label} chain range`, up.cr, row.cr, issues);
+        compareField(`${label} splash`, up.s, row.s, issues);
+        if (tower.id === 'P4' || tower.id === 'P7') compareField(`${label} target count`, up.n, row.n, issues);
+        if (tower.id === 'P6') compareField(`${label} poison targets`, up.ps, row.ps, issues);
+      } else if (type === 'block') {
+        compareField(`${label} HP`, up.hp, row.hp, issues);
+        compareField(`${label} danger`, up.danger, row.danger, issues);
+        compareField(`${label} damage`, up.d, row.d, issues);
+        compareField(`${label} heal`, up.hl, row.hl, issues);
+        compareField(`${label} blast damage`, up.bm, row.bm, issues);
+        compareField(`${label} interval`, up.i, row.i, issues);
+      } else if (type === 'drone') {
+        compareField(`${label} core HP`, up.coreHp, row.coreHp, issues);
+        compareField(`${label} danger`, up.danger, row.danger, issues);
+        compareField(`${label} drone cap`, up.md, row.md, issues);
+        compareField(`${label} drone HP`, up.hp, row.hp, issues);
+        compareField(`${label} damage`, up.d, row.d, issues);
+        compareField(`${label} heal`, up.hl, row.hl, issues);
+        compareField(`${label} interval`, up.i, row.i, issues);
+        compareField(`${label} production`, up.prod, row.prod, issues);
+      }
+    });
+  }
+}
+
+function validateGddEnemyTable(data, table, issues) {
+  for (const [id, enemy] of Object.entries(data.EC || {})) {
+    const row = table[id];
+    assert(!!row, `GDD/code mismatch: ${id} missing from enemy table`, issues);
+    if (!row) continue;
+    compareField(`${id} HP`, enemy.hp, row.hp, issues);
+    compareField(`${id} speed`, enemy.spd, row.spd, issues);
+    compareField(`${id} damage`, enemy.dmg, row.dmg, issues);
+    if (id !== 'E13') compareField(`${id} attack interval`, enemy.atk, row.atk, issues);
+    compareField(`${id} danger`, enemy.danger, row.danger, issues);
+  }
 }
 
 function validateDangerEffects(data, issues) {
