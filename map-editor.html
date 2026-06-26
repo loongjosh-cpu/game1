@@ -58,6 +58,7 @@
       radial-gradient(circle at 75% 55%,rgba(52,211,153,.07),transparent 30%),
       #06101d;padding:14px}
     canvas{display:block;background:#07111f;border:1px solid #233047;border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.35);image-rendering:auto}
+    canvas.move-mode{cursor:move}
     .status{display:flex;gap:14px;align-items:center;padding:8px 12px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden}
     .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
     .stat{border:1px solid var(--line);border-radius:10px;padding:8px;background:#0f172a}
@@ -102,11 +103,12 @@
         <div class="tools">
           <button data-mode="wall" class="active">墙体 W</button>
           <button data-mode="select">选择 S</button>
+          <button data-mode="move">移动 M</button>
           <button data-mode="spawn">出生点</button>
           <button data-mode="reactor">主反应炉</button>
           <button data-mode="erase" class="danger">擦除</button>
         </div>
-        <p class="small">墙体：拖拽矩形。出生点/主反应炉：点击放置。选择模式可点击墙体查看坐标。</p>
+        <p class="small">墙体：拖拽矩形。移动：拖动已有墙体。出生点/主反应炉：点击放置。选择模式可点击墙体查看坐标。</p>
       </div>
       <div class="section">
         <h3>图例</h3>
@@ -136,7 +138,7 @@
       </div>
       <div class="status">
         <span id="coord">坐标：-</span>
-        <span>快捷键：<span class="kbd">W</span>墙体 <span class="kbd">S</span>选择 <span class="kbd">Ctrl+Z</span>撤销</span>
+        <span>快捷键：<span class="kbd">W</span>墙体 <span class="kbd">S</span>选择 <span class="kbd">M</span>移动 <span class="kbd">Ctrl+Z</span>撤销</span>
         <span id="saveState"></span>
       </div>
     </main>
@@ -459,7 +461,9 @@
 
     function setMode(next){
       mode = next;
+      drag = null;
       document.querySelectorAll('[data-mode]').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+      canvas.classList.toggle('move-mode', mode === 'move');
     }
 
     function snap(v){ return $('snapGrid').checked ? Math.round(v/40)*40 : v; }
@@ -801,7 +805,7 @@
       drawLabel('主反应炉', reactor.x, reactor.y-reactorRadius-45, '#bae6fd');
       ctx.restore();
 
-      if(drag){
+      if(drag && drag.type === 'new-wall'){
         const x = Math.min(drag.x, drag.cx), y = Math.min(drag.y, drag.cy);
         const w = Math.abs(drag.cx-drag.x), h = Math.abs(drag.cy-drag.y);
         ctx.fillStyle = 'rgba(96,165,250,.24)';
@@ -820,17 +824,45 @@
     canvas.addEventListener('mousemove', e => {
       const p = toCanvasPoint(e);
       $('coord').textContent = `坐标：${Math.round(p.x)}, ${Math.round(p.y)} / 模式：${mode}`;
-      if(drag){ drag.cx=p.x; drag.cy=p.y; draw(); }
+      if(drag){
+        if(drag.type === 'new-wall'){
+          drag.cx=p.x;
+          drag.cy=p.y;
+        }else if(drag.type === 'move-wall' && walls[drag.index]){
+          const dx = p.x - drag.start.x;
+          const dy = p.y - drag.start.y;
+          walls[drag.index] = [
+            Math.max(0, Math.min(W-drag.rect[2], drag.rect[0] + dx)),
+            Math.max(0, Math.min(H-drag.rect[3], drag.rect[1] + dy)),
+            drag.rect[2],
+            drag.rect[3]
+          ];
+        }
+        draw();
+      }
     });
 
     canvas.addEventListener('mousedown', e => {
       const p = toCanvasPoint(e);
       if(mode === 'wall'){
         pushUndo();
-        drag = {x:p.x,y:p.y,cx:p.x,cy:p.y};
+        drag = {type:'new-wall',x:p.x,y:p.y,cx:p.x,cy:p.y};
       }else if(mode === 'select'){
         selectedWall = wallAt(p);
         renderAll();
+      }else if(mode === 'move'){
+        const wi = wallAt(p);
+        selectedWall = wi;
+        if(wi >= 0){
+          pushUndo();
+          actualPaths = [];
+          pathReport = [];
+          drag = {type:'move-wall',index:wi,start:p,rect:[...walls[wi]]};
+          draw();
+          renderInfo();
+        }else{
+          renderAll();
+        }
       }else if(mode === 'spawn'){
         pushUndo();
         spawns.push([p.x,p.y]);
@@ -849,9 +881,14 @@
 
     window.addEventListener('mouseup', () => {
       if(!drag) return;
-      const x = Math.min(drag.x, drag.cx), y = Math.min(drag.y, drag.cy);
-      const w = Math.abs(drag.cx-drag.x), h = Math.abs(drag.cy-drag.y);
-      if(w > 20 && h > 20) walls.push([x,y,w,h]);
+      if(drag.type === 'new-wall'){
+        const x = Math.min(drag.x, drag.cx), y = Math.min(drag.y, drag.cy);
+        const w = Math.abs(drag.cx-drag.x), h = Math.abs(drag.cy-drag.y);
+        if(w > 20 && h > 20){
+          walls.push([x,y,w,h]);
+          selectedWall = walls.length - 1;
+        }
+      }
       drag = null;
       renderAll();
     });
@@ -862,6 +899,7 @@
       const key = e.key.toLowerCase();
       if(key === 'w') setMode('wall');
       if(key === 's') setMode('select');
+      if(key === 'm') setMode('move');
       if(key === 'delete' && selectedWall >= 0){
         pushUndo();
         walls.splice(selectedWall,1);
