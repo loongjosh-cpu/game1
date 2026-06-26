@@ -62,7 +62,7 @@ const PlayerRuntimeMethods={
     }
     if(this.sel===SMALL_REACTOR)this.drawReactorDistancePreview();
     if(this.sel.range)this.drawBuildRangePreview(wx,wy,ok);
-    if(this.input.activePointer.isDown&&!this._buildLatch&&ok){this._buildLatch=true;this.startBuild(wx,wy)}
+    if(this.input.activePointer.leftButtonDown()&&!this._buildLatch&&ok){this._buildLatch=true;this.startBuild(wx,wy)}
   },
   updateShipMissiles(dt){
     if(this.shipDead)return;
