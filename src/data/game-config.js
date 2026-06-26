@@ -8,7 +8,7 @@ const SHIP_SPD=500,SHIP_RNG=1200,MSL_CD=8000,MSL_DMG=20,MSL_SPD=800;
 
 const LOCAL_CAMERA_ZOOM=3.2,MINIMAP_REFRESH=120;
 
-const P3_SHELL_SPD=700,POISON_BOLT_SPD=520,RX_HP=200;
+const P3_SHELL_SPD=700,POISON_BOLT_SPD=520,RX_HP=120;
 
 const EN_START=200,EN_CAP=9999,PREP_TIME=10000,SHIP_RESPAWN=5000;
 const KILL_REWARD_MULT=3,REACTOR_WAVE_BONUS_LIMIT=5;
@@ -26,9 +26,9 @@ const MAIN_REACTOR={
   tSize:120,
   desc:'主目标 · 摧毁后游戏失败',
   upg:[
-    {l:1,hp:200,prod:4},
-    {l:2,hp:200,prod:5.5,c:100},
-    {l:3,hp:200,prod:7,c:100}
+    {l:1,hp:120,prod:4},
+    {l:2,hp:120,prod:5.5,c:100},
+    {l:3,hp:120,prod:7,c:100}
   ]
 };
 
@@ -41,9 +41,9 @@ const SMALL_REACTOR={
   maxCount:5,
   desc:'经济建筑 · 全图兜底目标',
   upg:[
-    {l:1,hp:300,prod:2},
-    {l:2,hp:300,prod:3,c:80},
-    {l:3,hp:300,prod:4,c:80}
+    {l:1,hp:80,prod:2},
+    {l:2,hp:80,prod:3,c:80},
+    {l:3,hp:80,prod:4,c:80}
   ]
 };
 

@@ -32,7 +32,7 @@ function applySavedMapToEndless(src,world){
 }
 
 const LEVELS={
-  level1:makeLevel('level1','边境蛇道',0.82,LEVEL_PATHS.level1,240,{x:6900,y:3720}),
+  level1:{id:'level1',name:'边境蛇道',map:cloneMap(LEVEL1_FRONTIER_MAP),waves:cloneLevelWaves(LEVEL_WAVES.level1)},
   level2:makeLevel('level2','双门汇流',0.78,LEVEL_PATHS.level2,330,{x:6960,y:2070}),
   level3:makeLevel('level3','环形矿区',0.74,LEVEL_PATHS.level3,240,{x:3680,y:3820},[[3240,1700,880,720]]),
   level4:makeLevel('level4','裂谷三线',0.70,LEVEL_PATHS.level4,310,{x:3680,y:3820}),
