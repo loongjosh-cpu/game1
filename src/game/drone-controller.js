@@ -187,10 +187,9 @@ const DroneControllerMethods={
     if(next)this.aggroDrone(e,next);
     else this.rejoinPath(e);
   },
-  damageDrone(d,dmg){
+  damageDrone(d,dmg,source=null,options={}){
     if(!d||!d.active)return;
-    d._hp-=dmg;
-    if(d._hp<=0)this.destroyDrone(d);
+    this.applyFriendlyDamage({source,target:d,amount:dmg,...options});
   },
   aggroDrone(e,d){
     if(!e||!e.active||!d||!d.active||d._hp<=0)return;

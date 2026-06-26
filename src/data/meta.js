@@ -19,5 +19,7 @@ const META_NODES=[
   {id:'tower_p7',group:'tower',tower:'P7',name:'毒性弹头',cost:4,desc:'每第三次攻击额外挂1层毒'},
   {id:'tower_b1',group:'tower',tower:'B1',name:'可维修残骸',cost:2,desc:'钢塔残骸可被B5与D3维修'},
   {id:'tower_b3',group:'tower',tower:'B3',name:'吸血弹头',cost:5,desc:'每次攻击恢复自身2HP'},
-  {id:'tower_b4',group:'tower',tower:'B4',name:'过载护盾',cost:3,desc:'每10秒获得1层护盾，最多5层；消耗1层将单次伤害限制为10'}
+  {id:'tower_b4',group:'tower',tower:'B4',name:'过载护盾',cost:3,desc:'每10秒获得1层护盾，最多5层；消耗1层将单次伤害限制为10'},
+  {id:'tower_b6',group:'tower',tower:'B6',name:'毒性护膜',cost:4,desc:'中毒敌人对B6造成的伤害降低30%'},
+  {id:'tower_d1',group:'tower',tower:'D1',name:'应激装甲',cost:5,desc:'每架D1无人机受到每个敌人的首次伤害降低60%'}
 ];

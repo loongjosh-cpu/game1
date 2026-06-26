@@ -18,7 +18,7 @@ const EnemyCombatMethods={
         return true
       }
       if(this.enemyAttackReady(e,dt)){
-        this.damageDrone(droneTarget,e._dmg);
+        this.damageDrone(droneTarget,e._dmg,e,{kind:'melee'});
         this.enemyAttackEffect(e,droneTarget)
       }
       return true
@@ -50,18 +50,11 @@ const EnemyCombatMethods={
     return true
   },
   enemyHitBlocker(e,target){
-    let incoming=e._dmg;
-    if(target._type.id==='B4'&&this.meta.b4Shield&&(target._shield||0)>0){
-      target._shield--;
-      incoming=Math.min(10,incoming);
-      this.flashArea(target.x,target.y,sd(55),0xaaddff)
-    }
-    target._hp-=incoming;
+    this.applyFriendlyDamage({source:e,target,amount:e._dmg,kind:'melee'});
     this.enemyAttackEffect(e,target);
     if(target._type.id==='B4'&&target.active){
       this.areaAttack(target,target._type.upg[target._lv||0],0x66ccff)
     }
-    if(target._hp<=0)this.destroyB1(target)
   },
   handleEnemyReactorCombat(e,cfg,dt){
     let reactor=this.reactorAlive(e._reactorTarget)?e._reactorTarget:null;
@@ -94,12 +87,7 @@ const EnemyCombatMethods={
     return false
   },
   enemyHitReactor(e,reactor){
-    reactor._hp=Math.max(0,reactor._hp-e._dmg);
-    if(reactor._isMainReactor)this.rxHP=reactor._hp;
+    this.applyFriendlyDamage({source:e,target:reactor,amount:e._dmg,kind:'melee'});
     this.enemyAttackEffect(e,reactor);
-    this.tweens.add({targets:reactor,alpha:0.5,duration:100,yoyo:true});
-    if(reactor._hp>0)return;
-    if(reactor._isMainReactor)this.gameOver();
-    else this.destroyReactor(reactor)
   }
 };

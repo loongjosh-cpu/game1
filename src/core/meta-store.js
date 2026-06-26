@@ -134,6 +134,8 @@ function metaEffects(){
     p7Poison:hasMeta('tower_p7'),
     b1Repair:hasMeta('tower_b1'),
     b3Leech:hasMeta('tower_b3'),
-    b4Shield:hasMeta('tower_b4')
+    b4Shield:hasMeta('tower_b4'),
+    b6ToxicShell:hasMeta('tower_b6'),
+    d1ReactiveArmor:hasMeta('tower_d1')
   };
 }
