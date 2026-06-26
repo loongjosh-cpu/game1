@@ -4,6 +4,7 @@ function towerLevelText(t,u){
   if(u.i)bits.push(`间隔 ${(u.i/1000).toFixed(1)}秒`);
   if(u.r)bits.push(`范围 ${u.r}`);
   if(u.hp)bits.push(`${t.type==='drone'?'无人机HP':'HP'} ${u.hp}`);
+  if(u.danger!==undefined)bits.push(`危险等级 ${u.danger}`);
   if(u.targets)bits.push(`目标 ${u.targets}`);
   if(u.n)bits.push(`目标 ${u.n}`);
   if(u.md)bits.push(`上限 ${u.md}`);
@@ -201,7 +202,7 @@ function enemyArchiveListButton(enemy){
     enemyArchiveIcon(enemy),
     '<span>',
     `<strong>${enemy.id} · ${enemy.name}</strong>`,
-    `<span>移动${enemySpeedLabel(enemy)} · 危险 ${enemy.danger} · ${ENEMY_INTROS[enemy.id]||'暂无介绍'}</span>`,
+    `<span>移动${enemySpeedLabel(enemy)} · 危险等级 ${enemy.danger} · ${ENEMY_INTROS[enemy.id]||'暂无介绍'}</span>`,
     '</span>',
     '</button>'
   ].join('');

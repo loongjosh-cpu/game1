@@ -1,5 +1,5 @@
 const TowerPanelMethods={
-  towerStats(td,up,lv){
+  towerStats(td,up,lv,tw=null){
     const rows=[];
     const add=(key,label,value)=>{
       if(value!==undefined&&value!==null&&value!=='')rows.push({key,label,value:String(value)})
@@ -10,7 +10,7 @@ const TowerPanelMethods={
     }
     add('type','类型',this.towerTypeLabel(td));
     this.addTowerDamageStats(td,up,add);
-    this.addTowerCommonStats(td,up,add);
+    this.addTowerCommonStats(td,up,add,tw);
     this.addTowerTargetStats(td,up,add);
     this.addTowerSpecialStats(td,up,add);
     if(td.type==='drone')this.addDroneStats(td,up,add);
@@ -22,7 +22,7 @@ const TowerPanelMethods={
     add('hp','HP上限',up.hp);
     add('production','能源产出',`${up.prod}/秒`);
     add('aggro','仇恨','全图兜底');
-    add('danger','标称危险',3);
+    add('danger','标称危险等级',3);
     add('repair','维修 / 出售','均不可');
     add('special','规则',td.desc)
   },
@@ -41,11 +41,15 @@ const TowerPanelMethods={
     else if((up.d||0)>0)add('damage','伤害',up.d);
     if(td.id==='B7')add('damage','自爆伤害',up.bm||td.boom)
   },
-  addTowerCommonStats(td,up,add){
+  displayTowerDanger(td,up,tw=null){
+    if(tw&&td.id==='B3'&&this.meta?.b3Taunt&&typeof this.towerDanger==='function')return this.towerDanger(tw);
+    return up.danger??td.danger
+  },
+  addTowerCommonStats(td,up,add,tw=null){
     if(up.i)add('interval',td.id==='D3'?'维修间隔':'攻击间隔',`${(up.i/1000).toFixed(1)}秒`);
     if(up.r)add('range','作用范围',up.r);
     if(up.hp)add('hp',td.type==='drone'?'无人机HP':'HP上限',up.hp);
-    if(td.type==='block')add('danger','危险',up.danger??td.danger)
+    if(td.type==='block')add('danger','危险等级',this.displayTowerDanger(td,up,tw))
   },
   addTowerTargetStats(td,up,add){
     if(td.chain){
@@ -70,7 +74,7 @@ const TowerPanelMethods={
   },
   addDroneStats(td,up,add){
     add('coreHp','核心HP',up.coreHp);
-    add('danger','危险',up.danger);
+    add('danger','危险等级',up.danger);
     add('capacity','无人机上限',up.md);
     add('production','生产间隔',`${(up.prod/1000).toFixed(0)}秒`);
     add('replacementCost','补员耗能',`${td.droneCost} / 架`);
@@ -96,7 +100,7 @@ const TowerPanelMethods={
     const tw=this.selTw;
     if(!tw||!tw.active)return null;
     const td=tw._type,lv=tw._lv||0,up=td.upg[lv],nextLevel=lv+1,nx=td.upg[nextLevel];
-    const rows=this.towerStats(td,up,lv);
+    const rows=this.towerStats(td,up,lv,tw);
     if(td.type==='block'||td.type==='reactor'){
       rows.splice(1,0,{key:'currentHp',label:'当前耐久',value:`${Math.ceil(tw._hp||0)} / ${tw._maxhp||up.hp}`})
     }
@@ -139,7 +143,7 @@ const TowerPanelMethods={
   },
   upgradePreviewHtml(ctx){
     const current=new Map(ctx.rows.map(row=>[row.key,row.value]));
-    const nextRows=this.towerStats(ctx.td,ctx.nx,ctx.nextLevel);
+    const nextRows=this.towerStats(ctx.td,ctx.nx,ctx.nextLevel,ctx.tw);
     const changes=nextRows.filter(row=>current.get(row.key)!==row.value);
     const rows=changes.map(row=>{
       const oldValue=current.get(row.key)??'-';

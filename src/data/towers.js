@@ -86,8 +86,7 @@ const BLOCK_TOWERS=[
     color:0xcc8844,hp:150,danger:2,tSize:45,desc:'输出150HP',
     upg:[
       {l:1,d:3,i:600,r:800,hp:150,danger:2},
-      {l:2,d:5,i:600,r:800,hp:180,danger:2,c:130},
-      {l:3,d:8,i:400,r:800,hp:180,danger:2,c:260}
+      {l:2,d:5,i:600,r:800,hp:180,danger:2,c:130}
     ]
   },
   {
