@@ -7146,7 +7146,7 @@
       walls = clone(lv.walls);
       spawns = clone(lv.spawns);
       pockets = clone(lv.pockets || []);
-      routes = clone(lv.routes || []);
+      routes = clone(lv.routes || lv.paths || []).map(route => route.map(normalizePoint));
       reactor = clone(lv.reactor);
       unitScale = lv.unitScale || 1;
       clearSelection();
@@ -7163,9 +7163,10 @@
       host.innerHTML = '';
       LEVELS.forEach((lv, idx) => {
         const card = document.createElement('div');
+        const difficulty = lv.difficulty || (lv.id && lv.id.startsWith('draft-') ? '草案' : '白盒');
         card.className = 'level-card' + (idx===levelIndex ? ' active' : '');
         card.innerHTML = `
-          <div class="level-title"><span>${lv.name}</span><span class="tag">${lv.difficulty}</span></div>
+          <div class="level-title"><span>${lv.name}</span><span class="tag">${difficulty}</span></div>
           <div class="small" style="margin-top:6px">${lv.summary}</div>
           <div class="meta">
             <span class="tag">${lv.spawns.length}入口</span>
