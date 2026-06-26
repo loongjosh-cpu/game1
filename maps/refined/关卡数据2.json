@@ -3,7 +3,7 @@
   "kind": "level-map",
   "id": "dual-wing-front",
   "name": "双翼前线",
-  "levelId": "dual-wing-front",
+  "levelId": "level2",
   "levelName": "双翼前线",
   "summary": "左侧核心、右侧多入口。上翼和下翼路径长度接近，玩家不能只守一路，需要用小反应炉逐步外推。",
   "unitScale": 0.66,
@@ -433,16 +433,16 @@
       220
     ],
     [
-      5400,
-      1380,
+      5280,
+      2860,
       420,
       180
     ],
     [
-      5360,
-      2940,
-      420,
-      180
+      2640,
+      2720,
+      1120,
+      320
     ]
   ],
   "spawns": [
@@ -475,144 +475,144 @@
   "paths": [
     [
       [
-        7080,
-        360
+        null,
+        null
       ],
       [
-        6100,
-        360
+        null,
+        null
       ],
       [
-        6100,
-        1040
+        null,
+        null
       ],
       [
-        4700,
-        1040
+        null,
+        null
       ],
       [
-        4700,
-        1660
+        null,
+        null
       ],
       [
-        3320,
-        1660
+        null,
+        null
       ],
       [
-        3320,
-        2140
+        null,
+        null
       ],
       [
-        1240,
-        2140
+        null,
+        null
       ]
     ],
     [
       [
-        7080,
-        2060
+        null,
+        null
       ],
       [
-        6200,
-        2060
+        null,
+        null
       ],
       [
-        6200,
-        2600
+        null,
+        null
       ],
       [
-        4720,
-        2600
+        null,
+        null
       ],
       [
-        4720,
-        2180
+        null,
+        null
       ],
       [
-        3000,
-        2180
+        null,
+        null
       ],
       [
-        1240,
-        2140
+        null,
+        null
       ]
     ],
     [
       [
-        7080,
-        3820
+        null,
+        null
       ],
       [
-        5960,
-        3820
+        null,
+        null
       ],
       [
-        5960,
-        3260
+        null,
+        null
       ],
       [
-        4400,
-        3260
+        null,
+        null
       ],
       [
-        4400,
-        2780
+        null,
+        null
       ],
       [
-        2480,
-        2780
+        null,
+        null
       ],
       [
-        2480,
-        2260
+        null,
+        null
       ],
       [
-        1240,
-        2140
+        null,
+        null
       ]
     ],
     [
       [
-        3720,
-        3960
+        null,
+        null
       ],
       [
-        3720,
-        3340
+        null,
+        null
       ],
       [
-        2740,
-        3340
+        null,
+        null
       ],
       [
-        2740,
-        2520
+        null,
+        null
       ],
       [
-        1240,
-        2140
+        null,
+        null
       ]
     ],
     [
       [
-        3300,
-        240
+        null,
+        null
       ],
       [
-        3300,
-        760
+        null,
+        null
       ],
       [
-        2380,
-        760
+        null,
+        null
       ],
       [
-        2380,
-        1500
+        null,
+        null
       ],
       [
-        1240,
-        2140
+        null,
+        null
       ]
     ]
   ],

@@ -3,7 +3,7 @@
   "kind": "level-map",
   "id": "polar-rift-lines",
   "name": "极冠裂隙",
-  "levelId": "polar-rift-lines",
+  "levelId": "level4",
   "levelName": "极冠裂隙",
   "summary": "顶部核心，左右翼与下方夹击。中央裂隙形成双翼推进，保留原图顶部核心的紧张感。",
   "unitScale": 0.62,
@@ -455,30 +455,6 @@
       4000,
       7360,
       160
-    ],
-    [
-      3260,
-      1760,
-      360,
-      260
-    ],
-    [
-      3740,
-      1760,
-      360,
-      260
-    ],
-    [
-      2280,
-      1280,
-      420,
-      220
-    ],
-    [
-      4640,
-      1280,
-      420,
-      220
     ]
   ],
   "spawns": [
@@ -511,140 +487,140 @@
   "paths": [
     [
       [
-        240,
-        3800
+        null,
+        null
       ],
       [
-        1500,
-        3800
+        null,
+        null
       ],
       [
-        1500,
-        3060
+        null,
+        null
       ],
       [
-        2840,
-        3060
+        null,
+        null
       ],
       [
-        2840,
-        2140
+        null,
+        null
       ],
       [
-        3280,
-        1540
+        null,
+        null
       ],
       [
-        3680,
-        420
+        null,
+        null
       ]
     ],
     [
       [
-        7040,
-        3600
+        null,
+        null
       ],
       [
-        5860,
-        3600
+        null,
+        null
       ],
       [
-        5860,
-        3060
+        null,
+        null
       ],
       [
-        4520,
-        3060
+        null,
+        null
       ],
       [
-        4520,
-        2140
+        null,
+        null
       ],
       [
-        4080,
-        1540
+        null,
+        null
       ],
       [
-        3680,
-        420
+        null,
+        null
       ]
     ],
     [
       [
-        180,
-        180
+        null,
+        null
       ],
       [
-        1760,
-        180
+        null,
+        null
       ],
       [
-        1760,
-        1020
+        null,
+        null
       ],
       [
-        2980,
-        1020
+        null,
+        null
       ],
       [
-        2980,
-        620
+        null,
+        null
       ],
       [
-        3680,
-        420
+        null,
+        null
       ]
     ],
     [
       [
-        7180,
-        180
+        null,
+        null
       ],
       [
-        5600,
-        180
+        null,
+        null
       ],
       [
-        5600,
-        1020
+        null,
+        null
       ],
       [
-        4380,
-        1020
+        null,
+        null
       ],
       [
-        4380,
-        620
+        null,
+        null
       ],
       [
-        3680,
-        420
+        null,
+        null
       ]
     ],
     [
       [
-        3680,
-        3960
+        null,
+        null
       ],
       [
-        3680,
-        3240
+        null,
+        null
       ],
       [
-        3000,
-        3240
+        null,
+        null
       ],
       [
-        3000,
-        2300
+        null,
+        null
       ],
       [
-        3360,
-        1540
+        null,
+        null
       ],
       [
-        3680,
-        420
+        null,
+        null
       ]
     ]
   ],

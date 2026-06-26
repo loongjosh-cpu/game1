@@ -3,7 +3,7 @@
   "kind": "level-map",
   "id": "north-corner-citadel",
   "name": "北角堡垒",
-  "levelId": "north-corner-citadel",
+  "levelId": "level3",
   "levelName": "北角堡垒",
   "summary": "北西角核心，远端多入口绕行后压入核心区。修复非法出生点，并用路线型地貌统一视觉风格。",
   "unitScale": 0.64,
@@ -473,18 +473,6 @@
       4000,
       7360,
       160
-    ],
-    [
-      4380,
-      1880,
-      520,
-      220
-    ],
-    [
-      2500,
-      1840,
-      420,
-      220
     ]
   ],
   "spawns": [
@@ -517,168 +505,168 @@
   "paths": [
     [
       [
-        7160,
-        360
+        null,
+        null
       ],
       [
-        6320,
-        360
+        null,
+        null
       ],
       [
-        6320,
-        1240
+        null,
+        null
       ],
       [
-        5040,
-        1240
+        null,
+        null
       ],
       [
-        5040,
-        900
+        null,
+        null
       ],
       [
-        3560,
-        900
+        null,
+        null
       ],
       [
-        3560,
-        1440
+        null,
+        null
       ],
       [
-        1680,
-        1440
+        null,
+        null
       ],
       [
-        680,
-        520
+        null,
+        null
       ]
     ],
     [
       [
-        7160,
-        3780
+        null,
+        null
       ],
       [
-        6200,
-        3780
+        null,
+        null
       ],
       [
-        6200,
-        3060
+        null,
+        null
       ],
       [
-        5100,
-        3060
+        null,
+        null
       ],
       [
-        5100,
-        2300
+        null,
+        null
       ],
       [
-        3860,
-        2300
+        null,
+        null
       ],
       [
-        3860,
-        1500
+        null,
+        null
       ],
       [
-        1680,
-        1500
+        null,
+        null
       ],
       [
-        680,
-        520
+        null,
+        null
       ]
     ],
     [
       [
-        3720,
-        3960
+        null,
+        null
       ],
       [
-        3720,
-        3300
+        null,
+        null
       ],
       [
-        2920,
-        3300
+        null,
+        null
       ],
       [
-        2920,
-        2460
+        null,
+        null
       ],
       [
-        1980,
-        2460
+        null,
+        null
       ],
       [
-        1980,
-        1540
+        null,
+        null
       ],
       [
-        680,
-        520
+        null,
+        null
       ]
     ],
     [
       [
-        3560,
-        240
+        null,
+        null
       ],
       [
-        3560,
-        740
+        null,
+        null
       ],
       [
-        2700,
-        740
+        null,
+        null
       ],
       [
-        2700,
-        1360
+        null,
+        null
       ],
       [
-        1680,
-        1360
+        null,
+        null
       ],
       [
-        680,
-        520
+        null,
+        null
       ]
     ],
     [
       [
-        5800,
-        3920
+        null,
+        null
       ],
       [
-        5800,
-        3320
+        null,
+        null
       ],
       [
-        4920,
-        3320
+        null,
+        null
       ],
       [
-        4920,
-        2420
+        null,
+        null
       ],
       [
-        3860,
-        2420
+        null,
+        null
       ],
       [
-        3860,
-        1500
+        null,
+        null
       ],
       [
-        1680,
-        1500
+        null,
+        null
       ],
       [
-        680,
-        520
+        null,
+        null
       ]
     ]
   ],
