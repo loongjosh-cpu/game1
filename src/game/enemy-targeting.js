@@ -1,5 +1,17 @@
 const EnemyTargetingMethods={
-  towerDanger(tw){if(tw._wreck&&tw._type.id==='B1')return (tw._lv||0)===0?3:2;const up=tw._type.upg[tw._lv||0];return up.danger??tw._type.danger??0},
+  towerDanger(tw){
+    if(tw._wreck&&tw._type.id==='B1'){
+      const base=(tw._lv||0)===0?3:2;
+      return Math.max(0,base-(this.meta.b1LowWreck?1:0))
+    }
+    const up=tw._type.upg[tw._lv||0];
+    let danger=up.danger??tw._type.danger??0;
+    if(tw._type.id==='B3'&&this.meta.b3Taunt){
+      const low=tw._maxhp&&tw._hp/tw._maxhp<0.4;
+      danger+=low?-1:1
+    }
+    return Math.max(0,danger)
+  },
   enemyCanBeTauntedBy(e,cfg,tw){
     if(!tw||!tw.active||tw._hp<=0)return false;
     const danger=this.towerDanger(tw);

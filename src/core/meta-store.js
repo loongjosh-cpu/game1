@@ -97,6 +97,23 @@ function chipRequirementsMet(node,predicate){
   return (node.req||[]).every(predicate);
 }
 
+function chipMutexKey(node){
+  if(!node)return null;
+  if(node.mutex)return `mutex:${node.mutex}`;
+  if(node.group==='tower'&&node.tower)return `tower:${node.tower}`;
+  return null;
+}
+
+function unequipConflictingChips(node){
+  const key=chipMutexKey(node);
+  if(!key)return;
+  META_NODES.forEach(other=>{
+    if(other.id!==node.id&&chipMutexKey(other)===key){
+      delete metaSave.equippedChips[other.id];
+    }
+  });
+}
+
 function enforceEquippedRequirements(){
   let changed=true;
   while(changed){
@@ -108,8 +125,21 @@ function enforceEquippedRequirements(){
       }
     });
   }
+  const keptByMutex={};
+  META_NODES.forEach(node=>{
+    if(!isChipEquipped(node.id))return;
+    const key=chipMutexKey(node);
+    if(!key)return;
+    if(!keptByMutex[key]){
+      keptByMutex[key]=node.id;
+      return;
+    }
+    delete metaSave.equippedChips[node.id];
+  });
   syncMetaNodeAlias();
 }
+
+enforceEquippedRequirements();
 
 function metaEffects(){
   const shipSpeedFlat=500
@@ -127,15 +157,35 @@ function metaEffects(){
     reactorWaveBonus:hasMeta('reactor_wave_supply')?120:0,
     reactorWaveBonusLimit:REACTOR_WAVE_BONUS_LIMIT,
     p1Double:hasMeta('tower_p1'),
+    p1Recycle:hasMeta('tower_p1_recycle'),
     p2Stop:hasMeta('tower_p2'),
+    p2Superchain:hasMeta('tower_p2_superchain'),
     p3Residual:hasMeta('tower_p3'),
     p4Slow:hasMeta('tower_p4'),
+    p4Freeze:hasMeta('tower_p4_freeze'),
     p5Focus:hasMeta('tower_p5'),
+    p6Range:hasMeta('tower_p6'),
     p7Poison:hasMeta('tower_p7'),
+    p7Burst:hasMeta('tower_p7_burst'),
     b1Repair:hasMeta('tower_b1'),
+    b1LowWreck:hasMeta('tower_b1_low_wreck'),
+    b2Surge:hasMeta('tower_b2'),
     b3Leech:hasMeta('tower_b3'),
+    b3Taunt:hasMeta('tower_b3_taunt'),
     b4Shield:hasMeta('tower_b4'),
+    b4Resonance:hasMeta('tower_b4_resonance'),
+    b5DroneHeal:hasMeta('tower_b5'),
+    b5Overheal:hasMeta('tower_b5_overheal'),
     b6ToxicShell:hasMeta('tower_b6'),
-    d1ReactiveArmor:hasMeta('tower_d1')
+    b7Hp:hasMeta('tower_b7'),
+    b7Manual:hasMeta('tower_b7_manual'),
+    b7Damage:hasMeta('tower_b7_damage'),
+    d1ReactiveArmor:hasMeta('tower_d1'),
+    d1DeathBlast:hasMeta('tower_d1_death_blast'),
+    d2Revive:hasMeta('tower_d2'),
+    d3Retreat:hasMeta('tower_d3'),
+    poisonLong:hasMeta('poison_long'),
+    poisonDamage:hasMeta('poison_damage'),
+    poisonSlow:hasMeta('poison_slow')
   };
 }

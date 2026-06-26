@@ -50,7 +50,8 @@ const PlayerRuntimeMethods={
     const rawX=this.input.activePointer.worldX,rawY=this.input.activePointer.worldY;
     const point=this.placementPoint(rawX,rawY),wx=point.x,wy=point.y;
     const d=Phaser.Math.Distance.Between(this.ship.x,this.ship.y,wx,wy),shipRange=sd(SHIP_RNG);
-    const ok=d<=shipRange&&this.canPl(wx,wy)&&this.en>=this.sel.cost;
+    const cost=this.towerBuildCost?this.towerBuildCost(this.sel):this.sel.cost;
+    const ok=d<=shipRange&&this.canPl(wx,wy)&&this.en>=cost;
     this.ghost.setVisible(d<=shipRange);
     this.ghost.setPosition(wx,wy);
     this.ghost.setTexture('gh'+this.sel.id);

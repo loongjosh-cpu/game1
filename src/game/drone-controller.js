@@ -171,8 +171,23 @@ const DroneControllerMethods={
     });
     return next;
   },
-  destroyDrone(d){
+  destroyDrone(d,options={}){
     if(!d||!d.active)return;
+    const core=d._owner,td=core?._type;
+    if(td?.id==='D2'&&this.meta.d2Revive&&!d._revived&&!options.skipRevive&&core?.active){
+      d._revived=true;
+      d._decayHp=true;
+      d._noHeal=true;
+      d._hp=d._maxhp;
+      d.setPosition(core.x,core.y);
+      d.setTint(0xffaa66);
+      this.clearDroneRoute(d);
+      return
+    }
+    if(td?.id==='D1'&&this.meta.d1DeathBlast&&!options.skipDeathEffect){
+      this.flashArea(d.x,d.y,sd(80),0xffcc44);
+      this.findTargets(d.x,d.y,sd(80)).forEach(e=>this.damageEnemy(e,20))
+    }
     const locked=[];
     this.enemies.children.iterate(e=>{
       if(e&&e.active&&e._droneTarget===d)locked.push(e)
@@ -221,6 +236,7 @@ const DroneControllerMethods={
 
     const td=core._type,up=td.upg[core._lv||0],range=sd(up.r||td.range);
     this.refreshDroneRuntime(d,td,up,dt);
+    if(!d.active)return;
     if(td.id==='D3'){
       this.updateRepairDrone(d,core,up,range,dt);
       return
@@ -233,7 +249,11 @@ const DroneControllerMethods={
     d._at=(d._at||0)+dt;
     d._retargetT=(d._retargetT||0)-dt;
     d._avoidT=Math.max(0,(d._avoidT||0)-dt);
-    if(!d._avoidT)d._avoidUid=null
+    if(!d._avoidT)d._avoidUid=null;
+    if(d._decayHp){
+      d._hp-=dt/1000;
+      if(d._hp<=0)this.destroyDrone(d,{skipRevive:true})
+    }
   },
   findRepairTask(core,range){
     let task=null,hd=Infinity;
@@ -247,6 +267,14 @@ const DroneControllerMethods={
     return task
   },
   updateRepairDrone(d,core,up,range,dt){
+    if(this.meta.d3Retreat&&d._hp/d._maxhp<0.2)d._forcedReturn=true;
+    if(d._forcedReturn){
+      if(d._hp/d._maxhp>=0.6)d._forcedReturn=false;
+      else{
+        this.returnDroneToCore(d,core,dt);
+        return
+      }
+    }
     const task=this.findRepairTask(core,range);
     if(task){
       this.performDroneRepair(d,task,up,dt);
@@ -280,6 +308,7 @@ const DroneControllerMethods={
     }
     d.body.setVelocity(0,0);
     this.clearDroneRoute(d);
+    if(d._noHeal)return;
     d._hp=Math.min(d._maxhp,d._hp+2*dt/1000)
   },
   patrolDrone(d,core,dt){

@@ -17,8 +17,42 @@ const ProjectileControllerMethods={
   updateP3Shells(dt){this.p3Shells.children.iterate(s=>{if(!s||!s.active)return;const dx=s._destX-s.x,dy=s._destY-s.y,dist=Math.hypot(dx,dy),step=sd(P3_SHELL_SPD)*dt/1000;if(dist>step){s.x+=dx/dist*step;s.y+=dy/dist*step;return}const x=s._destX,y=s._destY,dmg=s._dmg,radius=s._radius,residual=s._residual;s.destroy();this.flashArea(x,y,radius,0x88ccff);this.findTargets(x,y,radius).forEach(e=>this.damageEnemy(e,dmg));if(residual)this.createResidual(x,y)})},
   firePoisonBolt(x,y,tgt,layers=1){const b=this.add.image(x,y,'bolt').setDepth(8).setTint(0xc96cff).setScale(2.4);this.poisonBolts.add(b);b._t=tgt;b._layers=layers},
   updatePoisonBolts(dt){this.poisonBolts.children.iterate(b=>{if(!b||!b.active)return;const tgt=b._t;if(!tgt||!tgt.active){b.destroy();return}const dx=tgt.x-b.x,dy=tgt.y-b.y,dist=Math.hypot(dx,dy),step=sd(POISON_BOLT_SPD)*dt/1000;b.setRotation(Math.atan2(dy,dx));if(dist>step){b.x+=dx/dist*step;b.y+=dy/dist*step;return}const x=tgt.x,y=tgt.y,layers=b._layers;b.destroy();this.applyPoison(tgt,layers);this.flashArea(x,y,22,0xaa44ff)})},
-  fireBolt(x,y,tgt,dmg,effect=null){const b=this.physics.add.image(x,y,'bolt').setDepth(7);this.bolts.add(b);b._t=tgt;b._dmg=dmg;b._effect=effect;this.physics.add.overlap(b,this.enemies,(a,c)=>{if(!a.active||!c.active||c!==a._t)return;c._hp-=a._dmg;if(a._effect?.slow){c._slow=Math.max(c._slow||0,a._effect.slow);c._slowT=Math.max(c._slowT||0,a._effect.duration||2000)}a.destroy();if(c._hp<=0)this.killE(c)})},
+  fireBolt(x,y,tgt,dmg,effect=null){
+    const b=this.physics.add.image(x,y,'bolt').setDepth(7);
+    this.bolts.add(b);
+    b._t=tgt;
+    b._dmg=dmg;
+    b._effect=effect;
+    this.physics.add.overlap(b,this.enemies,(a,c)=>{
+      if(!a.active||!c.active||c!==a._t)return;
+      this.damageEnemy(c,a._dmg);
+      if(a._effect?.slow&&c.active){
+        c._slow=Math.max(c._slow||0,a._effect.slow);
+        c._slowT=Math.max(c._slowT||0,a._effect.duration||2000)
+      }
+      if(a._effect?.freeze&&c.active&&c._slowT>0&&(c._freezeCd||0)<=0){
+        c._frozenT=500;
+        c._freezeAmpT=500;
+        c._freezeCd=2000;
+        this.flashArea(c.x,c.y,sd(45),0x99eeff)
+      }
+      a.destroy()
+    })
+  },
   drawElectricLinks(g,links){g.clear();links.forEach(link=>{const dx=link.x2-link.x1,dy=link.y2-link.y1,len=Math.hypot(dx,dy),steps=Math.max(3,Math.ceil(len/38)),nx=len?-dy/len:0,ny=len?dx/len:0,pts=[{x:link.x1,y:link.y1}];for(let i=1;i<steps;i++){const t=i/steps,offset=Phaser.Math.Between(-9,9);pts.push({x:link.x1+dx*t+nx*offset,y:link.y1+dy*t+ny*offset})}pts.push({x:link.x2,y:link.y2});for(const style of [[7,0x2288ff,0.25],[2,0xd8f7ff,1]]){g.lineStyle(style[0],style[1],style[2]);g.beginPath();g.moveTo(pts[0].x,pts[0].y);for(let i=1;i<pts.length;i++)g.lineTo(pts[i].x,pts[i].y);g.strokePath()}})},
   flashElectricChain(links){const g=this.add.graphics().setDepth(17);const flash=()=>{if(g.active){g.setVisible(true);this.drawElectricLinks(g,links)}};flash();this.time.delayedCall(45,()=>{if(g.active)g.setVisible(false)});this.time.delayedCall(80,flash);this.time.delayedCall(130,()=>{if(g.active)g.destroy()})},
-  fireElectricChain(tw,tgts,up){const main=tgts[0],near=this.findTargets(main.x,main.y,sd(up.cr||100)).filter(e=>e!==main).slice(0,Math.max(0,(up.targets||1)-1)),targets=[main,...near],links=[{x1:tw.x,y1:tw.y,x2:main.x,y2:main.y},...near.map(e=>({x1:main.x,y1:main.y,x2:e.x,y2:e.y}))];this.flashElectricChain(links);targets.forEach(e=>{this.damageEnemy(e,up.d||0);if(this.meta.p2Stop&&e.active){e._slow=Math.max(e._slow||0,0.7);e._slowT=Math.max(e._slowT||0,500)}})}
+  fireElectricChain(tw,tgts,up){
+    const main=tgts[0],total=(up.targets||1)+(this.meta.p2Superchain?1:0);
+    const near=this.findTargets(main.x,main.y,sd(up.cr||100)).filter(e=>e!==main).slice(0,Math.max(0,total-1));
+    const targets=[main,...near],links=[{x1:tw.x,y1:tw.y,x2:main.x,y2:main.y},...near.map(e=>({x1:main.x,y1:main.y,x2:e.x,y2:e.y}))];
+    this.flashElectricChain(links);
+    targets.forEach((e,i)=>{
+      const mult=this.meta.p2Superchain?(i===0?2.5:0.6):1;
+      this.damageEnemy(e,(up.d||0)*mult);
+      if(this.meta.p2Stop&&e.active){
+        e._slow=Math.max(e._slow||0,0.7);
+        e._slowT=Math.max(e._slowT||0,400)
+      }
+    })
+  }
 };

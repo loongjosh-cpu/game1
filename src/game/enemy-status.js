@@ -48,12 +48,15 @@ const EnemyStatusMethods={
         p.tick-=dt;
         if(p.tick<=0){
           p.tick+=500;
-          this.damageEnemy(e,2);
+          this.damageEnemy(e,p.dmg||this.poisonTickDamage());
           if(!e.active)return false
         }
       }
       e._poisons=e._poisons.filter(p=>p.left>0)
     }
+    e._freezeCd=Math.max(0,(e._freezeCd||0)-dt);
+    e._frozenT=Math.max(0,(e._frozenT||0)-dt);
+    e._freezeAmpT=Math.max(0,(e._freezeAmpT||0)-dt);
     e._slowT=Math.max(0,(e._slowT||0)-dt);
     if(!e._slowT)e._slow=0;
     return true
@@ -62,12 +65,14 @@ const EnemyStatusMethods={
     this.updateEnemyAura(e,cfg,dt);
     e._auraBoostT=Math.max(0,(e._auraBoostT||0)-dt);
     const aura=e._auraBoostT>0?1.2:1;
-    let speed=sd(e._spd)*aura*(e._slow?1-e._slow:1);
+    if(e._frozenT>0)return 0;
+    const poisonSlow=this.meta.poisonSlow&&this.enemyIsPoisoned(e)?0.9:1;
+    let speed=sd(e._spd)*aura*(e._slow?1-e._slow:1)*poisonSlow;
     if(cfg.burst){
       e._bt=(e._bt||0)+dt;
       const phase=e._bt%(cfg.burstCycle||4000);
       if(phase<(cfg.burstDuration||1000)){
-        speed=sd(cfg.burstSpeed||400)*aura*(e._slow?1-e._slow:1)
+        speed=sd(cfg.burstSpeed||400)*aura*(e._slow?1-e._slow:1)*poisonSlow
       }
     }
     return speed

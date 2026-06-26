@@ -149,7 +149,7 @@ const TowerPanelMethods={
   },
   drawUpgradeRangePreview(ctx){
     if(ctx.td.type==='reactor')return;
-    const nextRange=sd(ctx.nx.r||ctx.td.range),tw=ctx.tw;
+    const nextRange=sd(this.effectiveTowerRange?this.effectiveTowerRange(ctx.td,ctx.nx):(ctx.nx.r||ctx.td.range)),tw=ctx.tw;
     this.upgradePreviewGfx.lineStyle(2,0x44ff88,0.45);
     for(let a=0;a<Math.PI*2;a+=0.3){
       this.upgradePreviewGfx.lineBetween(
@@ -232,9 +232,10 @@ const TowerPanelMethods={
   },
   applyTowerHpUpgrade(tw,td,lv,nxt){
     if((td.type!=='block'&&td.type!=='reactor')||!nxt.hp)return;
-    const oldHp=td.upg[lv].hp||0;
-    tw._hp=Math.min((tw._hp||0)+(nxt.hp-oldHp),nxt.hp);
-    tw._maxhp=nxt.hp
+    const oldHp=this.effectiveTowerHp?this.effectiveTowerHp(td,td.upg[lv]):td.upg[lv].hp||0;
+    const nextHp=this.effectiveTowerHp?this.effectiveTowerHp(td,nxt):nxt.hp;
+    tw._hp=Math.min((tw._hp||0)+(nextHp-oldHp),nextHp);
+    tw._maxhp=nextHp
   },
   applyDroneCoreHpUpgrade(tw,td,lv,nxt){
     if(td.type!=='drone'||!nxt.coreHp)return;
@@ -255,11 +256,20 @@ const TowerPanelMethods={
     if(!tw._rngGfx)return;
     tw._rngGfx.clear();
     tw._rngGfx.lineStyle(1,this.towerRangeColor(td),0.12);
-    tw._rngGfx.strokeCircle(tw.x,tw.y,sd(up.r||td.range))
+    tw._rngGfx.strokeCircle(tw.x,tw.y,sd(this.effectiveTowerRange?this.effectiveTowerRange(td,up):(up.r||td.range)))
   },
   sellTower(){
     const tw=this.selTw;
     if(!this.canSellTower(tw))return;
+    if(tw._type?.id==='B7'&&this.meta.b7Manual){
+      this.explodeB7(tw);
+      if(tw._rngGfx)tw._rngGfx.destroy();
+      tw.destroy();
+      this.selTw=null;
+      this.selectionGfx.clear();
+      this.updTwPanel();
+      return
+    }
     this.gainEnergy(this.sellRefund(tw));
     if(tw._type?.type==='drone'){
       this.destroyDroneCore(tw);
@@ -279,7 +289,10 @@ const TowerPanelMethods={
   },
   sellRefund(tw){
     const td=tw._type,lv=tw._lv||0;
-    const invested=td.upg.slice(0,lv+1).reduce((sum,up)=>sum+(up.c||0),td.cost);
-    return Math.floor(invested*0.5)
+    if(td.id==='B7'&&this.meta.b7Manual)return 0;
+    const buildCost=tw._buildCost??td.cost;
+    const invested=td.upg.slice(0,lv+1).reduce((sum,up)=>sum+(up.c||0),buildCost);
+    const ratio=td.id==='P1'&&this.meta.p1Recycle?0.9:0.5;
+    return Math.floor(invested*ratio)
   }
 };

@@ -86,6 +86,7 @@ function chipStatusClass(state,mode){
 function chipKicker(node){
   const tower=towerByChip(node);
   if(tower)return `${tower.id} · ${tower.name}`;
+  if(node.mutex==='poison')return '全局毒药';
   if(node.id.startsWith('reactor_'))return '主反应炉协议';
   return '飞船系统';
 }
@@ -93,6 +94,7 @@ function chipKicker(node){
 function chipMetaLine(node){
   const tower=towerByChip(node);
   if(tower)return `${towerTypeName(tower)} · 建造 ${tower.cost}⚡`;
+  if(node.mutex==='poison')return '毒系全局改造 · 三选一';
   return node.id.startsWith('reactor_')?'经济补给 · 波次收益':'舰载火控 · 飞船强化';
 }
 
@@ -100,6 +102,7 @@ function chipIconText(node){
   const tower=towerByChip(node);
   if(tower)return tower.id;
   if(node.id.startsWith('reactor_'))return '炉';
+  if(node.mutex==='poison')return '毒';
   if(node.id.includes('speed'))return '速';
   if(node.id.includes('damage'))return '弹';
   if(node.id.includes('cd'))return '装';
@@ -273,6 +276,7 @@ function toggleChip(id){
   }else{
     const state=nodeState(node);
     if(!state.canEquip)return;
+    unequipConflictingChips(node);
     metaSave.equippedChips[id]=true;
   }
   enforceEquippedRequirements();

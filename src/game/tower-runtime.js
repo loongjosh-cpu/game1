@@ -1,7 +1,7 @@
 const TowerRuntimeMethods={
   runTower(td,tw,dt){
     if(tw._wreck)return;
-    const up=td.upg[tw._lv||0],range=sd(up.r||td.range);
+    const up=td.upg[tw._lv||0],range=sd(this.effectiveTowerRange(td,up));
     tw._at=(tw._at||0)+dt;
     this.updateTowerPassive(td,tw,dt);
     if(td.heal){this.runHealTower(tw,up,range);return}
@@ -14,6 +14,11 @@ const TowerRuntimeMethods={
     tw._at=0;
     if(this.runSpecialTowerAttack(td,tw,up,range,targets))return;
     this.runBasicTowerAttack(td,tw,up,targets)
+  },
+  effectiveTowerRange(td,up){
+    let range=up.r||td.range;
+    if(td.id==='P6'&&this.meta.p6Range)range+=200;
+    return range
   },
   updateTowerPassive(td,tw,dt){
     if(td.id!=='B4'||!this.meta.b4Shield)return;

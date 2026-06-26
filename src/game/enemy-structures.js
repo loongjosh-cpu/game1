@@ -5,10 +5,27 @@ const EnemyStructureMethods={
       this.destroyDroneCore(b1);
       return
     }
-    const isSteel=b1._type.id==='B1';if(b1._type.id==='B7'){this.findTargets(b1.x,b1.y,sd(b1._type.range)).forEach(e=>this.damageEnemy(e,b1._type.boom||50))}if(isSteel&&!b1._wreck){b1._hp=200;b1._maxhp=200;b1._repair=0;b1._wreck=true;b1.setAlpha(0.4);b1.setTint(0x666666);this.time.delayedCall(20000,()=>{if(b1.active&&b1._wreck)this.reviveSteel(b1)})}else{if(this.selTw===b1){this.selTw=null;this.selectionGfx.clear();this.updTwPanel()}if(b1._rngGfx)b1._rngGfx.destroy();b1.destroy()}this.enemies.children.iterate(e=>{if(e&&e.active&&e._b1tgt===b1)this.rejoinPath(e)})},
+    const isSteel=b1._type.id==='B1';
+    if(b1._type.id==='B7')this.explodeB7(b1);
+    if(b1._type.id==='B4'&&this.meta.b4Resonance)this.createB4Resonance(b1);
+    if(isSteel&&!b1._wreck){b1._hp=200;b1._maxhp=200;b1._repair=0;b1._wreck=true;b1.setAlpha(0.4);b1.setTint(0x666666);this.time.delayedCall(20000,()=>{if(b1.active&&b1._wreck)this.reviveSteel(b1)})}else{if(this.selTw===b1){this.selTw=null;this.selectionGfx.clear();this.updTwPanel()}if(b1._rngGfx)b1._rngGfx.destroy();b1.destroy()}this.enemies.children.iterate(e=>{if(e&&e.active&&e._b1tgt===b1)this.rejoinPath(e)})},
+  explodeB7(tw){
+    const dmg=(tw._type.boom||50)*(this.meta.b7Damage?1.5:1),range=sd(tw._type.range);
+    this.flashArea(tw.x,tw.y,range,0xff4444);
+    this.findTargets(tw.x,tw.y,range).forEach(e=>this.damageEnemy(e,dmg))
+  },
+  createB4Resonance(tw){
+    const x=tw.x,y=tw.y,range=sd(tw._type.upg[tw._lv||0].r||tw._type.range);
+    let pulses=0;
+    this.time.addEvent({delay:1000,repeat:7,callback:()=>{
+      pulses++;
+      this.flashArea(x,y,range,0x66ccff);
+      this.findTargets(x,y,range).forEach(e=>this.damageEnemy(e,8))
+    }})
+  },
   destroyDroneCore(core){
     if(!core||!core.active)return;
-    this.droneHelpers.children.iterate(d=>{if(d&&d.active&&d._owner===core)this.destroyDrone(d)});
+    this.droneHelpers.children.iterate(d=>{if(d&&d.active&&d._owner===core)this.destroyDrone(d,{skipRevive:true,skipDeathEffect:true})});
     if(this.selTw===core){this.selTw=null;this.selectionGfx.clear();this.updTwPanel()}
     if(core._rngGfx)core._rngGfx.destroy();
     core.destroy();

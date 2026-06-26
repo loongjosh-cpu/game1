@@ -1,5 +1,10 @@
 const CombatUtilMethods={
-  damageEnemy(e,dmg){if(!e||!e.active)return;e._hp-=dmg;if(e._hp<=0)this.killE(e)},
+  damageEnemy(e,dmg){
+    if(!e||!e.active)return;
+    const amp=e._freezeAmpT>0?1.2:1;
+    e._hp-=dmg*amp;
+    if(e._hp<=0)this.killE(e)
+  },
   flashArea(x,y,r,color){const g=this.add.graphics().setPosition(x,y).setDepth(16);g.fillStyle(color,0.07);g.fillCircle(0,0,r);g.lineStyle(4,color,0.75);g.strokeCircle(0,0,r);this.tweens.add({targets:g,alpha:0,scaleX:1.08,scaleY:1.08,duration:220,onComplete:()=>g.destroy()})},
   flashPoisonAura(x,y,r,targets){const g=this.add.graphics().setPosition(x,y).setDepth(16).setScale(0.88);g.fillStyle(0x8c3ec4,0.1);g.fillCircle(0,0,r);g.lineStyle(5,0xc96cff,0.78);g.strokeCircle(0,0,r);g.lineStyle(2,0x83ff9b,0.42);g.strokeCircle(0,0,r*0.68);g.strokeCircle(0,0,r*0.35);for(let i=0;i<12;i++){const a=Math.PI*2*i/12+0.2,rr=r*(0.18+(i%4)*0.17);g.fillStyle(i%2?0xb45cff:0x63e88c,0.34);g.fillCircle(Math.cos(a)*rr,Math.sin(a)*rr,5+(i%3)*2)}targets.forEach(e=>{const dx=e.x-x,dy=e.y-y;g.lineStyle(2,0xa852d4,0.45);g.lineBetween(0,0,dx,dy);g.fillStyle(0x91ff9f,0.3);g.fillCircle(dx,dy,18);g.lineStyle(3,0xd57aff,0.85);g.strokeCircle(dx,dy,14)});this.tweens.add({targets:g,alpha:0,scaleX:1.04,scaleY:1.04,duration:420,ease:'Quad.easeOut',onComplete:()=>g.destroy()})},
   createResidual(x,y){const radius=sd(150),g=this.add.graphics().setDepth(5);g.fillStyle(0x66ccff,0.08);g.fillCircle(x,y,radius);g.lineStyle(2,0x88ddff,0.35);g.strokeCircle(x,y,radius);let ticks=0;this.time.addEvent({delay:300,repeat:4,callback:()=>{ticks++;this.findTargets(x,y,radius).forEach(e=>this.damageEnemy(e,1));g.setAlpha(0.5+0.15*(ticks%2));if(ticks>=5)g.destroy()}})},
@@ -25,6 +30,8 @@ const CombatUtilMethods={
     if(damage<=0)return 0;
     damage=this.applyFriendlyDamageModifiers(source,target,damage,ctx);
     if(damage<=0)return 0;
+    damage=this.absorbFriendlyShield(target,damage);
+    if(damage<=0)return 0;
     return this.commitFriendlyDamage(target,damage)
   },
   applyFriendlyDamageModifiers(source,target,damage,ctx={}){
@@ -48,6 +55,13 @@ const CombatUtilMethods={
   },
   enemyIsPoisoned(e){
     return !!(e&&e.active&&e._poisons?.some(p=>p.left>0))
+  },
+  absorbFriendlyShield(target,damage){
+    if(!target._overShield||damage<=0)return damage;
+    const absorbed=Math.min(target._overShield,damage);
+    target._overShield-=absorbed;
+    if(target._overShield<=0)target._overShield=0;
+    return damage-absorbed
   },
   commitFriendlyDamage(target,damage){
     if(target._owner){
@@ -80,5 +94,22 @@ const CombatUtilMethods={
   moveEnemy(e,dx,dy,speed){const dist=Math.hypot(dx,dy);let bx=dist>0?dx/dist:0,by=dist>0?dy/dist:0,sx=0,sy=0,count=0;this.enemies.children.iterate(o=>{if(!o||!o.active||o===e)return;let ox=e.x-o.x,oy=e.y-o.y,d=Math.hypot(ox,oy);const desired=(e.body.radius||16)+(o.body.radius||16)+4;if(d>=desired)return;if(d<0.01){const a=((e._uid||1)*2.399+(o._uid||1)*0.73)%(Math.PI*2);ox=Math.cos(a);oy=Math.sin(a);d=1}const force=(desired-d)/desired;sx+=ox/d*force;sy+=oy/d*force;count++});if(count){sx/=count;sy/=count}let vx=bx+sx*0.7,vy=by+sy*0.7,vl=Math.hypot(vx,vy);if(vl<0.01){e.body.setVelocity(0,0);return}const moveSpeed=dist>0?speed:Math.min(55,speed||55);e.body.setVelocity(vx/vl*moveSpeed,vy/vl*moveSpeed)},
   nrEnemy(x,y,r){const t=this.findTargets(x,y,r);return t.length?t[0]:null},
   findTargets(x,y,r){const t=[];this.enemies.children.iterate(e=>{if(!e||!e.active)return;const d=Phaser.Math.Distance.Between(x,y,e.x,e.y);if(d<=r)t.push({e,d})});t.sort((a,b)=>a.d-b.d);return t.map(i=>i.e)},
-  applyPoison(e,layers=1){if(!e||!e.active)return;e._poisons=e._poisons||[];for(let i=0;i<layers;i++)e._poisons.push({left:2000,tick:500})}
+  poisonTickDamage(){return 2+(this.meta.poisonDamage?1:0)},
+  poisonDuration(){return this.meta.poisonLong?2500:2000},
+  remainingPoisonDamage(e){
+    if(!e?._poisons?.length)return 0;
+    const fallback=this.poisonTickDamage();
+    return e._poisons.reduce((sum,p)=>sum+Math.max(0,Math.ceil((p.left||0)/500))*(p.dmg||fallback),0)
+  },
+  poisonLayerCount(e){
+    return e?._poisons?.filter(p=>p.left>0).length||0
+  },
+  consumePoison(e){
+    if(e)e._poisons=[]
+  },
+  applyPoison(e,layers=1){
+    if(!e||!e.active)return;
+    e._poisons=e._poisons||[];
+    for(let i=0;i<layers;i++)e._poisons.push({left:this.poisonDuration(),tick:500,dmg:this.poisonTickDamage()})
+  }
 };

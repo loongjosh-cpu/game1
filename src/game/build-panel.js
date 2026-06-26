@@ -16,7 +16,8 @@ const BuildPanelMethods={
   },
   buildButtonText(t,i){
     if(t===SMALL_REACTOR)return `R · ${t.name} ${this.smallReactorCount()}/${t.maxCount} ${t.cost}⚡`;
-    return (i+1)+' · '+t.name+' '+t.cost+'⚡';
+    const cost=this.towerBuildCost?this.towerBuildCost(t):t.cost;
+    return (i+1)+' · '+t.name+' '+cost+'⚡';
   },
   selectBuildChoice(t,i){
     this.sel=t;
@@ -31,9 +32,10 @@ const BuildPanelMethods={
   },
   updateBuildButton(btn,t,i){
     const atLimit=t===SMALL_REACTOR&&this.smallReactorCount()>=SMALL_REACTOR.maxCount;
-    const cant=this.en<t.cost||atLimit||this.channel;
+    const cost=this.towerBuildCost?this.towerBuildCost(t):t.cost;
+    const cant=this.en<cost||atLimit||this.channel;
     btn.className='build-btn'+(this.sel===t?' active':cant?' cant':'');
-    if(t===SMALL_REACTOR)btn.textContent=this.buildButtonText(t,i);
+    btn.textContent=this.buildButtonText(t,i);
   },
   scrollBtnIntoView(idx){
     const bp=document.getElementById('buildPanel');

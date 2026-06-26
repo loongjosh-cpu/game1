@@ -1,4 +1,8 @@
 const PlacementControllerMethods={
+  towerBuildCost(td){
+    if(td?.id==='B4'&&this.meta.b4Resonance)return Math.max(0,td.cost-80);
+    return td.cost
+  },
   placementPoint(x,y,td=this.sel){return td.type==='path'?snapToWallEdge(x,y,20):{x,y,snapped:false}},
   canPl(x,y){
     const td=this.sel;
@@ -64,7 +68,7 @@ const PlacementControllerMethods={
     this.updPanel();
   },
   canStartBuildAt(td,x,y){
-    if(this.en<td.cost)return false;
+    if(this.en<this.towerBuildCost(td))return false;
     if(Phaser.Math.Distance.Between(this.ship.x,this.ship.y,x,y)>sd(SHIP_RNG))return false;
     return this.canPlaceType(td,x,y);
   },
@@ -127,7 +131,7 @@ const PlacementControllerMethods={
     this.updTwPanel()
   },
   finishBuildChannel(c){
-    if(this.en<c.td.cost||!this.canPlaceType(c.td,c.x,c.y))return;
+    if(this.en<this.towerBuildCost(c.td)||!this.canPlaceType(c.td,c.x,c.y))return;
     const prev=this.sel;
     this.sel=c.td;
     this.placeTower(c.x,c.y);
@@ -143,8 +147,10 @@ const PlacementControllerMethods={
       this.placeSmallReactor(point.x,point.y);
       return
     }
-    this.en-=td.cost;
+    const buildCost=this.towerBuildCost(td);
+    this.en-=buildCost;
     const tw=this.createTowerSprite(td,point.x,point.y);
+    tw._buildCost=buildCost;
     this.addTowerRangeGraphic(tw,td);
     this.registerTowerByType(tw,td);
     this.playTowerPlacedTween(tw);
@@ -167,7 +173,7 @@ const PlacementControllerMethods={
   addTowerRangeGraphic(tw,td){
     const rng=this.add.graphics().setDepth(1);
     rng.lineStyle(1,this.towerRangeColor(td),0.12);
-    rng.strokeCircle(tw.x,tw.y,sd(td.upg[0]?.r||td.range));
+    rng.strokeCircle(tw.x,tw.y,sd(this.effectiveTowerRange?this.effectiveTowerRange(td,td.upg[0]||{}):(td.upg[0]?.r||td.range)));
     tw._rngGfx=rng
   },
   registerTowerByType(tw,td){
@@ -184,13 +190,18 @@ const PlacementControllerMethods={
     if(td.type==='block'){
       this.blockers.add(tw);
       this.physics.add.existing(tw,true);
-      tw._hp=td.upg[0].hp;
-      tw._maxhp=td.upg[0].hp;
+      tw._hp=this.effectiveTowerHp(td,td.upg[0]);
+      tw._maxhp=tw._hp;
       if(td.id==='B4'){tw._shield=0;tw._shieldClock=0}
       return
     }
     this.towers.add(tw);
     this.physics.add.existing(tw,true)
+  },
+  effectiveTowerHp(td,up){
+    let hp=up.hp;
+    if(td.id==='B7'&&this.meta.b7Hp)hp+=100;
+    return hp
   },
   playTowerPlacedTween(tw){
     this.tweens.add({targets:tw,scaleX:1.3,scaleY:1.3,duration:150,yoyo:true})
@@ -263,7 +274,7 @@ const PlacementControllerMethods={
     return 0x44ff99;
   },
   drawAttackRangeHighlight(tw,td,up,color,pulse){
-    const range=sd(up.r||td.range);
+    const range=sd(this.effectiveTowerRange?this.effectiveTowerRange(td,up):(up.r||td.range));
     this.selectionGfx.fillStyle(color,0.055);
     this.selectionGfx.fillCircle(tw.x,tw.y,range);
     this.selectionGfx.lineStyle(10,color,0.11*pulse);
