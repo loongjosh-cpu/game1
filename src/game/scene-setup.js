@@ -94,12 +94,41 @@ const SceneSetupMethods={
     this.add.text(sx,sy,'入口 '+(i+1),textStyle(13,'#e94560')).setOrigin(0.5).setDepth(1);
   },
   createShip(){
-    const mw=mapW(),mh=mapH();
-    this.ship=this.physics.add.image(mw/2,mh/2,'ship').setDepth(10);
+    const spawn=this.resolveShipSpawn();
+    this.ship=this.physics.add.image(spawn.x,spawn.y,'ship').setDepth(10);
     this.ship.body.setCircle(24,6,6);
     this.ship.setCollideWorldBounds(true);
     this.physics.add.collider(this.ship,this.wallGrp);
     this.rng=this.add.image(0,0,'rng').setDepth(5).setAlpha(0.2).setScale(unitScale());
+  },
+  resolveShipSpawn(){
+    const mw=mapW(),mh=mapH();
+    const grid=this.gridPF?.length?this.gridPF:buildGrid(MAP);
+    const candidates=[
+      MAP.playerSpawn,
+      {x:mw/2,y:mh/2},
+      MAP.reactor,
+      MAP.paths?.[0]?.at(-1),
+      MAP.spawns?.[0]
+    ].filter(Boolean).map(pathPoint);
+    const maxRadius=Math.max(grid.length,grid[0]?.length||0);
+    for(const preferred of candidates){
+      const raw={
+        c:Math.floor(preferred.x/CELL),
+        r:Math.floor(preferred.y/CELL)
+      };
+      const cell=nearestOpenCell(grid,raw.c,raw.r,maxRadius);
+      if(cell){
+        return {
+          x:Phaser.Math.Clamp(cell.c*CELL+CELL/2,80,mw-80),
+          y:Phaser.Math.Clamp(cell.r*CELL+CELL/2,80,mh-80)
+        };
+      }
+    }
+    return {
+      x:mw/2,
+      y:mh/2
+    };
   },
   createRuntimeGraphics(){
     this.ghost=this.add.image(0,0,'ghP1').setDepth(12).setAlpha(0.8).setVisible(false);
