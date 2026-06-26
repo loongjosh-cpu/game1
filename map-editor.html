@@ -42,6 +42,8 @@
     .level-title{display:flex;justify-content:space-between;gap:8px;font-weight:700}
     .tag{display:inline-flex;align-items:center;border:1px solid #334155;border-radius:999px;padding:1px 7px;font-size:11px;color:#cbd5e1;background:#111827;white-space:nowrap}
     .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .boot-status{margin-top:8px;border:1px solid rgba(52,211,153,.38);border-radius:10px;background:rgba(4,120,87,.16);color:#bbf7d0;padding:7px 9px;font-size:12px}
+    .boot-status.bad{border-color:rgba(251,113,133,.7);background:rgba(127,29,29,.26);color:#fecdd3}
     .tools{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
     button,select,input,textarea{font:inherit}
     button{border:1px solid #334155;background:#1e293b;color:var(--ink);border-radius:10px;padding:8px 10px;cursor:pointer}
@@ -96,6 +98,7 @@
       <div class="section">
         <h2>关卡列表</h2>
         <div class="small">选择关卡后可直接在画布上继续编辑。旧关卡数据保留，新地图不再显示经济点圈或文字提示。</div>
+        <div id="editorBootStatus" class="boot-status">正在检查关卡数据……</div>
       </div>
       <div id="levelList" class="levels"></div>
       <div class="section">
@@ -7132,6 +7135,53 @@
     }
 
     function snap(v){ return $('snapGrid').checked ? Math.round(v/40)*40 : v; }
+    function normalizeRoute(route){ return clone(route || []).map(normalizePoint); }
+    function normalizeEditorMap(lv){
+      return {
+        ...lv,
+        walls: clone(lv.walls || []),
+        spawns: clone(lv.spawns || []),
+        pockets: clone(lv.pockets || []),
+        routes: clone(lv.routes || lv.paths || []).map(normalizeRoute),
+        reactor: lv.reactor ? clone(lv.reactor) : {x:W/2,y:H/2},
+        unitScale: lv.unitScale || 1,
+        notes: Array.isArray(lv.notes) ? lv.notes : []
+      };
+    }
+    function validateEditorBoot(){
+      const issues = [];
+      if(!Array.isArray(LEVELS) || !LEVELS.length) issues.push('LEVELS 为空或未定义');
+      LEVELS.forEach((raw, idx) => {
+        const label = raw?.id || raw?.name || `#${idx}`;
+        if(!raw?.id) issues.push(`${label} 缺少 id`);
+        if(!raw?.name) issues.push(`${label} 缺少 name`);
+        if(!Array.isArray(raw?.walls)) issues.push(`${label} 缺少 walls`);
+        if(!Array.isArray(raw?.spawns) || !raw.spawns.length) issues.push(`${label} 缺少 spawns`);
+        if(!raw?.reactor || !Number.isFinite(raw.reactor.x) || !Number.isFinite(raw.reactor.y)) issues.push(`${label} reactor 非法`);
+        const normalized = normalizeEditorMap(raw);
+        if(!normalized.routes.length) issues.push(`${label} 缺少 routes/paths`);
+        normalized.routes.forEach((route, routeIdx) => {
+          if(!route.length) issues.push(`${label} route ${routeIdx+1} 为空`);
+          route.forEach((p, pointIdx) => {
+            if(!Number.isFinite(p.x) || !Number.isFinite(p.y)) issues.push(`${label} route ${routeIdx+1}.${pointIdx+1} 坐标非法`);
+          });
+        });
+      });
+      if(levelIndex < 0 || levelIndex >= LEVELS.length) issues.push(`levelIndex 越界：${levelIndex}`);
+      return issues;
+    }
+    function setEditorBootStatus(issues){
+      const el = $('editorBootStatus');
+      if(!el) return;
+      const rendered = $('levelList')?.children?.length || 0;
+      if(issues.length){
+        el.classList.add('bad');
+        el.textContent = `关卡数据异常：${issues.slice(0,3).join('；')}${issues.length>3 ? ` 等 ${issues.length} 项` : ''}`;
+      }else{
+        el.classList.remove('bad');
+        el.textContent = `已加载 ${LEVELS.length} 张关卡，列表显示 ${rendered} 张`;
+      }
+    }
     function pushUndo(){ undoStack.push(JSON.stringify({walls,spawns,pockets,routes,reactor,unitScale,levelIndex})); actualPaths=[]; pathReport=[]; if(undoStack.length>80) undoStack.shift(); }
     function undo(){
       const last = undoStack.pop();
@@ -7142,12 +7192,12 @@
     }
 
     function loadLevel(idx){
-      const lv = LEVELS[idx];
+      const lv = normalizeEditorMap(LEVELS[idx]);
       levelIndex = idx;
       walls = clone(lv.walls);
       spawns = clone(lv.spawns);
       pockets = clone(lv.pockets || []);
-      routes = clone(lv.routes || lv.paths || []).map(route => route.map(normalizePoint));
+      routes = clone(lv.routes);
       reactor = clone(lv.reactor);
       unitScale = lv.unitScale || 1;
       clearSelection();
@@ -7176,10 +7226,11 @@
         card.onclick = () => loadLevel(idx);
         host.appendChild(card);
       });
+      setEditorBootStatus(validateEditorBoot());
     }
 
     function renderInfo(){
-      const lv = LEVELS[levelIndex];
+      const lv = normalizeEditorMap(LEVELS[levelIndex]);
       const check = inspectOpenEnds();
       $('levelName').textContent = lv.name;
       $('levelSummary').textContent = lv.summary;
@@ -7196,7 +7247,7 @@
         ? pathReport.map(r => `<div class="path-row ${r.level}">${r.text}</div>`).join('')
         : '<div class="path-row">还未运行实际寻路测试。点击“实际寻路测试”后会按 Demo 的 A* 规则检查每个出生点。</div>';
       $('designNotes').innerHTML = `
-        <p><b>难度：</b>${lv.difficulty}</p>
+        <p><b>难度：</b>${lv.difficulty || (lv.id && lv.id.startsWith('draft-') ? '草案' : '白盒')}</p>
         <p><b>单位缩放：</b>${unitScale}。缩放越小，视觉地图越大，飞船奔波感越强。</p>
         <ul>${lv.notes.map(n=>`<li>${n}</li>`).join('')}</ul>
         ${selectedWall>=0 ? `<p><b>选中墙体：</b>${JSON.stringify(walls[selectedWall])}</p>` : ''}
@@ -7780,9 +7831,19 @@
       $('saveState').textContent = '已写入 r32-map，打开 Demo 无尽模式可测试墙体/出生点/主反应炉';
     };
 
-    renderLevelList();
-    loadLevel(0);
-    $('fitBtn').click();
+    try{
+      renderLevelList();
+      loadLevel(0);
+      $('fitBtn').click();
+      setEditorBootStatus(validateEditorBoot());
+    }catch(err){
+      const el = $('editorBootStatus');
+      if(el){
+        el.classList.add('bad');
+        el.textContent = `地图编辑器启动失败：${err.message}`;
+      }
+      throw err;
+    }
   </script>
 </body>
 </html>
