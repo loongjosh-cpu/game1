@@ -108,7 +108,7 @@
           <button data-mode="reactor">主反应炉</button>
           <button data-mode="erase" class="danger">擦除</button>
         </div>
-        <p class="small">墙体：拖拽矩形。移动：拖动已有墙体。出生点/主反应炉：点击放置。选择模式可点击墙体查看坐标。</p>
+        <p class="small">墙体：拖拽矩形。移动：拖动已有墙体、出生点或主反应炉。出生点/主反应炉：点击放置。选择模式可点击对象查看坐标。</p>
       </div>
       <div class="section">
         <h3>图例</h3>
@@ -454,6 +454,8 @@
     let unitScale = 1;
     let mode = 'wall';
     let selectedWall = -1;
+    let selectedSpawn = -1;
+    let selectedReactor = false;
     let drag = null;
     let undoStack = [];
     let actualPaths = [];
@@ -473,7 +475,7 @@
       if(!last) return;
       const data = JSON.parse(last);
       walls=data.walls; spawns=data.spawns; pockets=data.pockets||[]; routes=data.routes||[]; reactor=data.reactor; unitScale=data.unitScale||1; levelIndex=data.levelIndex||0;
-      selectedWall=-1; renderAll();
+      clearSelection(); renderAll();
     }
 
     function loadLevel(idx){
@@ -485,7 +487,7 @@
       routes = clone(lv.routes || []);
       reactor = clone(lv.reactor);
       unitScale = lv.unitScale || 1;
-      selectedWall = -1;
+      clearSelection();
       actualPaths = [];
       pathReport = [];
       undoStack = [];
@@ -533,7 +535,30 @@
         <p><b>难度：</b>${lv.difficulty}</p>
         <p><b>单位缩放：</b>${unitScale}。缩放越小，视觉地图越大，飞船奔波感越强。</p>
         <ul>${lv.notes.map(n=>`<li>${n}</li>`).join('')}</ul>
-        ${selectedWall>=0 ? `<p><b>选中墙体：</b>${JSON.stringify(walls[selectedWall])}</p>` : ''}`;
+        ${selectedWall>=0 ? `<p><b>选中墙体：</b>${JSON.stringify(walls[selectedWall])}</p>` : ''}
+        ${selectedSpawn>=0 ? `<p><b>选中出生点：</b>${JSON.stringify(spawns[selectedSpawn])}</p>` : ''}
+        ${selectedReactor ? `<p><b>选中主反应炉：</b>${JSON.stringify(reactor)}</p>` : ''}`;
+    }
+
+    function clearSelection(){
+      selectedWall = -1;
+      selectedSpawn = -1;
+      selectedReactor = false;
+    }
+
+    function selectWall(index){
+      clearSelection();
+      selectedWall = index;
+    }
+
+    function selectSpawn(index){
+      clearSelection();
+      selectedSpawn = index;
+    }
+
+    function selectReactor(){
+      clearSelection();
+      selectedReactor = true;
     }
 
     function toCanvasPoint(evt){
@@ -550,6 +575,44 @@
         if(p.x>=x && p.x<=x+w && p.y>=y && p.y<=y+h) return i;
       }
       return -1;
+    }
+
+    function spawnAt(p){
+      for(let i=spawns.length-1;i>=0;i--){
+        if(Math.hypot(spawns[i][0]-p.x,spawns[i][1]-p.y) < 110) return i;
+      }
+      return -1;
+    }
+
+    function reactorRadius(){
+      return Math.max(42, 120 * unitScale);
+    }
+
+    function reactorAt(p){
+      return Math.hypot(reactor.x-p.x,reactor.y-p.y) <= reactorRadius() + 24;
+    }
+
+    function movableAt(p){
+      const spawnIndex = spawnAt(p);
+      if(spawnIndex >= 0)return {type:'spawn',index:spawnIndex};
+      if(reactorAt(p))return {type:'reactor'};
+      const wallIndex = wallAt(p);
+      if(wallIndex >= 0)return {type:'wall',index:wallIndex};
+      return null;
+    }
+
+    function selectMovable(hit){
+      if(!hit){ clearSelection(); return; }
+      if(hit.type === 'wall')selectWall(hit.index);
+      else if(hit.type === 'spawn')selectSpawn(hit.index);
+      else if(hit.type === 'reactor')selectReactor();
+    }
+
+    function clampPoint(p){
+      return {
+        x: Math.max(0, Math.min(W, p.x)),
+        y: Math.max(0, Math.min(H, p.y))
+      };
     }
 
     function eraseAt(p){
@@ -785,8 +848,8 @@
         ctx.beginPath();
         ctx.arc(s[0],s[1],90,0,Math.PI*2);
         ctx.fillStyle = 'rgba(249,115,22,.9)';
-        ctx.strokeStyle = '#fed7aa';
-        ctx.lineWidth = 6;
+        ctx.strokeStyle = i === selectedSpawn ? '#fbbf24' : '#fed7aa';
+        ctx.lineWidth = i === selectedSpawn ? 10 : 6;
         ctx.fill();
         ctx.stroke();
         drawLabel(`出生${i+1}`, s[0], s[1]-130, '#fdba74');
@@ -798,8 +861,8 @@
       const reactorRadius = Math.max(42, 120 * unitScale);
       ctx.arc(reactor.x,reactor.y,reactorRadius,0,Math.PI*2);
       ctx.fillStyle = 'rgba(56,189,248,.92)';
-      ctx.strokeStyle = '#e0f2fe';
-      ctx.lineWidth = 7;
+      ctx.strokeStyle = selectedReactor ? '#fbbf24' : '#e0f2fe';
+      ctx.lineWidth = selectedReactor ? 11 : 7;
       ctx.fill();
       ctx.stroke();
       drawLabel('主反应炉', reactor.x, reactor.y-reactorRadius-45, '#bae6fd');
@@ -837,6 +900,15 @@
             drag.rect[2],
             drag.rect[3]
           ];
+        }else if(drag.type === 'move-spawn' && spawns[drag.index]){
+          const dx = p.x - drag.start.x;
+          const dy = p.y - drag.start.y;
+          const next = clampPoint({x:drag.point[0]+dx,y:drag.point[1]+dy});
+          spawns[drag.index] = [next.x,next.y];
+        }else if(drag.type === 'move-reactor'){
+          const dx = p.x - drag.start.x;
+          const dy = p.y - drag.start.y;
+          reactor = clampPoint({x:drag.point.x+dx,y:drag.point.y+dy});
         }
         draw();
       }
@@ -846,18 +918,25 @@
       const p = toCanvasPoint(e);
       if(mode === 'wall'){
         pushUndo();
+        clearSelection();
         drag = {type:'new-wall',x:p.x,y:p.y,cx:p.x,cy:p.y};
       }else if(mode === 'select'){
-        selectedWall = wallAt(p);
+        selectMovable(movableAt(p));
         renderAll();
       }else if(mode === 'move'){
-        const wi = wallAt(p);
-        selectedWall = wi;
-        if(wi >= 0){
+        const hit = movableAt(p);
+        selectMovable(hit);
+        if(hit){
           pushUndo();
           actualPaths = [];
           pathReport = [];
-          drag = {type:'move-wall',index:wi,start:p,rect:[...walls[wi]]};
+          if(hit.type === 'wall'){
+            drag = {type:'move-wall',index:hit.index,start:p,rect:[...walls[hit.index]]};
+          }else if(hit.type === 'spawn'){
+            drag = {type:'move-spawn',index:hit.index,start:p,point:[...spawns[hit.index]]};
+          }else if(hit.type === 'reactor'){
+            drag = {type:'move-reactor',start:p,point:{...reactor}};
+          }
           draw();
           renderInfo();
         }else{
@@ -866,15 +945,17 @@
       }else if(mode === 'spawn'){
         pushUndo();
         spawns.push([p.x,p.y]);
+        selectSpawn(spawns.length - 1);
         renderAll();
       }else if(mode === 'reactor'){
         pushUndo();
         reactor = {x:p.x,y:p.y};
+        selectReactor();
         renderAll();
       }else if(mode === 'erase'){
         pushUndo();
         eraseAt(p);
-        selectedWall = -1;
+        clearSelection();
         renderAll();
       }
     });
@@ -886,7 +967,7 @@
         const w = Math.abs(drag.cx-drag.x), h = Math.abs(drag.cy-drag.y);
         if(w > 20 && h > 20){
           walls.push([x,y,w,h]);
-          selectedWall = walls.length - 1;
+          selectWall(walls.length - 1);
         }
       }
       drag = null;
@@ -903,7 +984,7 @@
       if(key === 'delete' && selectedWall >= 0){
         pushUndo();
         walls.splice(selectedWall,1);
-        selectedWall=-1;
+        clearSelection();
         renderAll();
       }
     });
@@ -913,7 +994,7 @@
     $('undoBtn').onclick = undo;
     $('clearBtn').onclick = () => {
       pushUndo();
-      walls=[]; spawns=[]; pockets=[]; routes=[]; reactor={x:W/2,y:H/2}; selectedWall=-1;
+      walls=[]; spawns=[]; pockets=[]; routes=[]; reactor={x:W/2,y:H/2}; clearSelection();
       renderAll();
     };
     $('fitBtn').onclick = () => {
@@ -978,7 +1059,7 @@
       routes = m.routes;
       reactor = m.reactor;
       unitScale = m.unitScale;
-      selectedWall = -1;
+      clearSelection();
       actualPaths = [];
       pathReport = [];
       const idx = LEVELS.findIndex(lv => lv.id === m.levelId || lv.name === m.levelName);
