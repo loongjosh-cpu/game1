@@ -1,4 +1,4 @@
-const LEVEL_UI_ORDER=['level1','level2','level3','level4','level5'];
+const LEVEL_UI_ORDER=['level1','level2','level3','level4','level5','level6','level7','level8','level9'];
 
 const W=7356,H=4144,CELL=80,NAV_CLEARANCE=20;
 

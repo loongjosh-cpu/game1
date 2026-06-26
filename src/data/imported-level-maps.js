@@ -1,10 +1,10 @@
 const IMPORTED_LEVEL_MAPS={
-  "level1": {
+  "level6": {
     "schemaVersion": 1,
     "kind": "level-map",
     "id": "polar-rift-lines",
     "name": "极冠裂隙",
-    "levelId": "level1",
+    "levelId": "level6",
     "levelName": "极冠裂隙",
     "summary": "顶部核心，左右翼与下方夹击。中央裂隙形成双翼推进，保留原图顶部核心的紧张感。",
     "unitScale": 0.62,
@@ -771,12 +771,12 @@ const IMPORTED_LEVEL_MAPS={
       "地图节奏：下方中心路更长，左右上路更快，形成波次中的前后压力差。"
     ]
   },
-  "level2": {
+  "level7": {
     "schemaVersion": 1,
     "kind": "level-map",
     "id": "dual-wing-front",
     "name": "双翼前线",
-    "levelId": "level2",
+    "levelId": "level7",
     "levelName": "双翼前线",
     "summary": "左侧核心、右侧多入口。上翼和下翼路径长度接近，玩家不能只守一路，需要用小反应炉逐步外推。",
     "unitScale": 0.66,
@@ -1539,12 +1539,12 @@ const IMPORTED_LEVEL_MAPS={
       "经济考虑：中部 3000～4700 区域是小反应炉扩张战线，不应被单一路口完全覆盖。"
     ]
   },
-  "level3": {
+  "level8": {
     "schemaVersion": 1,
     "kind": "level-map",
     "id": "north-corner-citadel",
     "name": "北角堡垒",
-    "levelId": "level3",
+    "levelId": "level8",
     "levelName": "北角堡垒",
     "summary": "北西角核心，远端多入口绕行后压入核心区。修复非法出生点，并用路线型地貌统一视觉风格。",
     "unitScale": 0.64,
@@ -2385,12 +2385,12 @@ const IMPORTED_LEVEL_MAPS={
       "炮塔考虑：北角终点空间偏窄，阻挡塔强但风险高；远程塔需要在中段提前削血。"
     ]
   },
-  "level4": {
+  "level9": {
     "schemaVersion": 1,
     "kind": "level-map",
     "id": "polar-rift-lines",
     "name": "极冠裂隙",
-    "levelId": "level4",
+    "levelId": "level9",
     "levelName": "极冠裂隙",
     "summary": "顶部核心，左右翼与下方夹击。中央裂隙形成双翼推进，保留原图顶部核心的紧张感。",
     "unitScale": 0.62,

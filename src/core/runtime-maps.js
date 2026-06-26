@@ -31,10 +31,10 @@ function applySavedMapToEndless(src,world){
   ENDLESS_MAP.pockets=src.pockets||[];
 }
 
-const LEVEL_WAVE_COUNT=15;
+const ADDED_LEVEL_WAVE_COUNT=15;
 
-function levelWaves(id){
-  return extendLevelWaves(LEVEL_WAVES[id]||LEVEL_TRIAL_1.waves,LEVEL_WAVE_COUNT);
+function addedLevelWaves(seedId='level5'){
+  return extendLevelWaves(LEVEL_WAVES[seedId]||LEVEL_TRIAL_1.waves,ADDED_LEVEL_WAVE_COUNT);
 }
 
 function extendLevelWaves(waves=[],targetCount=15){
@@ -54,27 +54,29 @@ function extendLevelWaves(waves=[],targetCount=15){
   return out.slice(0,targetCount);
 }
 
-function importedLevel(id,fallback){
+function addedImportedLevel(id,waveSeed='level5'){
   const imported=typeof IMPORTED_LEVEL_MAPS!=='undefined'?IMPORTED_LEVEL_MAPS[id]:null;
-  if(!imported){
-    fallback.waves=levelWaves(id);
-    return fallback;
-  }
+  if(!imported)return null;
   return {
     id,
-    name:imported.name||fallback.name,
+    name:imported.name||id,
     map:cloneMap(imported),
-    waves:levelWaves(id)
+    waves:addedLevelWaves(waveSeed)
   };
 }
 
 const LEVELS={
-  level1:importedLevel('level1',{id:'level1',name:'边境蛇道',map:cloneMap(LEVEL1_FRONTIER_MAP),waves:levelWaves('level1')}),
-  level2:importedLevel('level2',makeLevel('level2','双门汇流',0.78,LEVEL_PATHS.level2,330,{x:6960,y:2070})),
-  level3:importedLevel('level3',makeLevel('level3','环形矿区',0.74,LEVEL_PATHS.level3,240,{x:3680,y:3820},[[3240,1700,880,720]])),
-  level4:importedLevel('level4',makeLevel('level4','裂谷三线',0.70,LEVEL_PATHS.level4,310,{x:3680,y:3820})),
-  level5:importedLevel('level5',makeLevel('level5','远征试验',0.64,LEVEL_PATHS.level5,310,{x:3680,y:2160}))
+  level1:{id:'level1',name:'边境蛇道',map:cloneMap(LEVEL1_FRONTIER_MAP),waves:cloneLevelWaves(LEVEL_WAVES.level1)},
+  level2:makeLevel('level2','双门汇流',0.78,LEVEL_PATHS.level2,330,{x:6960,y:2070}),
+  level3:makeLevel('level3','环形矿区',0.74,LEVEL_PATHS.level3,240,{x:3680,y:3820},[[3240,1700,880,720]]),
+  level4:makeLevel('level4','裂谷三线',0.70,LEVEL_PATHS.level4,310,{x:3680,y:3820}),
+  level5:makeLevel('level5','远征试验',0.64,LEVEL_PATHS.level5,310,{x:3680,y:2160})
 };
+
+for(const id of ['level6','level7','level8','level9']){
+  const level=addedImportedLevel(id,'level5');
+  if(level)LEVELS[id]=level;
+}
 
 const ENDLESS_MAPS={
   endless1:{id:'endless1',name:'无尽模式一',map:{
