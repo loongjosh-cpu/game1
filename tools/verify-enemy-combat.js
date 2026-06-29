@@ -317,18 +317,21 @@ function testE4Leech(ctx, issues) {
 function testE9MeleeSplash(ctx, issues) {
   const main = makeBlocker(ctx, 'B1', 0, 0);
   const nearby = makeBlocker(ctx, 'B3', 20, 0);
+  const mid = makeBlocker(ctx, 'B3', 120, 0);
   const far = makeBlocker(ctx, 'B3', 200, 0);
   const droneCore = makeDroneCore(ctx, 'D1', 0, 0);
   const helper = makeDroneHelper(droneCore, 25, 0, 20);
   const enemy = makeEnemy(ctx, 'E9', 40, 0);
   enemy._b1tgt = main;
-  const scene = makeScene(ctx, { blockers: [main, nearby, far], drones: [droneCore], droneHelpers: [helper], enemies: [enemy] });
+  const scene = makeScene(ctx, { blockers: [main, nearby, mid, far], drones: [droneCore], droneHelpers: [helper], enemies: [enemy] });
   const nearbyBefore = nearby._hp;
+  const midBefore = mid._hp;
   const helperBefore = helper._hp;
   const farBefore = far._hp;
   scene.handleEnemyBlockerCombat(enemy, ctx.EC.E9, 650);
   assert(main._hp < main._maxhp, 'E9 should damage the main blocker target', issues);
   assert(nearby._hp < nearbyBefore, 'E9 melee splash should damage nearby blockers', issues);
+  assert(mid._hp < midBefore, 'E9 150-range melee splash should damage blockers beyond the old 50 range', issues);
   assert(helper._hp < helperBefore, 'E9 melee splash should damage nearby drone helpers', issues);
   assert(far._hp === farBefore, 'E9 melee splash should not damage out-of-range blockers', issues);
 }

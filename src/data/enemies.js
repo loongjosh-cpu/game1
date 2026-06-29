@@ -15,7 +15,7 @@ const EC={
   },
   E9:{
     name:'裂地兽',hp:300,spd:200,dmg:20,atk:1800,key:'enE1',
-    danger:3,color:0x9b5d35,meleeSplash:0.5,meleeSplashRange:50
+    danger:3,color:0x9b5d35,meleeSplash:0.5,meleeSplashRange:150
   },
   E10:{name:'唤卫兽',hp:180,spd:240,dmg:15,atk:800,key:'enE2',danger:2,color:0x4f7cff,summonEvery:2},
   E11:{
