@@ -144,3 +144,51 @@ map editor ok: 9 levels, 9 rendered cards
 
 - 本批验证的是目标选择与规则入口，没有做完整浏览器实机寻路压力测试。
 - 后续批次仍需在“全局回归/压力测试”中跑实际多怪、多线、多塔场景。
+
+## 2026-06-29：批次 4
+
+范围：
+- 防御塔攻击、治疗、DOT、弹道落点与主要芯片战斗效果。
+- 覆盖 P2/P3/P4/P6/P7、B2/B4/B5/B6/B7，以及毒药芯片、D1/B6 减伤机制。
+
+执行命令：
+```bash
+node tools/verify-tower-combat.js
+node tools/verify-game-preflight.js
+node tools/verify-map-editor.js
+node tools/verify-build-flow.js
+node tools/verify-enemy-targeting.js
+```
+
+结果：
+```text
+tower combat ok: attacks, DOT, healing, shields, projectiles and chip combat effects verified
+game preflight ok: 44 scripts, 17 towers, 14 enemies
+map editor ok: 9 levels, 9 rendered cards
+已加载 9 张关卡，列表显示 9 张
+build flow ok: placement, channel, upgrade and sell guards verified
+enemy targeting ok: taunt range, priority, reactor fallback and E11 blocker rules verified
+```
+
+本轮新增自动化覆盖：
+
+- P6 芯片攻击范围 +200，以及 B1/B7/P6 的攻击入口守卫。
+- P2 超导主束：主目标 2.5 倍、分叉 60%、连锁范围限制。
+- B2 第三击焚域喷涌：1200 码范围、1.5 倍伤害。
+- P3 弹幕到达目标点后才进行 AOE 结算。
+- P4 冰冻芯片：优先未冰冻目标、命中已减速敌人后冰冻 0.5 秒、2 秒冻结冷却、受伤放大窗口。
+- P7 毒爆结算：结算剩余毒伤、层数附加伤害、清除旧毒并补 1 层新毒。
+- 毒药芯片：持续 2.5 秒、每跳 +1、移动速度 -10%。
+- B5 过量治疗护盾上限 100，以及 B5 治疗无人机芯片。
+- B6 毒性护膜：中毒敌人对 B6 伤害 -30%。
+- D1 应激装甲：每个敌人对每架无人机的首次伤害 -60%。
+- B7 爆炸伤害芯片与 B4 残响 8 次脉冲事件。
+
+发现与处理：
+
+- 本批次没有发现需要修改游戏逻辑的真实 bug。
+- 新增 `tools/verify-tower-combat.js`，作为塔战斗规则的回归测试入口。
+
+遗留：
+
+- 本批次验证的是结算层与触发条件，不覆盖完整浏览器内视觉表现、长时间波次压力测试和复杂实战手感。
