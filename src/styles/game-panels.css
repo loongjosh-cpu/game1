@@ -78,3 +78,57 @@
 .channelTrack{height:9px;border:1px solid #34566e;background:#08121c;border-radius:5px;overflow:hidden}
 .channelFill{height:100%;width:0;background:linear-gradient(90deg,#238ab1,#75e6ff)}
 .channelHint{margin-top:4px;color:#8299aa;text-align:center}
+#enemyTestPanel{
+  position:fixed;
+  right:14px;
+  top:92px;
+  z-index:28;
+  display:none;
+  width:300px;
+  max-height:calc(100vh - 120px);
+  overflow:auto;
+  padding:12px;
+  border:1px solid #2e6f92;
+  border-radius:12px;
+  background:#07111ce8;
+  color:#cfe9f4;
+  box-shadow:0 0 24px #06101ccc, inset 0 0 20px #123a5533;
+  backdrop-filter:blur(6px);
+  font-size:12px;
+}
+.enemyTestHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;color:#9fe8ff}
+.enemyTestHead strong{font-size:15px;letter-spacing:.05em}
+.enemyTestHead span{font-size:10px;color:#ffd36a;border:1px solid #6d5b24;border-radius:999px;padding:2px 7px;background:#2a2109aa}
+#enemyTestPanel label{display:block;margin:8px 0 4px;color:#89aabc}
+#enemyTestPanel select{
+  width:100%;
+  margin-top:4px;
+  padding:7px 8px;
+  border:1px solid #25465d;
+  border-radius:8px;
+  background:#0c1a28;
+  color:#dff7ff;
+}
+.enemyTestInfo,.enemyTestHp,.enemyTestLog{
+  margin-top:9px;
+  padding:9px;
+  border:1px solid #1d3d55;
+  border-radius:8px;
+  background:#091724cc;
+  line-height:1.5;
+}
+.enemyTestInfo{color:#f3cf78}
+.enemyTestHp{color:#d8eef7}
+.enemyTestLog{min-height:72px;color:#8da5b5;font-size:11px}
+.enemyTestActions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.enemyTestActions button{
+  padding:7px 8px;
+  border:1px solid #2d5b78;
+  border-radius:8px;
+  background:#102238;
+  color:#bfefff;
+  cursor:pointer;
+}
+.enemyTestActions button:hover{border-color:#7ec8e3;color:#fff;background:#143453}
+.mainMenuBtn.dev{border-color:#6d5b24;background:linear-gradient(135deg,#122033,#221b0a)}
+.mainMenuBtn.dev strong{color:#ffd36a}

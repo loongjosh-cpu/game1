@@ -5,6 +5,8 @@ function initPageFlow(){
   document.getElementById('btnShop').onclick=showShopPage;
   document.getElementById('btnShopBack').onclick=showSelectPage;
   document.getElementById('btnShopArchive').onclick=showArchivePage;
+  const enemyTestBtn=document.getElementById('btnEnemyTest');
+  if(enemyTestBtn)enemyTestBtn.onclick=startEnemyCombatTest;
   document.querySelectorAll('.btnStartMode').forEach(btn=>btn.addEventListener('click',startSelectedMode));
   document.getElementById('btnReturnHome').onclick=returnToHome;
   document.getElementById('btnPauseContinue').onclick=()=>gameInstance?.scene?.scenes?.[0]?.togglePause(false);
@@ -66,9 +68,18 @@ function startSelectedMode(){
   if(!selectedTowers.length||selectedModeLocked())return;
   hidePage('selectPage');
   hidePage('gameOverPanel');
+  hideEnemyTestPanel();
   document.getElementById('gamePage').style.display='flex';
   setGameChromeVisible(true);
   gameInstance=launch(selectedTowers,selectedMode);
+}
+
+function startEnemyCombatTest(){
+  hidePage('selectPage');
+  hidePage('gameOverPanel');
+  document.getElementById('gamePage').style.display='flex';
+  setGameChromeVisible(true);
+  gameInstance=launch([],ENEMY_TEST_MODE);
 }
 
 function returnToHome(){
@@ -77,6 +88,7 @@ function returnToHome(){
   hidePage('gamePage');
   hidePage('metaPage');
   hidePage('shopPage');
+  hideEnemyTestPanel();
   destroyGameInstance();
   document.getElementById('selectPage').style.display='flex';
   showHomePane('homeMainPane');
@@ -84,6 +96,11 @@ function returnToHome(){
 
 function hidePage(id){
   document.getElementById(id).style.display='none';
+}
+
+function hideEnemyTestPanel(){
+  const panel=document.getElementById('enemyTestPanel');
+  if(panel)panel.style.display='none';
 }
 
 function destroyGameInstance(){

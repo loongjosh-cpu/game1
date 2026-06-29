@@ -388,6 +388,20 @@ function testStaticUiGuards() {
   ['主界面只保留', '过程性文案', 'demo目标'].forEach(text => {
     assert(!demo.includes(text), `demo should not include process placeholder copy: ${text}`);
   });
+  assert(demo.includes('id="btnEnemyTest"'), 'demo should expose the enemy combat browser test entry');
+  assert(demo.includes('id="enemyTestPanel"'), 'demo should include the enemy combat test control panel');
+  assert(demo.includes('src/game/enemy-test-lab.js'), 'demo should load the enemy combat test lab script');
+  assert(demo.indexOf('src/game/enemy-test-lab.js') < demo.indexOf('src/game/game-scene.js'), 'enemy test lab should load before game-scene.js');
+
+  const pageFlow = read('src/ui/page-flow.js');
+  assert(pageFlow.includes('startEnemyCombatTest'), 'page flow should define an enemy combat test launcher');
+  assert(pageFlow.includes('btnEnemyTest'), 'page flow should bind the enemy combat test button');
+  assert(pageFlow.includes('launch([],ENEMY_TEST_MODE)'), 'enemy combat test should launch without requiring a tower loadout');
+
+  const lab = read('src/game/enemy-test-lab.js');
+  ['ENEMY_TEST_MODE', 'spawnEnemyTestSelection', 'assignEnemyTestTarget', 'resetEnemyTestTargets', 'clearEnemyTestEnemies'].forEach(snippet => {
+    assert(lab.includes(snippet), `enemy test lab missing expected hook: ${snippet}`);
+  });
 }
 
 function main() {

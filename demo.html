@@ -29,6 +29,7 @@
       <button type="button" class="mainMenuBtn" id="btnShop"><strong>专精商店</strong><span>购买飞船与防御塔专精芯片。</span></button>
       <button type="button" class="mainMenuBtn" id="btnMeta"><strong>星核整备舱</strong><span>装备或卸下已拥有的专精芯片。</span></button>
       <button type="button" class="mainMenuBtn" data-home-pane="homeSettingsPane" onclick="activateHomePane(this,event)"><strong>设置</strong><span>调整视角、操作与音频。</span></button>
+      <button type="button" class="mainMenuBtn dev" id="btnEnemyTest"><strong>怪物攻击测试</strong><span>进入靶场快速生成怪物，验证攻击、弹道、分裂、自爆和反应炉伤害。</span></button>
     </div>
   </section>
 
@@ -327,6 +328,27 @@
 <div id="controlHints">
   <span>右键</span>移动 · <span>B</span>建造 · <span>1-0</span>选塔 · <span>R</span>小反应炉 · <span>滚轮</span>切换 · <span>V/U</span>升级 · <span>X</span>出售 · <span>Esc/空格</span>暂停
 </div>
+<div id="enemyTestPanel">
+  <div class="enemyTestHead">
+    <strong>怪物攻击测试</strong>
+    <span>靶场模式</span>
+  </div>
+  <label>怪物
+    <select id="enemyTestEnemy"></select>
+  </label>
+  <label>目标
+    <select id="enemyTestTarget"></select>
+  </label>
+  <div class="enemyTestInfo" id="enemyTestInfo"></div>
+  <div class="enemyTestActions">
+    <button type="button" id="enemyTestSpawn">生成 1 个</button>
+    <button type="button" id="enemyTestSpawnPack">生成 5 个</button>
+    <button type="button" id="enemyTestResetTargets">重置靶标</button>
+    <button type="button" id="enemyTestClear">清怪</button>
+  </div>
+  <div class="enemyTestHp" id="enemyTestHp"></div>
+  <div class="enemyTestLog" id="enemyTestLog"></div>
+</div>
 <div id="buildPanel"></div>
 <div id="twPanel">
   <div class="twPanelHead">
@@ -416,6 +438,7 @@
 <script src="src/game/enemy-combat.js"></script>
 <script src="src/game/enemy-waves.js"></script>
 <script src="src/game/enemy-controller.js"></script>
+<script src="src/game/enemy-test-lab.js"></script>
 <script src="src/game/player-runtime.js"></script>
 <script src="src/game/hud-overlay.js"></script>
 <script src="src/core/meta-store.js"></script>

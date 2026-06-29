@@ -2,7 +2,8 @@ function launch(sel,mode='endless1'){
   const selIds=sel.map(i=>ALL_TOWERS[i]);
   const levelConfig=LEVELS[mode]||null;
   const endlessConfig=ENDLESS_MAPS[mode]||null;
-  MAP=cloneMap(levelConfig?.map||endlessConfig?.map||ENDLESS_MAP);
+  const testMap=mode===ENEMY_TEST_MODE?ENEMY_TEST_MAP:null;
+  MAP=cloneMap(testMap||levelConfig?.map||endlessConfig?.map||ENDLESS_MAP);
   const nav=buildNavigation(MAP);
   const enemyPaths=nav.enemyPaths;
   const enemyWaypoints=nav.enemyWaypoints;
@@ -37,6 +38,7 @@ function launch(sel,mode='endless1'){
       this.bindTowerPanelButtons();
       this.rebuildPanel();
       this.initMiniMap();
+      this.setupEnemyTestLab();
       this.applyViewSettings();
     }
     smallReactorCount(){return this.reactors.filter(r=>this.reactorAlive(r)&&!r._isMainReactor).length}
@@ -62,15 +64,16 @@ function launch(sel,mode='endless1'){
       this.updateEnemies(dt);
 
       // Waves
-      this.updateWaves(dt);if(this.ended)return;
+      if(!this.isEnemyTestMode())this.updateWaves(dt);if(this.ended)return;
       // HP bars
       this.renderOverlayBars();
       this.updateHud(t,dt);
       this.updateMiniMap(dt);
+      this.updateEnemyTestLab(dt);
     }
 
   }
-  Object.assign(GameScene.prototype,TextureFactoryMethods,SceneSetupMethods,MiniMapMethods,InputControllerMethods,BuildPanelMethods,PlacementControllerMethods,TowerPanelMethods,DroneControllerMethods,CombatUtilMethods,TowerCombatMethods,ProjectileControllerMethods,EnemyControllerMethods,PlayerRuntimeMethods,HudOverlayMethods);
+  Object.assign(GameScene.prototype,TextureFactoryMethods,SceneSetupMethods,MiniMapMethods,InputControllerMethods,BuildPanelMethods,PlacementControllerMethods,TowerPanelMethods,DroneControllerMethods,CombatUtilMethods,TowerCombatMethods,ProjectileControllerMethods,EnemyControllerMethods,PlayerRuntimeMethods,HudOverlayMethods,EnemyTestLabMethods);
   const game=new Phaser.Game({type:Phaser.AUTO,width:W,height:H,backgroundColor:'#0d1219',parent:'gamePage',scale:{mode:Phaser.Scale.ENVELOP,autoCenter:Phaser.Scale.CENTER_BOTH},physics:{default:'arcade',arcade:{gravity:{y:0}}},scene:GameScene});
   setTimeout(()=>document.querySelector('canvas')?.focus(),500);
   return game;
