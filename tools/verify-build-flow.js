@@ -159,6 +159,12 @@ function testUpgradeGuards(build, issues) {
   assert(scene.upgradeBlockReason() !== '', 'upgrade should be blocked at max level', issues);
 }
 
+function testEnemySandboxInstantUpgradeSource(issues) {
+  const source = read('src/game/tower-panel.js');
+  assert(source.includes('this.isEnemyTestMode?.()') && source.includes('this.applyUpgrade(tw);'), 'enemy combat sandbox upgrades should apply immediately without a channel', issues);
+  assert(source.includes('沙盒模式：升级已立即完成'), 'enemy combat sandbox instant upgrade should show a clear hint', issues);
+}
+
 function testChannelFinishGuards(build, issues) {
   const scene = makeScene(build);
   const p1 = build.PATH_TOWERS.find(t => t.id === 'P1');
@@ -197,6 +203,7 @@ function main() {
   testBuildCosts(build, issues);
   testSellRefunds(build, issues);
   testUpgradeGuards(build, issues);
+  testEnemySandboxInstantUpgradeSource(issues);
   testChannelFinishGuards(build, issues);
   testReactorAndHpRules(build, issues);
   if (issues.length) {

@@ -185,6 +185,7 @@ const TowerPanelMethods={
     const tw=this.selTw,td=tw._type,nl=(tw._lv||0)+1;
     if(nl>=td.upg.length)return'已达到最高等级';
     if(this.en<td.upg[nl].c)return`能量不足，还需 ${Math.ceil(td.upg[nl].c-this.en)}⚡`;
+    if(this.isEnemyTestMode?.())return'';
     if(Phaser.Math.Distance.Between(this.ship.x,this.ship.y,tw.x,tw.y)>sd(SHIP_RNG)){
       return'距离过远，请进入 1200 码操作范围';
     }
@@ -208,6 +209,13 @@ const TowerPanelMethods={
     }
 
     const tw=this.selTw,td=tw._type,lv=tw._lv||0,nl=lv+1;
+    if(this.isEnemyTestMode?.()){
+      this.applyUpgrade(tw);
+      this.updPanel();
+      this.updTwPanel();
+      this.updUpgradeHint('沙盒模式：升级已立即完成');
+      return
+    }
     this.channel={
       kind:'upgrade',
       tw,
