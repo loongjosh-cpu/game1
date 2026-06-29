@@ -219,7 +219,8 @@ function testE11DronePriorityObeysBlocker(ctx, issues) {
   assert(scene._dartCount === 0, 'E11 should not fire at drone while blocked by a valid blocker', issues);
 
   e._b1tgt = null;
-  scene.handleEnemyDroneCombat(e, ctx.EC.E11, 1000);
+  const handledFree = scene.handleEnemyDroneCombat(e, ctx.EC.E11, 1000);
+  assert(handledFree === true, 'E11 drone branch should consume combat after selecting a ranged drone target', issues);
   assert(scene._dartCount === 1, 'E11 should fire at nearest drone when no valid blocker is active', issues);
 }
 

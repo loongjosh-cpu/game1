@@ -3,8 +3,12 @@ const EnemyCombatMethods={
     if(cfg.droneRange){
       if(e._b1tgt&&this.enemyCanBeTauntedBy(e,cfg,e._b1tgt))return false;
       const target=this.chooseDroneInRange(e,sd(cfg.droneRange));
-      if(target&&this.enemyAttackReady(e,dt)){
-        this.fireEnemyDart(e,target,cfg.shotSpeed||700,e._dmg)
+      if(target){
+        this.stopEnemyAndFace(e,target);
+        if(this.enemyAttackReady(e,dt)){
+          this.fireEnemyDart(e,target,cfg.shotSpeed||700,e._dmg)
+        }
+        return true
       }
       return false
     }
@@ -35,6 +39,11 @@ const EnemyCombatMethods={
 
     const stop=Math.max(sd(CLOSE_ATTACK_RANGE),24+(target._type.tSize||45)/2);
     const dist=Phaser.Math.Distance.Between(e.x,e.y,target.x,target.y);
+    if(cfg.droneRange&&dist<=sd(cfg.droneRange)){
+      this.stopEnemyAndFace(e,target);
+      if(this.enemyAttackReady(e,dt))this.fireEnemyDart(e,target,cfg.shotSpeed||700,e._dmg);
+      return true
+    }
     if(cfg.rangeAtk&&dist<=sd(cfg.rangeAtk)){
       this.stopEnemyAndFace(e,target);
       if(this.enemyAttackReady(e,dt))this.fireEnemyShell(e,target);
@@ -65,6 +74,11 @@ const EnemyCombatMethods={
     }
     if(!reactor){
       this.moveEnemy(e,0,0,55);
+      return true
+    }
+    if(cfg.droneRange&&Phaser.Math.Distance.Between(e.x,e.y,reactor.x,reactor.y)<=sd(cfg.droneRange)){
+      this.stopEnemyAndFace(e,reactor);
+      if(this.enemyAttackReady(e,dt))this.fireEnemyDart(e,reactor,cfg.shotSpeed||700,e._dmg);
       return true
     }
     if(cfg.rangeAtk&&Phaser.Math.Distance.Between(e.x,e.y,reactor.x,reactor.y)<=sd(cfg.rangeAtk)){

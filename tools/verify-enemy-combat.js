@@ -354,8 +354,29 @@ function testE11RangedDroneDamage(ctx, issues) {
   const enemy = makeEnemy(ctx, 'E11', 0, 0);
   const scene = makeScene(ctx, { drones: [core], droneHelpers: [helper], enemies: [enemy] });
   const before = helper._hp;
-  scene.handleEnemyDroneCombat(enemy, ctx.EC.E11, 650);
+  const handled = scene.handleEnemyDroneCombat(enemy, ctx.EC.E11, 650);
+  assert(handled === true, 'E11 drone-priority ranged combat should consume the enemy action for this frame', issues);
   assert(helper._hp < before, 'E11 dart should reduce drone helper HP after projectile arrives', issues);
+}
+
+function testE11RangedFallbackTargets(ctx, issues) {
+  const blocker = makeBlocker(ctx, 'B1', 300, 0);
+  const enemy = makeEnemy(ctx, 'E11', 0, 0);
+  enemy._b1tgt = blocker;
+  const scene = makeScene(ctx, { blockers: [blocker], enemies: [enemy] });
+  const blockerBefore = blocker._hp;
+  const handledBlocker = scene.handleEnemyBlockerCombat(enemy, ctx.EC.E11, 650);
+  assert(handledBlocker === true, 'E11 should handle blocker combat at dart range instead of walking into melee', issues);
+  assert(blocker._hp < blockerBefore, 'E11 dart should damage ordinary blocker targets when no drone overrides it', issues);
+
+  const reactor = makeReactor(300, 0, 120, { _isMainReactor: true, _size: 120 });
+  const reactorEnemy = makeEnemy(ctx, 'E11', 0, 0);
+  reactorEnemy._reactorTarget = reactor;
+  const reactorScene = makeScene(ctx, { reactors: [reactor], enemies: [reactorEnemy] });
+  const reactorBefore = reactor._hp;
+  const handledReactor = reactorScene.handleEnemyReactorCombat(reactorEnemy, ctx.EC.E11, 650);
+  assert(handledReactor === true, 'E11 should handle reactor combat at dart range instead of walking into melee', issues);
+  assert(reactor._hp < reactorBefore, 'E11 dart should damage reactor targets when no drone overrides it', issues);
 }
 
 function testE12RangedShell(ctx, issues) {
@@ -453,6 +474,7 @@ function main() {
   testE9MeleeSplash(ctx, issues);
   testE10SummonOnSecondHit(ctx, issues);
   testE11RangedDroneDamage(ctx, issues);
+  testE11RangedFallbackTargets(ctx, issues);
   testE12RangedShell(ctx, issues);
   testE13SelfDestruct(ctx, issues);
   testReactorDamageAndGameOver(ctx, issues);
