@@ -259,6 +259,10 @@ function testSpawnScaling(ctx, issues) {
   const levelScene = makeScene(ctx, { wave: 1, levelConfig });
   const levelEnemy = levelScene.spawnE(0, 'E1');
   assert(levelEnemy._hp === Math.round(ctx.EC.E1.hp * 2.25), 'level fixed wave scale should control enemy HP', issues);
+
+  const overlapScene = makeScene(ctx, { wave: 2, levelConfig: { waves: [{ scale: 3 }, { scale: 1 }] } });
+  const inheritedSummon = overlapScene.spawnAt('E1', 100, 100, 0, true, 1);
+  assert(inheritedSummon._waveNo === 1 && inheritedSummon._hp === Math.round(ctx.EC.E1.hp * 3), 'summoned enemies should inherit their parent wave number and HP scale during overlapped waves', issues);
 }
 
 function testWaveRosterRules(ctx, issues) {
@@ -341,6 +345,30 @@ function testWaveCompletionAndRewards(ctx, issues) {
   assert(ctx.metaSave.cores === 1 && ctx.metaSave.levelClears['level-test'], 'cleared level should grant one star core and unlock clear flag', issues);
 }
 
+function testTimedWaveAdvance(ctx, issues) {
+  const scene = makeScene(ctx, {
+    levelConfig: {
+      id: 'timed-wave-test',
+      waves: [
+        { lanes: [0], roster: ['E1'] },
+        { lanes: [0], roster: ['E2'] }
+      ]
+    },
+    prepTimer: 10000
+  });
+  scene.startWave();
+  scene._events[0].callback();
+  assert(scene.wActive === false && scene.wave === 2, 'wave should advance to next countdown after spawning, without waiting for enemies to die', issues);
+  assert(scene.enemies.countActive() === 1 && scene._pendingWaveClears.length === 1 && scene._pendingWaveClears[0] === 1, 'spawned-but-uncleared wave should stay pending while enemies remain active', issues);
+  scene.updateWaves(10000);
+  assert(scene.wActive === true && scene._events.length === 2, 'next wave should start on timer even while previous slow enemies are alive', issues);
+  scene._events[1].callback();
+  assert(scene.enemies.countActive() === 2 && scene._pendingWaveClears.length === 2, 'overlapped waves should track each spawned wave separately', issues);
+  scene.enemies.children.iterate(e => { if (e && e._waveNo === 1) e.active = false; });
+  scene.updateWaves(0);
+  assert(scene.completedWaves === 1 && scene._pendingWaveClears.length === 1 && scene._pendingWaveClears[0] === 2, 'completed wave count should advance for the cleared wave without waiting for later-wave enemies', issues);
+}
+
 function testReactorIncome(ctx, issues) {
   const main = reactor(ctx.MAIN_REACTOR, 2);
   const smallA = reactor(ctx.SMALL_REACTOR, 0);
@@ -361,6 +389,7 @@ function main() {
   testWaveRosterRules(ctx, issues);
   testFixedLevelWaves(ctx, issues);
   testWaveCompletionAndRewards(ctx, issues);
+  testTimedWaveAdvance(ctx, issues);
   testReactorIncome(ctx, issues);
   if (issues.length) {
     console.error(`wave/economy verification failed (${issues.length} issues):`);

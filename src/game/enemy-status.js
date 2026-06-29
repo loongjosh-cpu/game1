@@ -23,7 +23,8 @@ const EnemyStatusMethods={
           e.x+Phaser.Math.Between(-25,25),
           e.y+Phaser.Math.Between(-25,25),
           e._si,
-          true
+          true,
+          e._waveNo
         )
       }
     }
@@ -37,7 +38,8 @@ const EnemyStatusMethods={
             e.x+Phaser.Math.Between(-28,28),
             e.y+Phaser.Math.Between(-28,28),
             e._si,
-            true
+            true,
+            e._waveNo
           )
         }
       }

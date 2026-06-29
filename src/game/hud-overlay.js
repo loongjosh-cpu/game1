@@ -46,7 +46,8 @@ const HudOverlayMethods={
     this.renderReactorBars()
   },
   updateHud(t,dt){
-    const phase=this.wActive?'战斗中':`准备 ${(this.prepTimer/1000).toFixed(1)}s`;
+    const activeEnemies=this.enemies.countActive();
+    const phase=this.wActive?'出敌中':activeEnemies>0&&!this._allLevelWavesSpawned?`下一波 ${(this.prepTimer/1000).toFixed(1)}s`:`准备 ${(this.prepTimer/1000).toFixed(1)}s`;
     document.getElementById('hudPhase').textContent=phase;
     this.spawnMarkers.forEach((m,i)=>m.setAlpha(this.wActive?0.35:0.45+0.45*Math.sin(t*0.006+i)));
     document.getElementById('hudEnergy').textContent=Math.floor(this.en);
@@ -54,7 +55,7 @@ const HudOverlayMethods={
     document.getElementById('hudReactor').textContent=Math.ceil(this.rxHP);
     document.getElementById('hudSmallReactors').textContent=this.smallReactorCount()+'/'+SMALL_REACTOR.maxCount;
     document.getElementById('hudWave').textContent=this.wave;
-    document.getElementById('hudEnemies').textContent=this.enemies.countActive();
+    document.getElementById('hudEnemies').textContent=activeEnemies;
     document.getElementById('hudTowers').textContent=this.towers.countActive()+this.blockers.countActive()+this.drones.countActive();
     if(Math.floor(t/500)!==Math.floor((t-dt)/500))document.getElementById('hudFps').textContent=Math.round(this.game.loop.actualFps);
     this.updTwPanel();
