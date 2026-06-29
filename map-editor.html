@@ -182,6 +182,7 @@
     </aside>
   </div>
 
+  <script src="src/data/imported-level-maps.js"></script>
   <script>
     const W = 7356;
     const H = 4144;
@@ -248,7 +249,7 @@
       return d;
     }
 
-    const LEVELS = [
+    const LEGACY_EDITOR_LEVELS = [
   {
     "schemaVersion": 1,
     "kind": "level-map",
@@ -7110,6 +7111,16 @@
       "验证点：B1/B5 的长期抗线价值会被放大，但反应炉距离限制会逼玩家展开。"
     ]
   }];
+
+    const LEVELS = Object.entries(typeof IMPORTED_LEVEL_MAPS !== 'undefined' ? IMPORTED_LEVEL_MAPS : {}).map(([slotId, raw]) => ({
+      ...clone(raw),
+      id: slotId,
+      levelId: slotId,
+      name: raw.levelName || raw.name || slotId,
+      summary: raw.summary || '',
+      routes: clone(raw.routes || raw.paths || []),
+      notes: clone(raw.notes || [])
+    }));
 
     let walls = [];
     let spawns = [];

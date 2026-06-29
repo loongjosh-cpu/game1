@@ -1,4 +1,138 @@
+function buildImportedCorridorLevelMap(def){
+  const width=typeof globalThis!=='undefined'&&Number.isFinite(globalThis.W)?globalThis.W:7356;
+  const height=typeof globalThis!=='undefined'&&Number.isFinite(globalThis.H)?globalThis.H:4144;
+  const paths=(def.paths||[]).map(route=>route.map(p=>Array.isArray(p)?[p[0],p[1]]:[p.x,p.y]));
+  const pointNearRoute=(x,y,route,radius)=>{
+    for(let i=0;i<route.length-1;i++){
+      const a=route[i],b=route[i+1];
+      const dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy;
+      const t=l2?Math.max(0,Math.min(1,((x-a[0])*dx+(y-a[1])*dy)/l2)):0;
+      if(Math.hypot(x-(a[0]+dx*t),y-(a[1]+dy*t))<=radius)return true;
+    }
+    return false;
+  };
+  const walls=[];
+  const step=def.wallStep||160;
+  const cols=Math.ceil(width/step);
+  const rows=Math.ceil(height/step);
+  for(let r=0;r<rows;r++){
+    let run=-1;
+    for(let c=0;c<=cols;c++){
+      const cx=c*step+step/2;
+      const cy=r*step+step/2;
+      const inside=cx>80&&cx<width-80&&cy>80&&cy<height-80;
+      const open=c<cols&&inside&&paths.some(route=>pointNearRoute(cx,cy,route,def.corridorRadius));
+      const blocked=c<cols&&!open;
+      if(blocked&&run<0)run=c;
+      if((!blocked||c===cols)&&run>=0){
+        walls.push([run*step,r*step,(c-run)*step,step]);
+        run=-1;
+      }
+    }
+  }
+  return {
+    schemaVersion:1,
+    kind:'level-map',
+    id:def.id,
+    name:def.name,
+    levelId:def.levelId||def.id,
+    levelName:def.levelName||def.name,
+    summary:def.summary||'',
+    unitScale:def.unitScale||1,
+    worldSize:{w:width,h:height},
+    walls:[...walls,...(def.extraWalls||[]).map(w=>[...w])],
+    spawns:paths.map(route=>[...route[0]]),
+    reactor:{...def.reactor},
+    paths,
+    pockets:[],
+    notes:def.notes||[]
+  };
+}
+
 const IMPORTED_LEVEL_MAPS={
+  "level1": buildImportedCorridorLevelMap({
+    id:"level1",
+    name:"边境蛇道",
+    summary:"单入口长蛇形路线，用大块封闭障碍制造回头路，验证基础塔位和反应炉距离规则。",
+    unitScale:0.82,
+    corridorRadius:240,
+    reactor:{x:6900,y:3720},
+    paths:[
+      [[260,420],[760,420],[760,1280],[6500,1280],[6500,2220],[760,2220],[760,3230],[6900,3230],[6900,3720]]
+    ],
+    notes:[
+      "定位：第一关使用单入口长蛇形路线，玩家能清楚观察基础塔位、射程覆盖和反应炉距离限制。",
+      "路线：敌人会多次折返，适合验证减速、单体炮塔和基础阻挡塔的协同。"
+    ]
+  }),
+  "level2": buildImportedCorridorLevelMap({
+    id:"level2",
+    name:"双门汇流",
+    summary:"上下双入口在中段汇流，考验减速、AOE 与汇流点防守。",
+    unitScale:0.78,
+    corridorRadius:330,
+    reactor:{x:6960,y:2070},
+    paths:[
+      [[260,760],[2920,760],[2920,1530],[3650,1530],[3650,2070],[6960,2070]],
+      [[260,3370],[2920,3370],[2920,2550],[3650,2550],[3650,2070],[6960,2070]]
+    ],
+    notes:[
+      "定位：双入口汇流关，前段可分守，中后段可集中火力。",
+      "塔位：汇流点适合电磁塔、冷凝塔和火焰阻挡塔发挥。"
+    ]
+  }),
+  "level3": buildImportedCorridorLevelMap({
+    id:"level3",
+    name:"环形矿区",
+    summary:"双入口绕行中央封闭区，拉扯内外圈战线与经济扩张。",
+    unitScale:0.74,
+    corridorRadius:240,
+    reactor:{x:3680,y:3820},
+    extraWalls:[[3240,1700,880,720]],
+    paths:[
+      [[350,2070],[1300,2070],[1300,620],[3400,620],[3400,1280],[2700,1280],[2700,3820],[3500,3820]],
+      [[7000,2070],[6200,2070],[6200,3520],[5400,3520],[5200,3700],[3860,3820]]
+    ],
+    notes:[
+      "定位：左右入口围绕中央障碍形成内外圈，适合观察玩家移动与多线反应炉布局。",
+      "修正：中央大墙体作为合法封闭障碍存在，出生点和玩家初始点应避开墙体。"
+    ]
+  }),
+  "level4": buildImportedCorridorLevelMap({
+    id:"level4",
+    name:"裂谷三线",
+    summary:"三入口多线压迫，需要分线布防与火力转移。",
+    unitScale:0.70,
+    corridorRadius:310,
+    reactor:{x:3680,y:3820},
+    paths:[
+      [[320,660],[2480,660],[2480,1860],[2880,1860],[2880,3820],[3680,3820]],
+      [[3680,260],[4180,260],[4180,1860],[4680,1860],[4680,3820],[3680,3820]],
+      [[7030,660],[6420,660],[6420,1840],[4900,1840],[4900,3820],[3680,3820]]
+    ],
+    notes:[
+      "定位：三线入口从不同方向压向底部核心，要求玩家提前规划战线。",
+      "节奏：适合测试飞船奔波、无人机拦截和阻挡塔补位。"
+    ]
+  }),
+  "level5": buildImportedCorridorLevelMap({
+    id:"level5",
+    name:"远征试验",
+    summary:"四入口大地图关卡，原五关收束测试。",
+    unitScale:0.64,
+    corridorRadius:310,
+    reactor:{x:3680,y:2160},
+    paths:[
+      [[260,610],[2180,610],[2180,1340],[3680,1340],[3680,2160]],
+      [[7080,760],[6460,760],[6460,2440],[4860,2440],[4860,2160],[3680,2160]],
+      [[300,3540],[2220,3540],[2220,2260],[3680,2260],[3680,2160]],
+      [[7040,3500],[5200,3500],[5200,2460],[3680,2460],[3680,2160]]
+    ],
+    notes:[
+      "定位：前五关的综合测试，四入口带来更强的战线分配压力。",
+      "经济：小反应炉距离限制会迫使玩家分段建设，而不是只守一个路口。"
+    ]
+  }),
   "level6": {
     "schemaVersion": 1,
     "kind": "level-map",

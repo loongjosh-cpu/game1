@@ -371,7 +371,8 @@ function testMapEditorDragAndLevels() {
   ];
   required.forEach(snippet => assert(html.includes(snippet), `map editor missing expected interaction hook: ${snippet}`));
 
-  assert(/const\s+LEVELS\s*=\s*\[/.test(html), 'map editor should expose a LEVELS list for browser selection');
+  assert(html.includes('src/data/imported-level-maps.js'), 'map editor should load the shared imported level map registry');
+  assert(/const\s+LEVELS\s*=\s*Object\.entries/.test(html), 'map editor should derive its active LEVELS list from imported maps');
 }
 
 function testStaticUiGuards() {

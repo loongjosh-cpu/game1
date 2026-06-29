@@ -5,42 +5,12 @@ const EDITOR_FILE = 'map-editor.html';
 
 function readEditorScript() {
   const html = fs.readFileSync(EDITOR_FILE, 'utf8');
-  const match = html.match(/<script>([\s\S]*)<\/script>/);
-  if (!match) throw new Error('map-editor.html missing inline script');
-  return { html, script: match[1] };
-}
-
-function extractLevels(html) {
-  const startMatch = /const\s+LEVELS\s*=\s*\[/.exec(html);
-  const start = startMatch ? startMatch.index : -1;
-  const arrStart = startMatch ? html.indexOf('[', start) : -1;
-  let depth = 0;
-  let end = -1;
-  let inStr = false;
-  let esc = false;
-  for (let i = arrStart; i < html.length; i++) {
-    const ch = html[i];
-    if (inStr) {
-      if (esc) esc = false;
-      else if (ch === '\\') esc = true;
-      else if (ch === '"') inStr = false;
-      continue;
-    }
-    if (ch === '"') {
-      inStr = true;
-      continue;
-    }
-    if (ch === '[') depth++;
-    if (ch === ']') {
-      depth--;
-      if (depth === 0) {
-        end = i + 1;
-        break;
-      }
-    }
-  }
-  if (start < 0 || arrStart < 0 || end < 0) throw new Error('Could not locate LEVELS array');
-  return JSON.parse(html.slice(arrStart, end));
+  const scripts = [...html.matchAll(/<script(?:\s+src="([^"]+)")?>([\s\S]*?)<\/script>/g)].map(match => {
+    const src = match[1];
+    return src ? fs.readFileSync(src, 'utf8') : match[2];
+  });
+  if (!scripts.length) throw new Error('map-editor.html missing script');
+  return { html, script: scripts.join('\n') };
 }
 
 function normalizePoint(p) {
@@ -148,7 +118,9 @@ function simulateEditorBoot(script) {
   };
   vm.createContext(sandbox);
   vm.runInContext(script, sandbox, { filename: EDITOR_FILE });
+  vm.runInContext('this.__levels = LEVELS;', sandbox, { filename: EDITOR_FILE });
   return {
+    levels: sandbox.__levels,
     cardCount: ids.get('levelList').children.length,
     bootText: ids.get('editorBootStatus').textContent,
     bootBad: ids.get('editorBootStatus').classList.contains('bad')
@@ -156,12 +128,12 @@ function simulateEditorBoot(script) {
 }
 
 function main() {
-  const { html, script } = readEditorScript();
+  const { script } = readEditorScript();
   new Function(script);
-  const levels = extractLevels(html);
+  const boot = simulateEditorBoot(script);
+  const levels = boot.levels;
   const issues = validateLevels(levels);
   if (issues.length) throw new Error(`Level data validation failed:\n${issues.join('\n')}`);
-  const boot = simulateEditorBoot(script);
   if (boot.cardCount !== levels.length) {
     throw new Error(`Rendered level cards mismatch: expected ${levels.length}, got ${boot.cardCount}`);
   }

@@ -49,40 +49,12 @@ function corridorCellOpen(paths,radius,step,c,row){
   return inside&&pointNearPaths(cx,cy,paths,radius);
 }
 
-function makeLevel(id,name,unitScale,paths,radius,reactor,extraWalls=[]){
-  const cleanPaths=clonePaths(paths);
-  return {
-    id,
-    name,
-    map:makeLevelMap(id,name,unitScale,cleanPaths,radius,reactor,extraWalls),
-    waves:cloneLevelWaves(LEVEL_WAVES[id]||LEVEL_TRIAL_1.waves)
-  };
-}
-
 function cloneLevelWaves(waves=[]){
   return waves.map(w=>({
     ...w,
     lanes:[...(w.lanes||[])],
     roster:[...(w.roster||[])]
   }))
-}
-
-function makeLevelMap(id,name,unitScale,paths,radius,reactor,extraWalls=[]){
-  return {
-    schemaVersion:1,
-    kind:'level-map',
-    id,
-    name,
-    unitScale,
-    w:W,
-    h:H,
-    worldSize:{w:W,h:H},
-    walls:[...corridorWalls(paths,radius,160),...extraWalls],
-    spawns:paths.map(r=>[...r[0]]),
-    reactor:{...reactor},
-    paths,
-    pockets:[]
-  };
 }
 
 function mapW(map=MAP){return map.w||W}
