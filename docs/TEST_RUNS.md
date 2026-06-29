@@ -295,3 +295,57 @@ drone system ok: production, targeting, chase, stuck recovery, aggro, revive, de
 遗留：
 
 - 本批次验证的是规则层，不覆盖实际长时间无尽模式的经济曲线手感；最终批次仍需要跑完整实战压力测试。
+
+## 2026-06-29：批次 7
+
+范围：
+- 局外系统、专精商店、星核整备舱与存档。
+- 覆盖芯片购买、装备/卸下、塔槽位与毒药互斥、前置条件、旧存档迁移、效果字段输出与持久化。
+
+执行命令：
+```bash
+node tools/verify-meta-systems.js
+node tools/verify-game-preflight.js
+node tools/verify-map-editor.js
+node tools/verify-build-flow.js
+node tools/verify-enemy-targeting.js
+node tools/verify-tower-combat.js
+node tools/verify-drone-system.js
+node tools/verify-wave-economy.js
+```
+
+结果：
+```text
+meta systems ok: save migration, shop purchase, loadout equip, mutex, prerequisites, effects and persistence verified
+game preflight ok: 44 scripts, 17 towers, 14 enemies
+map editor ok: 9 levels, 9 rendered cards
+已加载 9 张关卡，列表显示 9 张
+build flow ok: placement, channel, upgrade and sell guards verified
+enemy targeting ok: taunt range, priority, reactor fallback and E11 blocker rules verified
+tower combat ok: attacks, DOT, healing, shields, projectiles and chip combat effects verified
+drone system ok: production, targeting, chase, stuck recovery, aggro, revive, death blast and D3 repair verified
+wave economy ok: kill rewards, spawn scaling, fixed waves, endless budget, reactor income and star-core rewards verified
+```
+
+本轮新增自动化覆盖：
+
+- 旧 `nodes` 存档迁移到 `ownedChips` / `equippedChips`。
+- 非法芯片 ID、非法视角设置、旧 `miniMap` 设置会被清理。
+- 商店购买会检查前置、星核数量、重复购买保护。
+- 舰载芯片前置链必须按顺序装备。
+- 每座塔只能装备一个芯片，同塔芯片会互斥替换。
+- 毒药芯片三选一，使用全局毒药槽位。
+- 拖放/安装底层逻辑会拒绝错误槽位。
+- 星核整备舱会生成塔槽位和毒药槽位，并能判断空槽、可安装、已安装状态。
+- `metaEffects()` 会正确输出舰载、塔、毒药芯片的生效字段。
+- `saveMeta()` 会持久化星核、拥有芯片、已装备芯片、旧别名 `nodes` 与设置。
+- 芯片目录检查：ID 唯一、费用有效、前置存在、塔引用存在，所有塔当前至少有一个芯片。
+
+发现与处理：
+
+- 本批次没有发现需要修改游戏逻辑的真实 bug。
+- 新增 `tools/verify-meta-systems.js`，作为局外商店、整备舱和存档系统的回归测试入口。
+
+遗留：
+
+- 本批次验证的是状态与规则层，不覆盖真实浏览器拖拽手感、视觉反馈和响应式 UI 布局；这些留到 UI/视角/地图编辑器批次处理。
