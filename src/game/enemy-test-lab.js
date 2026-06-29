@@ -97,6 +97,8 @@ const EnemyTestLabMethods={
     const panel=document.getElementById('enemyTestPanel');
     if(!panel)return;
     panel.style.display='block';
+    this.resetEnemyTestPanelPosition(panel);
+    this.bindEnemyTestPanelDrag(panel);
     this.fillEnemyTestSelects();
     document.getElementById('enemyTestStart').onclick=()=>this.startEnemyTestWave();
     document.getElementById('enemyTestStop').onclick=()=>this.stopEnemyTestWave(true);
@@ -104,6 +106,53 @@ const EnemyTestLabMethods={
     document.getElementById('enemyTestReset').onclick=()=>this.resetEnemyTestSandbox();
     document.getElementById('enemyTestEnemy').onchange=()=>this.updateEnemyTestPanel();
     document.getElementById('enemyTestCount').oninput=()=>this.updateEnemyTestPanel();
+  },
+  resetEnemyTestPanelPosition(panel){
+    panel.style.left='';
+    panel.style.right='14px';
+    panel.style.top='92px';
+  },
+  bindEnemyTestPanelDrag(panel){
+    if(panel.dataset.dragReady)return;
+    panel.dataset.dragReady='1';
+    const handle=panel.querySelector('.enemyTestHead');
+    if(!handle)return;
+    let drag=null;
+    const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+    const moveTo=(x,y)=>{
+      const rect=panel.getBoundingClientRect();
+      const maxX=Math.max(8,window.innerWidth-rect.width-8);
+      const maxY=Math.max(8,window.innerHeight-rect.height-8);
+      panel.style.left=clamp(x,8,maxX)+'px';
+      panel.style.top=clamp(y,8,maxY)+'px';
+      panel.style.right='auto';
+    };
+    handle.addEventListener('pointerdown',event=>{
+      if(event.button!==0)return;
+      const rect=panel.getBoundingClientRect();
+      drag={dx:event.clientX-rect.left,dy:event.clientY-rect.top};
+      panel.classList.add('dragging');
+      handle.setPointerCapture?.(event.pointerId);
+      event.preventDefault();
+      event.stopPropagation();
+    });
+    handle.addEventListener('pointermove',event=>{
+      if(!drag)return;
+      moveTo(event.clientX-drag.dx,event.clientY-drag.dy);
+      event.preventDefault();
+    });
+    const stop=event=>{
+      if(!drag)return;
+      drag=null;
+      panel.classList.remove('dragging');
+      handle.releasePointerCapture?.(event.pointerId);
+    };
+    handle.addEventListener('pointerup',stop);
+    handle.addEventListener('pointercancel',stop);
+    window.addEventListener('resize',()=>{
+      const rect=panel.getBoundingClientRect();
+      moveTo(rect.left,rect.top);
+    });
   },
   fillEnemyTestSelects(){
     const enemySel=document.getElementById('enemyTestEnemy');

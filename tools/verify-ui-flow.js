@@ -402,9 +402,10 @@ function testStaticUiGuards() {
   assert(pageFlow.includes('launch([],ENEMY_TEST_MODE)'), 'enemy combat test should launch without requiring a tower loadout');
 
   const lab = read('src/game/enemy-test-lab.js');
-  ['ENEMY_TEST_MODE', 'ENEMY_TEST_MAP', 'startEnemyTestWave', 'stopEnemyTestWave', 'enemyTestBuildChoices', 'applyEnemyTestCamera', 'clearEnemyTestEnemies'].forEach(snippet => {
+  ['ENEMY_TEST_MODE', 'ENEMY_TEST_MAP', 'startEnemyTestWave', 'stopEnemyTestWave', 'enemyTestBuildChoices', 'applyEnemyTestCamera', 'bindEnemyTestPanelDrag', 'clearEnemyTestEnemies'].forEach(snippet => {
     assert(lab.includes(snippet), `enemy test lab missing expected hook: ${snippet}`);
   });
+  assert(css.includes('.enemyTestHead') && css.includes('cursor:move'), 'enemy combat sandbox panel header should show draggable affordance');
 }
 
 function main() {
