@@ -69,6 +69,7 @@ function cloneMap(m){
     kind:m.kind||'runtime-map',
     id:m.id,
     name:m.name,
+    sourceId:m.sourceId,
     unitScale:m.unitScale||1,
     w:world.w,
     h:world.h,

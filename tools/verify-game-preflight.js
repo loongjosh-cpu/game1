@@ -223,8 +223,13 @@ function validateMap(id, map, issues) {
 function validateLevels(data, issues) {
   for (const [id, level] of Object.entries(data.LEVELS || {})) {
     assert(level.name, `${id}: missing level name`, issues);
+    assert(/^关卡\d{2}$/.test(level.name), `${id}: level name should use numeric label only, got ${level.name}`, issues);
     assert(Array.isArray(level.waves) && level.waves.length > 0, `${id}: missing waves`, issues);
-    if (level.map) validateMap(`${id}.map`, level.map, issues);
+    if (level.map) {
+      assert(level.map.id === id, `${id}: runtime map id ${level.map.id} should match level slot id`, issues);
+      assert(/^关卡\d{2}$/.test(level.map.name), `${id}: map name should use numeric label only, got ${level.map.name}`, issues);
+      validateMap(`${id}.map`, level.map, issues);
+    }
   }
   for (const [id, endless] of Object.entries(data.ENDLESS_MAPS || {})) {
     assert(endless.name, `${id}: missing endless map name`, issues);

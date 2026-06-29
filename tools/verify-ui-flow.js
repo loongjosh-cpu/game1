@@ -389,6 +389,18 @@ function testStaticUiGuards() {
   ['主界面只保留', '过程性文案', 'demo目标'].forEach(text => {
     assert(!demo.includes(text), `demo should not include process placeholder copy: ${text}`);
   });
+  [
+    '\u8fb9\u5883\u86c7\u9053',
+    '\u53cc\u95e8\u6c47\u6d41',
+    '\u73af\u5f62\u77ff\u533a',
+    '\u88c2\u8c37\u4e09\u7ebf',
+    '\u8fdc\u5f81\u8bd5\u9a8c',
+    '\u6781\u51a0\u88c2\u9699',
+    '\u53cc\u7ffc\u524d\u7ebf',
+    '\u5317\u89d2\u5821\u5792'
+  ].forEach(text => {
+    assert(!demo.includes(text), `demo should not expose designed level name: ${text}`);
+  });
   assert(demo.includes('id="btnEnemyTest"'), 'demo should expose the enemy combat browser test entry');
   assert(demo.includes('id="enemyTestPanel"'), 'demo should include the enemy combat test control panel');
   ['id="enemyTestStart"', 'id="enemyTestStop"', 'id="enemyTestCount"', 'id="enemyTestInterval"'].forEach(snippet => {

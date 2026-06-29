@@ -63,7 +63,7 @@ const LEVEL1_FRONTIER_MAP={
   schemaVersion:1,
   kind:'level-map',
   id:'border-snake',
-  name:'边境蛇道',
+  name:'关卡01',
   unitScale:0.82,
   w:W,
   h:H,

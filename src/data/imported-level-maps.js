@@ -37,6 +37,7 @@ function buildImportedCorridorLevelMap(def){
     name:def.name,
     levelId:def.levelId||def.id,
     levelName:def.levelName||def.name,
+    sourceId:def.sourceId||def.id,
     summary:def.summary||'',
     unitScale:def.unitScale||1,
     worldSize:{w:width,h:height},
@@ -52,7 +53,8 @@ function buildImportedCorridorLevelMap(def){
 const IMPORTED_LEVEL_MAPS={
   "level1": buildImportedCorridorLevelMap({
     id:"level1",
-    name:"边境蛇道",
+    name:"关卡01",
+    sourceId:"border-snake",
     summary:"单入口长蛇形路线，用大块封闭障碍制造回头路，验证基础塔位和反应炉距离规则。",
     unitScale:0.82,
     corridorRadius:240,
@@ -67,7 +69,8 @@ const IMPORTED_LEVEL_MAPS={
   }),
   "level2": buildImportedCorridorLevelMap({
     id:"level2",
-    name:"双门汇流",
+    name:"关卡02",
+    sourceId:"dual-gate-conflux",
     summary:"上下双入口在中段汇流，考验减速、AOE 与汇流点防守。",
     unitScale:0.78,
     corridorRadius:330,
@@ -83,7 +86,8 @@ const IMPORTED_LEVEL_MAPS={
   }),
   "level3": buildImportedCorridorLevelMap({
     id:"level3",
-    name:"环形矿区",
+    name:"关卡03",
+    sourceId:"ring-mine",
     summary:"双入口绕行中央封闭区，拉扯内外圈战线与经济扩张。",
     unitScale:0.74,
     corridorRadius:240,
@@ -100,7 +104,8 @@ const IMPORTED_LEVEL_MAPS={
   }),
   "level4": buildImportedCorridorLevelMap({
     id:"level4",
-    name:"裂谷三线",
+    name:"关卡04",
+    sourceId:"rift-three-lanes",
     summary:"三入口多线压迫，需要分线布防与火力转移。",
     unitScale:0.70,
     corridorRadius:310,
@@ -117,7 +122,8 @@ const IMPORTED_LEVEL_MAPS={
   }),
   "level5": buildImportedCorridorLevelMap({
     id:"level5",
-    name:"远征试验",
+    name:"关卡05",
+    sourceId:"expedition-trial",
     summary:"四入口大地图关卡，原五关收束测试。",
     unitScale:0.64,
     corridorRadius:310,
@@ -136,10 +142,11 @@ const IMPORTED_LEVEL_MAPS={
   "level6": {
     "schemaVersion": 1,
     "kind": "level-map",
-    "id": "polar-rift-lines",
-    "name": "极冠裂隙",
+    "id": "level6",
+    "name": "关卡06",
+    "sourceId": "polar-rift-lines",
     "levelId": "level6",
-    "levelName": "极冠裂隙",
+    "levelName": "关卡06",
     "summary": "顶部核心，左右翼与下方夹击。中央裂隙形成双翼推进，保留原图顶部核心的紧张感。",
     "unitScale": 0.62,
     "worldSize": {
@@ -908,10 +915,11 @@ const IMPORTED_LEVEL_MAPS={
   "level7": {
     "schemaVersion": 1,
     "kind": "level-map",
-    "id": "dual-wing-front",
-    "name": "双翼前线",
+    "id": "level7",
+    "name": "关卡07",
+    "sourceId": "dual-wing-front",
     "levelId": "level7",
-    "levelName": "双翼前线",
+    "levelName": "关卡07",
     "summary": "左侧核心、右侧多入口。上翼和下翼路径长度接近，玩家不能只守一路，需要用小反应炉逐步外推。",
     "unitScale": 0.66,
     "worldSize": {
@@ -1676,10 +1684,11 @@ const IMPORTED_LEVEL_MAPS={
   "level8": {
     "schemaVersion": 1,
     "kind": "level-map",
-    "id": "north-corner-citadel",
-    "name": "北角堡垒",
+    "id": "level8",
+    "name": "关卡08",
+    "sourceId": "north-corner-citadel",
     "levelId": "level8",
-    "levelName": "北角堡垒",
+    "levelName": "关卡08",
     "summary": "北西角核心，远端多入口绕行后压入核心区。修复非法出生点，并用路线型地貌统一视觉风格。",
     "unitScale": 0.64,
     "worldSize": {
@@ -2522,10 +2531,11 @@ const IMPORTED_LEVEL_MAPS={
   "level9": {
     "schemaVersion": 1,
     "kind": "level-map",
-    "id": "polar-rift-lines",
-    "name": "极冠裂隙",
+    "id": "level9",
+    "name": "关卡09",
+    "sourceId": "polar-rift-lines",
     "levelId": "level9",
-    "levelName": "极冠裂隙",
+    "levelName": "关卡09",
     "summary": "顶部核心，左右翼与下方夹击。中央裂隙形成双翼推进，保留原图顶部核心的紧张感。",
     "unitScale": 0.62,
     "worldSize": {

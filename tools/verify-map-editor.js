@@ -24,6 +24,8 @@ function validateLevels(levels) {
     const label = lv?.id || lv?.name || `#${idx}`;
     if (!lv?.id) issues.push(`${label}: missing id`);
     if (!lv?.name) issues.push(`${label}: missing name`);
+    if (lv?.id && !/^level\d+$/.test(lv.id)) issues.push(`${label}: editor level id should use level slot id`);
+    if (lv?.name && !/^关卡\d{2}$/.test(lv.name)) issues.push(`${label}: editor level name should use numeric label only`);
     if (!Array.isArray(lv?.walls)) issues.push(`${label}: missing walls`);
     if (!Array.isArray(lv?.spawns) || !lv.spawns.length) issues.push(`${label}: missing spawns`);
     if (!lv?.reactor || !Number.isFinite(lv.reactor.x) || !Number.isFinite(lv.reactor.y)) {
