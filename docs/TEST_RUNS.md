@@ -403,3 +403,59 @@ meta systems ok: save migration, shop purchase, loadout equip, mutex, prerequisi
 遗留：
 - `map-editor.before-map-import.html` 仍是历史未跟踪备份文件，本轮继续忽略。
 - 本批次验证了 UI 状态逻辑和关键静态护栏，但不等同于真实浏览器里逐屏视觉 QA；后续如果继续 UI 打磨，建议再做人工截图/实机确认。
+
+## 2026-06-29：批次 9
+
+范围：
+- 全局回归与集成压力测试。
+- 在前 8 个批次都通过后，补充跨系统串联检查：场景方法组合、全部关卡/无尽地图寻路、无尽长波次 roster、固定关卡波次、典型芯片组合与启动入口。
+
+执行命令：
+```bash
+node tools/verify-integration-stress.js
+node tools/verify-game-preflight.js
+node tools/verify-map-editor.js
+node tools/verify-build-flow.js
+node tools/verify-enemy-targeting.js
+node tools/verify-tower-combat.js
+node tools/verify-drone-system.js
+node tools/verify-wave-economy.js
+node tools/verify-meta-systems.js
+node tools/verify-ui-flow.js
+```
+
+结果：
+```text
+integration stress ok: scene composition, map reachability, long-wave rosters, fixed waves and meta combos verified
+game preflight ok: 44 scripts, 17 towers, 14 enemies
+map editor ok: 9 levels, 9 rendered cards
+已加载 9 张关卡，列表显示 9 张
+build flow ok: placement, channel, upgrade and sell guards verified
+enemy targeting ok: taunt range, priority, reactor fallback and E11 blocker rules verified
+tower combat ok: attacks, DOT, healing, shields, projectiles and chip combat effects verified
+drone system ok: production, targeting, chase, stuck recovery, aggro, revive, death blast and D3 repair verified
+wave economy ok: kill rewards, spawn scaling, fixed waves, endless budget, reactor income and star-core rewards verified
+meta systems ok: save migration, shop purchase, loadout equip, mutex, prerequisites, effects and persistence verified
+ui flow ok: view toggle, minimap modes, pause/ESC, home locks, archives, icons and editor interactions verified
+```
+
+本轮新增自动化覆盖：
+
+- `GameScene` 的模块组合完整性：创建/更新流程调用的方法必须能在拆分后的 game/render 模块中找到。
+- 全部关卡与无尽地图都能通过 `buildNavigation()` 为每个出生点生成通向反应炉的路径。
+- 无尽模式连续 60 波 roster 生成稳定：敌人类型存在、预算不过度溢出、特殊敌人单波数量受控。
+- 固定关卡波次完整：level1-level5 为 10 波，level6-level9 为 15 波；roster 敌人存在，lane 符合运行时折返规则。
+- 典型芯片组合可同时生效：P2/P4/P7、B1/B3/B4/B5/B6/B7、D1/D2/D3、主反应炉补给等关键效果字段可输出。
+- 毒药芯片互斥仍成立，避免全局毒药三选一规则被集成组合破坏。
+- `launch()` 入口存在，关卡表与主界面 `LEVEL_UI_ORDER` 保持一致，`endless1` 仍可作为无尽入口。
+
+发现与处理：
+
+- 新增验证器初版把固定波次 lane 限定为必须小于出生点数量；实际运行时代码会对 lane 做取模折返，因此改为验证“非负整数且可折返”。这不是运行 bug，但后续如果追求数据可读性，可以把固定波次 lane 统一规范成实际入口索引。
+- 未发现新的真实游戏逻辑 bug。
+
+清理：
+- 已删除旧的未跟踪备份文件 `map-editor.before-map-import.html`。
+
+遗留：
+- 批次 9 是自动化串联与压力级静态/规则验证，不等同于真实浏览器长时间挂机。最终发布前仍建议人工跑至少 1 次关卡模式与 1 次无尽模式实机流程。
