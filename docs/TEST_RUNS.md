@@ -241,3 +241,57 @@ tower combat ok: attacks, DOT, healing, shields, projectiles and chip combat eff
 遗留：
 
 - 本批次验证的是无人机状态机和结算规则，不等同于浏览器内长时间实战压力测试；大量无人机、多墙体、多高速怪场景仍建议在最终批次做实机观察。
+
+## 2026-06-29：批次 6
+
+范围：
+- 波次、经济、奖励与模式结算。
+- 覆盖关卡固定波次、无尽随机预算、击杀收益、召唤怪收益屏蔽、反应炉产能、主反应炉芯片波次补给、星核结算。
+
+执行命令：
+```bash
+node tools/verify-wave-economy.js
+node tools/verify-game-preflight.js
+node tools/verify-map-editor.js
+node tools/verify-build-flow.js
+node tools/verify-enemy-targeting.js
+node tools/verify-tower-combat.js
+node tools/verify-drone-system.js
+```
+
+结果：
+```text
+wave economy ok: kill rewards, spawn scaling, fixed waves, endless budget, reactor income and star-core rewards verified
+game preflight ok: 44 scripts, 17 towers, 14 enemies
+map editor ok: 9 levels, 9 rendered cards
+已加载 9 张关卡，列表显示 9 张
+build flow ok: placement, channel, upgrade and sell guards verified
+enemy targeting ok: taunt range, priority, reactor fallback and E11 blocker rules verified
+tower combat ok: attacks, DOT, healing, shields, projectiles and chip combat effects verified
+drone system ok: production, targeting, chase, stuck recovery, aggro, revive, death blast and D3 repair verified
+```
+
+本轮新增自动化覆盖：
+
+- 击杀收益 = 敌人威胁成本 × 3。
+- 召唤怪与分裂子怪不提供击杀能量。
+- E3 分裂后生成两个召唤标记的 E1。
+- 无尽模式只提高 HP，不提高伤害、速度、攻击间隔。
+- 关卡模式使用固定 roster 与固定 scale。
+- 无尽随机波次遵守预算、特殊怪预算上限、特殊怪同类型数量上限、直接压力怪前置比例。
+- E2/E4/E7/E8/E11/E13/E14 等敌人的无尽解锁波次入口。
+- 前 5 波主反应炉芯片每波 +120 能量，超过限制后停止。
+- 无尽模式结算按每 5 波 1 星核；主动退出同样按 completedWaves 结算。
+- 关卡失败不给星核、不标记通关；关卡完成给 1 星核并记录通关。
+- 反应炉产能只统计存活的主/小反应炉。
+- 后续导入关卡 level6-level9 使用 15 波；原前五关保持 10 波。
+
+发现与处理：
+
+- 本批次没有发现需要修改游戏逻辑的真实 bug。
+- 新增 `tools/verify-wave-economy.js`，作为波次与经济系统的回归测试入口。
+- 初次运行时测试沙箱导出变量写法有误，已修正；这是验证器环境问题，不是游戏逻辑问题。
+
+遗留：
+
+- 本批次验证的是规则层，不覆盖实际长时间无尽模式的经济曲线手感；最终批次仍需要跑完整实战压力测试。
