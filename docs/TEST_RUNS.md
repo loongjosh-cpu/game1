@@ -192,3 +192,52 @@ enemy targeting ok: taunt range, priority, reactor fallback and E11 blocker rule
 遗留：
 
 - 本批次验证的是结算层与触发条件，不覆盖完整浏览器内视觉表现、长时间波次压力测试和复杂实战手感。
+
+## 2026-06-29：批次 5
+
+范围：
+- 无人机系统：生产、补员耗能、目标选择、追击、卡住恢复、仇恨转移、D1/D2 芯片、D3 维修。
+- 重点覆盖之前实战反复出现的问题：无人机目标过度集中、交战后脱战换目标、追击高速敌人时停止、巡逻/卡住、不该穿墙的导航点。
+
+执行命令：
+```bash
+node tools/verify-drone-system.js
+node tools/verify-game-preflight.js
+node tools/verify-map-editor.js
+node tools/verify-build-flow.js
+node tools/verify-enemy-targeting.js
+node tools/verify-tower-combat.js
+```
+
+结果：
+```text
+drone system ok: production, targeting, chase, stuck recovery, aggro, revive, death blast and D3 repair verified
+game preflight ok: 44 scripts, 17 towers, 14 enemies
+map editor ok: 9 levels, 9 rendered cards
+已加载 9 张关卡，列表显示 9 张
+build flow ok: placement, channel, upgrade and sell guards verified
+enemy targeting ok: taunt range, priority, reactor fallback and E11 blocker rules verified
+tower combat ok: attacks, DOT, healing, shields, projectiles and chip combat effects verified
+```
+
+本轮新增自动化覆盖：
+
+- D1 补员上限、补员耗能、补员能量开关。
+- 多无人机目标负载分配：空闲无人机避免堆叠到已有无人机负责的目标。
+- 已进入交战状态的无人机不会因为重新评估目标而脱战；未交战无人机允许重新分配目标。
+- 无人机选定目标后，追击阶段可以离开核心范围；追击失败会丢弃目标并短暂避开该目标。
+- 导航点必须避开墙体与阻塞格；卡住恢复会清除目标、路线与运动状态。
+- 无人机攻击后拉取敌人仇恨；当前无人机死亡后，仇恨可转移给仍在攻击该敌人的其他无人机。
+- D1 死亡殉爆芯片：80 码范围、20 伤害。
+- D2 复活芯片：核心处满血复活、持续扣血、不可治疗、只触发一次。
+- D3 维修无人机不攻击敌人；维修时治疗塔并扣除自身等量 HP；低血撤离芯片触发返航。
+
+发现与处理：
+
+- 本批次没有发现需要修改游戏逻辑的真实 bug。
+- 新增 `tools/verify-drone-system.js`，作为无人机系统的回归测试入口。
+- 初次运行时测试沙箱漏加载 `nearestWallDistance()` 所在的路径模块，已修正为加载 `src/core/pathfinding.js`；这是验证器环境问题，不是游戏逻辑问题。
+
+遗留：
+
+- 本批次验证的是无人机状态机和结算规则，不等同于浏览器内长时间实战压力测试；大量无人机、多墙体、多高速怪场景仍建议在最终批次做实机观察。
