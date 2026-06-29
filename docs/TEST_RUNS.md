@@ -349,3 +349,57 @@ wave economy ok: kill rewards, spawn scaling, fixed waves, endless budget, react
 遗留：
 
 - 本批次验证的是状态与规则层，不覆盖真实浏览器拖拽手感、视觉反馈和响应式 UI 布局；这些留到 UI/视角/地图编辑器批次处理。
+
+## 2026-06-29：批次 8
+
+范围：
+- UI、视角、暂停、档案、地图编辑器交互回归。
+- 重点覆盖之前反复出问题的视角切换、局部/全局视角联动、小地图显示、ESC/空格暂停优先级、关卡/无尽入口状态、档案图标和地图编辑器拖动入口。
+
+执行命令：
+```bash
+node tools/verify-ui-flow.js
+node tools/verify-game-preflight.js
+node tools/verify-map-editor.js
+node tools/verify-build-flow.js
+node tools/verify-enemy-targeting.js
+node tools/verify-tower-combat.js
+node tools/verify-drone-system.js
+node tools/verify-wave-economy.js
+node tools/verify-meta-systems.js
+```
+
+结果：
+```text
+ui flow ok: view toggle, minimap modes, pause/ESC, home locks, archives, icons and editor interactions verified
+game preflight ok: 44 scripts, 17 towers, 14 enemies
+map editor ok: 9 levels, 9 rendered cards
+已加载 9 张关卡，列表显示 9 张
+build flow ok: placement, channel, upgrade and sell guards verified
+enemy targeting ok: taunt range, priority, reactor fallback and E11 blocker rules verified
+tower combat ok: attacks, DOT, healing, shields, projectiles and chip combat effects verified
+drone system ok: production, targeting, chase, stuck recovery, aggro, revive, death blast and D3 repair verified
+wave economy ok: kill rewards, spawn scaling, fixed waves, endless budget, reactor income and star-core rewards verified
+meta systems ok: save migration, shop purchase, loadout equip, mutex, prerequisites, effects and persistence verified
+```
+
+本轮新增自动化覆盖：
+
+- 视角切换按钮会在主界面与暂停界面同步标签、`aria-pressed`、存档设置，并通知当前游戏场景重新应用相机。
+- 局部视角会跟随飞船并显示小地图；全局视角会停止跟随、居中地图并隐藏小地图。
+- ESC 优先级：已暂停时恢复；读条中取消读条；建造/选塔时清空选择；否则进入暂停。
+- 暂停入口会同步视角 UI，并强制刷新一次小地图，避免暂停面板显示旧状态。
+- 关卡/无尽入口会自动切换当前模式；关卡锁定逻辑仍按上一关通关解锁；出击塔组上限仍为 10。
+- 塔档案会展示建造费用与升级费用；怪物档案只展示速度定性标签，不把具体速度作为面板数值暴露。
+- 档案图标统一走 `TOWER_ICON_SPECS` / `ENEMY_ICON_SPECS` 与 `ICON_GLYPH_DEFS`，避免档案图标和战斗图标继续分叉。
+- 地图编辑器保留墙体、出生点、主反应炉的拖动入口，以及 JSON 导入和加载关卡入口。
+- 静态 UI 护栏：保留 `:focus-visible`、响应式媒体规则，避免过高 `z-index` 和无焦点替代的 `outline:none`。
+
+发现与处理：
+
+- 首次编写验证器时有两处测试假设过死：地图编辑器导入不是独立 `importMapText()`，而是按钮回调；关卡 ID 命名也不适合用简单关键词筛选数量。已修正为检查真实交互入口和 `LEVELS` 列表存在。
+- 本轮没有发现需要修改游戏运行逻辑的真实 bug。
+
+遗留：
+- `map-editor.before-map-import.html` 仍是历史未跟踪备份文件，本轮继续忽略。
+- 本批次验证了 UI 状态逻辑和关键静态护栏，但不等同于真实浏览器里逐屏视觉 QA；后续如果继续 UI 打磨，建议再做人工截图/实机确认。
