@@ -38,7 +38,7 @@
   line-height:1.5;
   box-shadow:0 0 16px #07111c88;
 }
-.twPanelHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.twPanelHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-4px -4px 6px;padding:4px}
 #twPanel h3{color:#7ec8e3;font-size:13px;font-weight:400}
 .panelClose{width:24px;height:24px;border:1px solid #29435a;border-radius:5px;background:#0d1826;color:#8196a8;cursor:pointer;font-family:monospace}
 .panelClose:hover{border-color:#7ec8e3;color:#dff7ff}
@@ -96,10 +96,11 @@
   backdrop-filter:blur(6px);
   font-size:12px;
 }
-.enemyTestHead{display:flex;align-items:center;justify-content:space-between;margin:-4px -4px 10px;padding:4px;color:#9fe8ff;cursor:move;user-select:none;touch-action:none}
+.floatingDragHandle{cursor:move;user-select:none;touch-action:none}
+#twPanel.dragging,#enemyTestPanel.dragging{box-shadow:0 0 30px #0b1826cc,0 0 0 1px #7ec8e3aa,inset 0 0 20px #123a5533}
+.enemyTestHead{display:flex;align-items:center;justify-content:space-between;margin:-4px -4px 10px;padding:4px;color:#9fe8ff}
 .enemyTestHead strong{font-size:15px;letter-spacing:.05em}
 .enemyTestHead span{font-size:10px;color:#ffd36a;border:1px solid #6d5b24;border-radius:999px;padding:2px 7px;background:#2a2109aa}
-#enemyTestPanel.dragging{box-shadow:0 0 30px #0b1826cc,0 0 0 1px #7ec8e3aa,inset 0 0 20px #123a5533}
 #enemyTestPanel label{display:block;margin:8px 0 4px;color:#89aabc}
 #enemyTestPanel select,#enemyTestPanel input{
   width:100%;

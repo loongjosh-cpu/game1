@@ -16,6 +16,7 @@ function initPageFlow(){
     else returnToHome();
   };
   bindMetaOpenDelegates();
+  initDraggablePanels();
   showHomePane('homeMainPane');
 }
 

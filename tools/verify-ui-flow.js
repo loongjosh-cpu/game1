@@ -394,18 +394,26 @@ function testStaticUiGuards() {
     assert(demo.includes(snippet), `enemy combat sandbox should include control: ${snippet}`);
   });
   assert(demo.includes('src/game/enemy-test-lab.js'), 'demo should load the enemy combat test lab script');
+  assert(demo.includes('src/ui/draggable-panels.js'), 'demo should load shared draggable panel helpers');
+  assert(demo.indexOf('src/ui/draggable-panels.js') < demo.indexOf('src/ui/page-flow.js'), 'draggable panel helpers should load before page-flow.js');
   assert(demo.indexOf('src/game/enemy-test-lab.js') < demo.indexOf('src/game/game-scene.js'), 'enemy test lab should load before game-scene.js');
 
   const pageFlow = read('src/ui/page-flow.js');
+  assert(pageFlow.includes('initDraggablePanels()'), 'page flow should initialize shared draggable panels');
   assert(pageFlow.includes('startEnemyCombatTest'), 'page flow should define an enemy combat test launcher');
   assert(pageFlow.includes('btnEnemyTest'), 'page flow should bind the enemy combat test button');
   assert(pageFlow.includes('launch([],ENEMY_TEST_MODE)'), 'enemy combat test should launch without requiring a tower loadout');
 
   const lab = read('src/game/enemy-test-lab.js');
-  ['ENEMY_TEST_MODE', 'ENEMY_TEST_MAP', 'startEnemyTestWave', 'stopEnemyTestWave', 'enemyTestBuildChoices', 'applyEnemyTestCamera', 'bindEnemyTestPanelDrag', 'clearEnemyTestEnemies'].forEach(snippet => {
+  ['ENEMY_TEST_MODE', 'ENEMY_TEST_MAP', 'startEnemyTestWave', 'stopEnemyTestWave', 'enemyTestBuildChoices', 'applyEnemyTestCamera', 'makePanelDraggable', 'clearEnemyTestEnemies'].forEach(snippet => {
     assert(lab.includes(snippet), `enemy test lab missing expected hook: ${snippet}`);
   });
-  assert(css.includes('.enemyTestHead') && css.includes('cursor:move'), 'enemy combat sandbox panel header should show draggable affordance');
+  const draggable = read('src/ui/draggable-panels.js');
+  ['makePanelDraggable', 'resetFloatingPanel', 'twPanel', 'twPanelHead'].forEach(snippet => {
+    assert(draggable.includes(snippet), `shared draggable helper missing expected hook: ${snippet}`);
+  });
+  assert(css.includes('.floatingDragHandle') && css.includes('cursor:move'), 'draggable panels should show a move cursor affordance');
+  assert(css.includes('#twPanel.dragging') && css.includes('#enemyTestPanel.dragging'), 'tower and enemy sandbox panels should share dragging feedback');
 }
 
 function main() {
