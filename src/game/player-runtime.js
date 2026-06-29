@@ -1,5 +1,9 @@
 const PlayerRuntimeMethods={
   updateShip(dt){
+    if(this.isEnemyTestMode?.()){
+      this.hideEnemyTestShip?.();
+      return;
+    }
     let vx=0,vy=0;
     if(!this.shipDead){
       if(this.keys.left.isDown)vx=-1;
@@ -65,6 +69,7 @@ const PlayerRuntimeMethods={
     if(this.input.activePointer.leftButtonDown()&&!this._buildLatch&&ok){this._buildLatch=true;this.startBuild(wx,wy)}
   },
   updateShipMissiles(dt){
+    if(this.isEnemyTestMode?.())return;
     if(this.shipDead)return;
     this.mslTmr+=dt;
     if(this.mslTmr<this.meta.missileCd)return;

@@ -330,21 +330,24 @@
 </div>
 <div id="enemyTestPanel">
   <div class="enemyTestHead">
-    <strong>怪物攻击测试</strong>
-    <span>靶场模式</span>
+    <strong>怪物攻击沙盒</strong>
+    <span>纯沙盒</span>
   </div>
   <label>怪物
     <select id="enemyTestEnemy"></select>
   </label>
-  <label>目标
-    <select id="enemyTestTarget"></select>
+  <label>数量
+    <input id="enemyTestCount" type="number" min="1" max="200" value="10">
+  </label>
+  <label>出怪间隔 ms
+    <input id="enemyTestInterval" type="number" min="80" max="3000" step="10" value="450">
   </label>
   <div class="enemyTestInfo" id="enemyTestInfo"></div>
   <div class="enemyTestActions">
-    <button type="button" id="enemyTestSpawn">生成 1 个</button>
-    <button type="button" id="enemyTestSpawnPack">生成 5 个</button>
-    <button type="button" id="enemyTestResetTargets">重置靶标</button>
+    <button type="button" id="enemyTestStart">开始</button>
+    <button type="button" id="enemyTestStop">结束</button>
     <button type="button" id="enemyTestClear">清怪</button>
+    <button type="button" id="enemyTestReset">重置沙盒</button>
   </div>
   <div class="enemyTestHp" id="enemyTestHp"></div>
   <div class="enemyTestLog" id="enemyTestLog"></div>

@@ -38,8 +38,8 @@ function launch(sel,mode='endless1'){
       this.bindTowerPanelButtons();
       this.rebuildPanel();
       this.initMiniMap();
-      this.setupEnemyTestLab();
       this.applyViewSettings();
+      this.setupEnemyTestLab();
     }
     smallReactorCount(){return this.reactors.filter(r=>this.reactorAlive(r)&&!r._isMainReactor).length}
     energyRate(){return this.reactors.reduce((sum,r)=>sum+(this.reactorAlive(r)?r._type.upg[r._lv||0].prod:0),0)}
@@ -74,7 +74,10 @@ function launch(sel,mode='endless1'){
 
   }
   Object.assign(GameScene.prototype,TextureFactoryMethods,SceneSetupMethods,MiniMapMethods,InputControllerMethods,BuildPanelMethods,PlacementControllerMethods,TowerPanelMethods,DroneControllerMethods,CombatUtilMethods,TowerCombatMethods,ProjectileControllerMethods,EnemyControllerMethods,PlayerRuntimeMethods,HudOverlayMethods,EnemyTestLabMethods);
-  const game=new Phaser.Game({type:Phaser.AUTO,width:W,height:H,backgroundColor:'#0d1219',parent:'gamePage',scale:{mode:Phaser.Scale.ENVELOP,autoCenter:Phaser.Scale.CENTER_BOTH},physics:{default:'arcade',arcade:{gravity:{y:0}}},scene:GameScene});
+  const gameWidth=testMap?.worldSize?.w||W;
+  const gameHeight=testMap?.worldSize?.h||H;
+  const scaleMode=testMap?Phaser.Scale.FIT:Phaser.Scale.ENVELOP;
+  const game=new Phaser.Game({type:Phaser.AUTO,width:gameWidth,height:gameHeight,backgroundColor:'#0d1219',parent:'gamePage',scale:{mode:scaleMode,autoCenter:Phaser.Scale.CENTER_BOTH},physics:{default:'arcade',arcade:{gravity:{y:0}}},scene:GameScene});
   setTimeout(()=>document.querySelector('canvas')?.focus(),500);
   return game;
 }

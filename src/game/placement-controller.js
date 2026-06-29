@@ -3,18 +3,18 @@ const PlacementControllerMethods={
     if(td?.id==='B4'&&this.meta.b4Resonance)return Math.max(0,td.cost-80);
     return td.cost
   },
-  placementPoint(x,y,td=this.sel){return td.type==='path'?snapToWallEdge(x,y,20):{x,y,snapped:false}},
+  placementPoint(x,y,td=this.sel){return this.isEnemyTestMode?.()?{x,y,snapped:false}:td.type==='path'?snapToWallEdge(x,y,20):{x,y,snapped:false}},
   canPl(x,y){
     const td=this.sel;
     const point=this.placementPoint(x,y,td);
     const radius=this.placementRadius(td);
     x=point.x;
     y=point.y;
-    if(td===SMALL_REACTOR&&this.smallReactorCount()>=td.maxCount)return false;
-    if(!this.validWallPlacement(td,x,y,radius))return false;
+    if(!this.isEnemyTestMode?.()&&td===SMALL_REACTOR&&this.smallReactorCount()>=td.maxCount)return false;
+    if(!this.isEnemyTestMode?.()&&!this.validWallPlacement(td,x,y,radius))return false;
     if(this.overlapsExistingDefense(x,y,radius))return false;
-    if(this.overlapsReactorRule(td,x,y,radius))return false;
-    if(this.tooCloseToSpawn(x,y,radius))return false;
+    if(!this.isEnemyTestMode?.()&&this.overlapsReactorRule(td,x,y,radius))return false;
+    if(!this.isEnemyTestMode?.()&&this.tooCloseToSpawn(x,y,radius))return false;
     return true;
   },
   placementRadius(td){
@@ -61,6 +61,13 @@ const PlacementControllerMethods={
     x=point.x;
     y=point.y;
     if(!this.canStartBuildAt(td,x,y))return;
+    if(this.isEnemyTestMode?.()){
+      this.placeTower(x,y);
+      this.bld=true;
+      this.ghost.setVisible(false);
+      this.updPanel();
+      return;
+    }
     this.channel={kind:'build',td,x,y,elapsed:0,duration:BUILD_TIME[td.type]||1800,label:`建造 ${td.name}`};
     this.bld=false;
     this.ghost.setVisible(false);
@@ -69,6 +76,7 @@ const PlacementControllerMethods={
   },
   canStartBuildAt(td,x,y){
     if(this.en<this.towerBuildCost(td))return false;
+    if(this.isEnemyTestMode?.())return this.canPlaceType(td,x,y);
     if(Phaser.Math.Distance.Between(this.ship.x,this.ship.y,x,y)>sd(SHIP_RNG))return false;
     return this.canPlaceType(td,x,y);
   },
@@ -209,7 +217,7 @@ const PlacementControllerMethods={
   makeTowerInteractive(tw){
     tw.setInteractive();
     tw.on('pointerdown',pointer=>{
-      const inRange=Phaser.Math.Distance.Between(this.ship.x,this.ship.y,tw.x,tw.y)<=sd(SHIP_RNG);
+      const inRange=this.isEnemyTestMode?.()||Phaser.Math.Distance.Between(this.ship.x,this.ship.y,tw.x,tw.y)<=sd(SHIP_RNG);
       if(pointer.leftButtonDown()&&inRange){
         this.selTw=tw;
         this.updTwPanel()
@@ -222,6 +230,13 @@ const PlacementControllerMethods={
   },
   trySelectReactor(pointer,r){
     if(!pointer.leftButtonDown()||this.shipDead)return;
+    if(this.isEnemyTestMode?.()){
+      this.bld=false;
+      this.selTw=r;
+      this.updPanel();
+      this.updTwPanel();
+      return;
+    }
     const dist=Phaser.Math.Distance.Between(this.ship.x,this.ship.y,r.x,r.y);
     if(dist>sd(SHIP_RNG))return;
     this.bld=false;
@@ -230,7 +245,7 @@ const PlacementControllerMethods={
     this.updTwPanel();
   },
   placeSmallReactor(x,y){
-    if(this.en<SMALL_REACTOR.cost||this.smallReactorCount()>=SMALL_REACTOR.maxCount)return;
+    if(!this.isEnemyTestMode?.()&&(this.en<SMALL_REACTOR.cost||this.smallReactorCount()>=SMALL_REACTOR.maxCount))return;
     this.en-=SMALL_REACTOR.cost;
     const r=this.createSmallReactorSprite(x,y);
     this.reactors.push(r);

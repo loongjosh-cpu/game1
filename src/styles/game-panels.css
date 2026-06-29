@@ -100,7 +100,7 @@
 .enemyTestHead strong{font-size:15px;letter-spacing:.05em}
 .enemyTestHead span{font-size:10px;color:#ffd36a;border:1px solid #6d5b24;border-radius:999px;padding:2px 7px;background:#2a2109aa}
 #enemyTestPanel label{display:block;margin:8px 0 4px;color:#89aabc}
-#enemyTestPanel select{
+#enemyTestPanel select,#enemyTestPanel input{
   width:100%;
   margin-top:4px;
   padding:7px 8px;
@@ -108,6 +108,7 @@
   border-radius:8px;
   background:#0c1a28;
   color:#dff7ff;
+  box-sizing:border-box;
 }
 .enemyTestInfo,.enemyTestHp,.enemyTestLog{
   margin-top:9px;

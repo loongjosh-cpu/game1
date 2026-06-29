@@ -1,5 +1,5 @@
 const BuildPanelMethods={
-  buildChoices(){return[...this.selTowers,SMALL_REACTOR]},
+  buildChoices(){return this.isEnemyTestMode?.()?this.enemyTestBuildChoices():[...this.selTowers,SMALL_REACTOR]},
   rebuildPanel(){
     const bp=document.getElementById('buildPanel');
     bp.innerHTML='';

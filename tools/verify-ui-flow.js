@@ -390,6 +390,9 @@ function testStaticUiGuards() {
   });
   assert(demo.includes('id="btnEnemyTest"'), 'demo should expose the enemy combat browser test entry');
   assert(demo.includes('id="enemyTestPanel"'), 'demo should include the enemy combat test control panel');
+  ['id="enemyTestStart"', 'id="enemyTestStop"', 'id="enemyTestCount"', 'id="enemyTestInterval"'].forEach(snippet => {
+    assert(demo.includes(snippet), `enemy combat sandbox should include control: ${snippet}`);
+  });
   assert(demo.includes('src/game/enemy-test-lab.js'), 'demo should load the enemy combat test lab script');
   assert(demo.indexOf('src/game/enemy-test-lab.js') < demo.indexOf('src/game/game-scene.js'), 'enemy test lab should load before game-scene.js');
 
@@ -399,7 +402,7 @@ function testStaticUiGuards() {
   assert(pageFlow.includes('launch([],ENEMY_TEST_MODE)'), 'enemy combat test should launch without requiring a tower loadout');
 
   const lab = read('src/game/enemy-test-lab.js');
-  ['ENEMY_TEST_MODE', 'spawnEnemyTestSelection', 'assignEnemyTestTarget', 'resetEnemyTestTargets', 'clearEnemyTestEnemies'].forEach(snippet => {
+  ['ENEMY_TEST_MODE', 'ENEMY_TEST_MAP', 'startEnemyTestWave', 'stopEnemyTestWave', 'enemyTestBuildChoices', 'applyEnemyTestCamera', 'clearEnemyTestEnemies'].forEach(snippet => {
     assert(lab.includes(snippet), `enemy test lab missing expected hook: ${snippet}`);
   });
 }

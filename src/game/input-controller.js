@@ -35,8 +35,9 @@ const InputControllerMethods={
     }
   },
   selectTowerByHotkey(idx){
-    if(idx>=this.selTowers.length)return;
-    this.sel=this.selTowers[idx];
+    const choices=this.buildChoices();
+    if(idx>=choices.length)return;
+    this.sel=choices[idx];
     this.updPanel();
     this.scrollBtnIntoView(idx);
   },
@@ -61,6 +62,7 @@ const InputControllerMethods={
   },
   handlePointerDown(p){
     if(this.shipDead||this.isPaused)return;
+    if(this.isEnemyTestMode?.())return;
     if(p.rightButtonDown())this.shipMoveTarget={x:p.worldX,y:p.worldY};
   },
   bindTowerPanelButtons(){
