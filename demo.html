@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>R-32 DEMO</title>
-<link rel="stylesheet" href="src/styles/main.css?v=20260630-2">
+<link rel="stylesheet" href="src/styles/main.css?v=20260630-3">
 </head>
 <body>
 <div class="page" id="selectPage">
@@ -15,81 +15,90 @@
     <div class="homeHero main">
       <div>
         <div class="homeKicker">R-32 DEFENSE TERMINAL</div>
-        <h1>R-32 鏄熼檯娈栨皯濉旈槻</h1>
-        <div class="homeIntro">閫夋嫨浣滄垬妯″紡锛屾暣澶囧缁勶紝瀹堜綇 R-32 涓诲弽搴旂倝銆?/div>
+        <h1>R-32 星际殖民塔防</h1>
+        <div class="homeIntro">选择作战模式，整备塔组，守住 R-32 主反应炉。</div>
       </div>
-      <div class="coreCount">鏄熸牳 鈼?<span id="homeCoreCount">0</span></div>
+      <div class="coreCount">星核 ◈ <span id="homeCoreCount">0</span></div>
     </div>
     <div class="homeSummaryGrid">
-      <div class="summaryCard"><span>褰撳墠鍦板浘</span><strong id="homeCurrentMode">鏃犲敖妯″紡涓€</strong></div>
-      <div class="summaryCard"><span>鏃犲敖鏈€楂?/span><strong><span id="homeBestWave">0</span> 娉?/strong></div>
-      <div class="summaryCard"><span>瑙嗚妯″紡</span><strong id="homeViewMode">灞€閮ㄨ瑙?/strong></div>
+      <div class="summaryCard"><span>当前地图</span><strong id="homeCurrentMode">无尽模式一</strong></div>
+      <div class="summaryCard"><span>无尽最高</span><strong><span id="homeBestWave">0</span> 波</strong></div>
+      <div class="summaryCard"><span>视角模式</span><strong id="homeViewMode">局部视角</strong></div>
     </div>
     <div class="mainMenuActions">
-      <button type="button" class="mainMenuBtn primary" data-home-pane="homeLevelPane" onclick="activateHomePane(this,event)"><strong>鍏冲崱妯″紡</strong><span>鎸夐『搴忔寫鎴樺浐瀹氬叧鍗★紝閫氬叧涓婁竴鍏冲悗瑙ｉ攣涓嬩竴鍏炽€?/span></button>
-      <button type="button" class="mainMenuBtn" data-home-pane="homeEndlessPane" onclick="activateHomePane(this,event)"><strong>鏃犲敖妯″紡</strong><span>閫夋嫨鏃犲敖鍦板浘锛屽敖鍙兘鎾戣繃鏇村娉㈡骞惰幏鍙栨槦鏍搞€?/span></button>
-      <button type="button" class="mainMenuBtn" data-home-pane="homeArchivePane" onclick="activateHomePane(this,event)"><strong>浣滄垬妗ｆ</strong><span>鏌ョ湅闃插尽濉斻€佹€墿瀹氫綅涓庡叧閿綔鎴樹俊鎭€?/span></button>
-      <button type="button" class="mainMenuBtn" id="btnShop"><strong>涓撶簿鍟嗗簵</strong><span>璐拱椋炶埞涓庨槻寰″涓撶簿鑺墖銆?/span></button>
-      <button type="button" class="mainMenuBtn" id="btnMeta"><strong>鏄熸牳鏁村鑸?/strong><span>瑁呭鎴栧嵏涓嬪凡鎷ユ湁鐨勪笓绮捐姱鐗囥€?/span></button>
-      <button type="button" class="mainMenuBtn" data-home-pane="homeSettingsPane" onclick="activateHomePane(this,event)"><strong>璁剧疆</strong><span>璋冩暣瑙嗚銆佹搷浣滀笌闊抽銆?/span></button>
-      <button type="button" class="mainMenuBtn dev" id="btnEnemyTest"><strong>鎬墿鏀诲嚮娴嬭瘯</strong><span>杩涘叆闈跺満蹇€熺敓鎴愭€墿锛岄獙璇佹敾鍑汇€佸脊閬撱€佸垎瑁傘€佽嚜鐖嗗拰鍙嶅簲鐐変激瀹炽€?/span></button>
+      <button type="button" class="mainMenuBtn primary" data-home-pane="homeLevelPane" onclick="activateHomePane(this,event)"><strong>关卡模式</strong><span>按顺序挑战固定关卡，通关上一关后解锁下一关。</span></button>
+      <button type="button" class="mainMenuBtn" data-home-pane="homeEndlessPane" onclick="activateHomePane(this,event)"><strong>无尽模式</strong><span>选择无尽地图，尽可能撑过更多波次并获取星核。</span></button>
+      <button type="button" class="mainMenuBtn" data-home-pane="homeArchivePane" onclick="activateHomePane(this,event)"><strong>作战档案</strong><span>查看防御塔、怪物定位与关键作战信息。</span></button>
+      <button type="button" class="mainMenuBtn" id="btnShop"><strong>专精商店</strong><span>购买飞船与防御塔专精芯片。</span></button>
+      <button type="button" class="mainMenuBtn" id="btnMeta"><strong>星核整备舱</strong><span>装备或卸下已拥有的专精芯片。</span></button>
+      <button type="button" class="mainMenuBtn" data-home-pane="homeSettingsPane" onclick="activateHomePane(this,event)"><strong>设置</strong><span>调整视角、操作与音频。</span></button>
+      <button type="button" class="mainMenuBtn dev" id="btnEnemyTest"><strong>怪物攻击测试</strong><span>进入靶场快速生成怪物，验证攻击、弹道、分裂、自爆和反应炉伤害。</span></button>
     </div>
   </section>
 
   <section class="homePane" id="homeLevelPane">
     <div class="homeNavBar">
       <div class="homeNavTitle">
-        <h2>鍏冲崱妯″紡</h2>
-        <p>鍥哄畾鍏冲崱鎸夐『搴忚В閿侊紝閫氬叧姣忓叧鑾峰緱 1 鏄熸牳銆?/p>
+        <h2>关卡模式</h2>
+        <p>固定关卡按顺序解锁，通关每关获得 1 星核。</p>
       </div>
-      <button type="button" class="menuBtn" data-home-pane="homeMainPane" onclick="activateHomePane(this,event)">杩斿洖涓荤晫闈?/button>
+      <button type="button" class="menuBtn" data-home-pane="homeMainPane" onclick="activateHomePane(this,event)">返回主界面</button>
     </div>
     <div class="homeStack">
       <section class="homeSection">
         <div class="modeGrid" data-mode-group="level">
           <div class="modeCard active" data-mode="level1">
-            <strong>鍏冲崱01</strong>
-            鍗曞叆鍙ｉ暱铔囧舰璺嚎锛屽熀纭€鎴樼嚎涓庡弽搴旂倝璺濈瑙勫垯楠岃瘉銆?            <span class="modeMeta" data-level-state>鍙寫鎴?/span>
+            <strong>关卡01</strong>
+            单入口长蛇形路线，基础战线与反应炉距离规则验证。
+            <span class="modeMeta" data-level-state>可挑战</span>
           </div>
           <div class="modeCard" data-mode="level2">
-            <strong>鍏冲崱02</strong>
-            涓婁笅鍙屽叆鍙ｅ湪涓姹囨祦锛岃€冮獙鍑忛€熴€丄OE 涓庢眹娴佺偣闃插畧銆?            <span class="modeMeta" data-level-state>鏈В閿?/span>
+            <strong>关卡02</strong>
+            上下双入口在中段汇流，考验减速、AOE 与汇流点防守。
+            <span class="modeMeta" data-level-state>未解锁</span>
           </div>
           <div class="modeCard" data-mode="level3">
-            <strong>鍏冲崱03</strong>
-            鍙屽叆鍙ｇ粫琛屼腑澶皝闂尯锛屾媺鎵唴澶栧湀鎴樼嚎涓庣粡娴庢墿寮犮€?            <span class="modeMeta" data-level-state>鏈В閿?/span>
+            <strong>关卡03</strong>
+            双入口绕行中央封闭区，拉扯内外圈战线与经济扩张。
+            <span class="modeMeta" data-level-state>未解锁</span>
           </div>
           <div class="modeCard" data-mode="level4">
-            <strong>鍏冲崱04</strong>
-            涓夊叆鍙ｅ绾垮帇杩紝闇€瑕佸垎绾垮竷闃蹭笌鐏姏杞Щ銆?            <span class="modeMeta" data-level-state>鏈В閿?/span>
+            <strong>关卡04</strong>
+            三入口多线压迫，需要分线布防与火力转移。
+            <span class="modeMeta" data-level-state>未解锁</span>
           </div>
           <div class="modeCard" data-mode="level5">
-            <strong>鍏冲崱05</strong>
-            鍥涘叆鍙ｅぇ鍦板浘鍏冲崱锛屽師浜斿叧鏀舵潫娴嬭瘯銆?            <span class="modeMeta" data-level-state>鏈В閿?/span>
+            <strong>关卡05</strong>
+            四入口大地图关卡，原五关收束测试。
+            <span class="modeMeta" data-level-state>未解锁</span>
           </div>
           <div class="modeCard" data-mode="level6">
-            <strong>鍏冲崱06</strong>
-            鍚庣画鍏冲崱锛岄《閮ㄦ牳蹇冧笌澶氭柟鍚戝す鍑伙紝15 娉€?            <span class="modeMeta" data-level-state>鏈В閿?/span>
+            <strong>关卡06</strong>
+            后续关卡，顶部核心与多方向夹击，15 波。
+            <span class="modeMeta" data-level-state>未解锁</span>
           </div>
           <div class="modeCard" data-mode="level7">
-            <strong>鍏冲崱07</strong>
-            鍚庣画鍏冲崱锛屽乏渚ф牳蹇冧笌鍙充晶澶氬叆鍙ｏ紝15 娉€?            <span class="modeMeta" data-level-state>鏈В閿?/span>
+            <strong>关卡07</strong>
+            后续关卡，左侧核心与右侧多入口，15 波。
+            <span class="modeMeta" data-level-state>未解锁</span>
           </div>
           <div class="modeCard" data-mode="level8">
-            <strong>鍏冲崱08</strong>
-            鍚庣画鍏冲崱锛岃钀芥牳蹇冧笌闀胯窛绂诲娉紝15 娉€?            <span class="modeMeta" data-level-state>鏈В閿?/span>
+            <strong>关卡08</strong>
+            后续关卡，角落核心与长距离奔波，15 波。
+            <span class="modeMeta" data-level-state>未解锁</span>
           </div>
           <div class="modeCard" data-mode="level9">
-            <strong>鍏冲崱09</strong>
-            鍚庣画鍏冲崱锛屼娇鐢ㄥ綋鍓嶇 4 浠藉叧鍗℃暟鎹紝15 娉€?            <span class="modeMeta" data-level-state>鏈В閿?/span>
+            <strong>关卡09</strong>
+            后续关卡，使用当前第 4 份关卡数据，15 波。
+            <span class="modeMeta" data-level-state>未解锁</span>
           </div>
         </div>
       </section>
       <section class="homeSection">
         <div class="sectionHead">
           <div>
-            <h2>閫夋嫨鍑哄嚮濉旂粍</h2>
-            <p>鏈€澶氭惡甯?10 绉嶅銆傛牴鎹垬鍖哄帇鍔涢厤缃湰娆￠槻绾裤€?/p>
+            <h2>选择出击塔组</h2>
+            <p>最多携带 10 种塔。根据战区压力配置本次防线。</p>
           </div>
           <div class="loadoutCounter"><span class="selCount">0</span>/10</div>
         </div>
@@ -98,12 +107,12 @@
       <section class="homeSection startDock">
         <div class="sectionHead">
           <div>
-            <h2>纭鍑哄嚮</h2>
-            <p class="modeHint">閫夋嫨鍏冲崱01鍑哄嚮濉旓紙鏈€澶?0涓級</p>
+            <h2>确认出击</h2>
+            <p class="modeHint">选择关卡01出击塔（最多10个）</p>
           </div>
           <div class="loadoutCounter"><span class="homeStartTowerCount">0</span>/10</div>
         </div>
-        <button type="button" class="btnStartMode" disabled>寮€濮嬪叧鍗?1</button>
+        <button type="button" class="btnStartMode" disabled>开始关卡01</button>
       </section>
     </div>
   </section>
@@ -111,24 +120,25 @@
   <section class="homePane" id="homeEndlessPane">
     <div class="homeNavBar">
       <div class="homeNavTitle">
-        <h2>鏃犲敖妯″紡</h2>
-        <p>閫夋嫨鏃犲敖鍦板浘鍚庨厤缃缁勶紱姣忓畬鏁存拺杩?5 娉㈢粨绠?1 鏄熸牳銆?/p>
+        <h2>无尽模式</h2>
+        <p>选择无尽地图后配置塔组；每完整撑过 5 波结算 1 星核。</p>
       </div>
-      <button type="button" class="menuBtn" data-home-pane="homeMainPane" onclick="activateHomePane(this,event)">杩斿洖涓荤晫闈?/button>
+      <button type="button" class="menuBtn" data-home-pane="homeMainPane" onclick="activateHomePane(this,event)">返回主界面</button>
     </div>
     <div class="homeStack">
       <section class="homeSection">
         <div class="modeGrid" data-mode-group="endless">
           <div class="modeCard" data-mode="endless1">
-            <strong>鏃犲敖妯″紡涓€</strong>
-            澶х墿鐞嗗湴鍥撅紝8 鍏ュ彛闀垮粖鍘嬪悜涓ぎ涓诲弽搴旂倝锛涙瘡瀹屾暣鎾戣繃 5 娉㈢粨绠?1 鏄熸牳銆?          </div>
+            <strong>无尽模式一</strong>
+            大物理地图，8 入口长廊压向中央主反应炉；每完整撑过 5 波结算 1 星核。
+          </div>
         </div>
       </section>
       <section class="homeSection">
         <div class="sectionHead">
           <div>
-            <h2>閫夋嫨鍑哄嚮濉旂粍</h2>
-            <p>鏈€澶氭惡甯?10 绉嶅銆傚噯澶囬暱鏈熻鐩栥€佸绾挎墿寮犱笌鍚庢湡琛ュ己銆?/p>
+            <h2>选择出击塔组</h2>
+            <p>最多携带 10 种塔。准备长期覆盖、多线扩张与后期补强。</p>
           </div>
           <div class="loadoutCounter"><span class="selCount">0</span>/10</div>
         </div>
@@ -137,12 +147,12 @@
       <section class="homeSection startDock">
         <div class="sectionHead">
           <div>
-            <h2>纭鍑哄嚮</h2>
-            <p class="modeHint">閫夋嫨鏃犲敖妯″紡涓€鍑哄嚮濉旓紙鏈€澶?0涓級</p>
+            <h2>确认出击</h2>
+            <p class="modeHint">选择无尽模式一出击塔（最多10个）</p>
           </div>
           <div class="loadoutCounter"><span class="homeStartTowerCount">0</span>/10</div>
         </div>
-        <button type="button" class="btnStartMode" disabled>寮€濮嬫棤灏芥ā寮忎竴</button>
+        <button type="button" class="btnStartMode" disabled>开始无尽模式一</button>
       </section>
     </div>
   </section>
@@ -150,15 +160,15 @@
   <section class="homePane archivePage" id="homeArchivePane">
     <div class="homeNavBar">
       <div class="homeNavTitle">
-        <h2>浣滄垬妗ｆ</h2>
-        <p>闃插尽濉斾笌鎬墿璧勬枡鍒嗘爮褰掓。銆傛€墿閫熷害浠ヤ綔鎴樿瘎绾ф爣璁般€?/p>
+        <h2>作战档案</h2>
+        <p>防御塔与怪物资料分栏归档。怪物速度以作战评级标记。</p>
       </div>
-      <button type="button" class="menuBtn" data-home-pane="homeMainPane" onclick="activateHomePane(this,event)">杩斿洖涓荤晫闈?/button>
+      <button type="button" class="menuBtn" data-home-pane="homeMainPane" onclick="activateHomePane(this,event)">返回主界面</button>
     </div>
     <section class="homeSection">
-      <div class="archiveTabs" aria-label="妗ｆ鍒嗙被">
-        <button type="button" class="archiveTab active" data-archive-type="tower">闃插尽濉?/button>
-        <button type="button" class="archiveTab" data-archive-type="enemy">鎬墿</button>
+      <div class="archiveTabs" aria-label="档案分类">
+        <button type="button" class="archiveTab active" data-archive-type="tower">防御塔</button>
+        <button type="button" class="archiveTab" data-archive-type="enemy">怪物</button>
       </div>
       <div class="archiveLayout">
         <div class="archiveList" id="archiveList"></div>
@@ -170,60 +180,60 @@
   <section class="homePane" id="homeSettingsPane">
     <div class="homeNavBar">
       <div class="homeNavTitle">
-        <h2>璁剧疆</h2>
-        <p>璋冩暣瑙嗚銆佹搷浣滄彁绀轰笌闊抽鐘舵€併€?/p>
+        <h2>设置</h2>
+        <p>调整视角、操作提示与音频状态。</p>
       </div>
-      <button type="button" class="menuBtn" data-home-pane="homeMainPane" onclick="activateHomePane(this,event)">杩斿洖涓荤晫闈?/button>
+      <button type="button" class="menuBtn" data-home-pane="homeMainPane" onclick="activateHomePane(this,event)">返回主界面</button>
     </div>
     <section class="homeSection">
       <div class="settingsLayout">
-        <div class="settingsTabs" aria-label="璁剧疆鍒嗙被">
-          <button type="button" class="settingsTab active" data-settings-tab="display">鏄剧ず涓庤瑙?/button>
-          <button type="button" class="settingsTab" data-settings-tab="controls">鎿嶄綔</button>
-          <button type="button" class="settingsTab" data-settings-tab="audio">闊抽</button>
+        <div class="settingsTabs" aria-label="设置分类">
+          <button type="button" class="settingsTab active" data-settings-tab="display">显示与视角</button>
+          <button type="button" class="settingsTab" data-settings-tab="controls">操作</button>
+          <button type="button" class="settingsTab" data-settings-tab="audio">音频</button>
         </div>
         <div class="settingsPanel">
           <div class="settingsCategory active" data-settings-panel="display">
-            <h3>鏄剧ず涓庤瑙?/h3>
-            <p>閫夋嫨閫傚悎褰撳墠鎴樺尯鐨勮瀵熸柟寮忋€?/p>
+            <h3>显示与视角</h3>
+            <p>选择适合当前战区的观察方式。</p>
             <div class="settingsRow">
               <div>
-                <strong>褰撳墠瑙嗚锛?span id="homeSettingsViewMode">灞€閮ㄨ瑙?/span></strong>
-                <div class="settingsHint">鍏ㄥ眬瑙嗚閫傚悎鐪嬪叏灞€甯冮槻锛涘眬閮ㄨ瑙掗€傚悎澶у湴鍥剧Щ鍔ㄥ拰缁嗚妭鎿嶄綔銆?/div>
+                <strong>当前视角：<span id="homeSettingsViewMode">局部视角</span></strong>
+                <div class="settingsHint">全局视角适合看全局布防；局部视角适合大地图移动和细节操作。</div>
               </div>
-              <button type="button" class="settingBtn" id="btnViewToggle" data-view-toggle onclick="ViewModeController.handleButton(this,event)">瑙嗚鍒囨崲</button>
+              <button type="button" class="settingBtn" id="btnViewToggle" data-view-toggle onclick="ViewModeController.handleButton(this,event)">视角切换</button>
             </div>
             <div class="settingsRow">
               <div>
-                <strong>灏忓湴鍥?/strong>
-                <div class="settingsHint">灏忓湴鍥炬槸灞€閮ㄨ瑙掔殑閰嶅鏄剧ず锛屼笉鍐嶄綔涓虹嫭绔嬪紑鍏炽€?/div>
+                <strong>小地图</strong>
+                <div class="settingsHint">小地图是局部视角的配套显示，不再作为独立开关。</div>
               </div>
-              <span class="archivePill">鑷姩</span>
+              <span class="archivePill">自动</span>
             </div>
           </div>
           <div class="settingsCategory" data-settings-panel="controls">
-            <h3>鎿嶄綔</h3>
-            <p>鎺屾彙绉诲姩銆佹殏鍋滀笌閫€鍑烘寚浠ゃ€?/p>
+            <h3>操作</h3>
+            <p>掌握移动、暂停与退出指令。</p>
             <div class="settingsRow">
               <div>
-                <strong>绉诲姩涓庢殏鍋?/strong>
-                <div class="settingsHint">WASD 绉诲姩锛涘彸閿Щ鍔ㄩ鑸癸紱绌烘牸鏆傚仠銆?/div>
+                <strong>移动与暂停</strong>
+                <div class="settingsHint">WASD 移动；右键移动飞船；空格暂停。</div>
               </div>
             </div>
             <div class="settingsRow">
               <div>
-                <strong>閫€鍑轰紭鍏堢骇</strong>
-                <div class="settingsHint">ESC 浼樺厛閫€鍑哄綋鍓嶆搷浣滐紝娌℃湁鍙€€鍑哄唴瀹规椂鎵撳紑鏆傚仠鑿滃崟銆?/div>
+                <strong>退出优先级</strong>
+                <div class="settingsHint">ESC 优先退出当前操作，没有可退出内容时打开暂停菜单。</div>
               </div>
             </div>
           </div>
           <div class="settingsCategory" data-settings-panel="audio">
-            <h3>闊抽</h3>
-            <p>褰撳墠涓洪潤榛樹綔鎴樸€?/p>
+            <h3>音频</h3>
+            <p>当前为静默作战。</p>
             <div class="settingsRow">
               <div>
-                <strong>闈欓粯妯″紡</strong>
-                <div class="settingsHint">涓嶄細鎾斁闊充箰鎴栨晥鏋滈煶銆?/div>
+                <strong>静默模式</strong>
+                <div class="settingsHint">不会播放音乐或效果音。</div>
               </div>
             </div>
           </div>
@@ -236,31 +246,31 @@
 <div class="page" id="metaPage">
 <div class="metaHeader">
   <div>
-    <h2>鏄熸牳鏁村鑸?/h2>
-    <div class="sub">瑁呭鎴栧嵏涓嬪凡鎷ユ湁鐨勪笓绮捐姱鐗囥€傚凡瑁呭鑺墖浼氬湪浣滄垬涓敓鏁堛€?/div>
+    <h2>星核整备舱</h2>
+    <div class="sub">装备或卸下已拥有的专精芯片。已装备芯片会在作战中生效。</div>
   </div>
   <div>
-    <span class="coreCount">鏄熸牳 鈼?<span id="metaCoreCount">0</span></span>
-    <button class="menuBtn" id="btnMetaArchive">鏌ョ湅浣滄垬妗ｆ</button>
-    <button class="menuBtn" id="btnMetaBack">杩斿洖閮ㄧ讲缁堢</button>
+    <span class="coreCount">星核 ◈ <span id="metaCoreCount">0</span></span>
+    <button class="menuBtn" id="btnMetaArchive">查看作战档案</button>
+    <button class="menuBtn" id="btnMetaBack">返回部署终端</button>
   </div>
 </div>
 <div class="metaBody metaSystem">
-  <aside class="metaRail" aria-label="鏁村鍒嗙被">
+  <aside class="metaRail" aria-label="整备分类">
     <button type="button" class="metaRailBtn active" data-meta-screen="equip" data-meta-group="ship">
-      <strong>鑸拌浇绯荤粺</strong><span>椋炶埞涓庡弽搴旂倝鑺墖</span>
+      <strong>舰载系统</strong><span>飞船与反应炉芯片</span>
     </button>
     <button type="button" class="metaRailBtn" data-meta-screen="equip" data-meta-group="tower">
-      <strong>闃插尽濉?/strong><span>濉斾笓绮捐姱鐗?/span>
+      <strong>防御塔</strong><span>塔专精芯片</span>
     </button>
   </aside>
   <section class="metaWorkspace">
     <div class="metaSectionHead">
       <div>
-        <h3 id="metaEquipTitle">鑸拌浇绯荤粺</h3>
-        <p id="metaEquipHint">閫夋嫨鑺墖鏌ョ湅瑁呭鐘舵€佷笌鍓嶇疆鏉′欢銆?/p>
+        <h3 id="metaEquipTitle">舰载系统</h3>
+        <p id="metaEquipHint">选择芯片查看装备状态与前置条件。</p>
       </div>
-      <span class="metaBadge" id="metaEquipSummary">0 宸茶澶?/span>
+      <span class="metaBadge" id="metaEquipSummary">0 已装备</span>
     </div>
     <div class="metaGrid active" id="shipMetaGrid" data-meta-group-panel="ship"></div>
     <div class="metaGrid" id="towerMetaGrid" data-meta-group-panel="tower"></div>
@@ -271,31 +281,31 @@
 <div class="page" id="shopPage">
 <div class="metaHeader">
   <div>
-    <h2>涓撶簿鍟嗗簵</h2>
-    <div class="sub">浣跨敤鏄熸牳璐拱椋炶埞涓庨槻寰″涓撶簿鑺墖銆傝姱鐗囬渶瑕佸湪鏄熸牳鏁村鑸辫澶囧悗鐢熸晥銆?/div>
+    <h2>专精商店</h2>
+    <div class="sub">使用星核购买飞船与防御塔专精芯片。芯片需要在星核整备舱装备后生效。</div>
   </div>
   <div>
-    <span class="coreCount">鏄熸牳 鈼?<span id="shopCoreCount">0</span></span>
-    <button class="menuBtn" id="btnShopArchive">鏌ョ湅浣滄垬妗ｆ</button>
-    <button class="menuBtn" id="btnShopBack">杩斿洖閮ㄧ讲缁堢</button>
+    <span class="coreCount">星核 ◈ <span id="shopCoreCount">0</span></span>
+    <button class="menuBtn" id="btnShopArchive">查看作战档案</button>
+    <button class="menuBtn" id="btnShopBack">返回部署终端</button>
   </div>
 </div>
 <div class="metaBody metaSystem">
-  <aside class="metaRail" aria-label="鍟嗗簵鍒嗙被">
+  <aside class="metaRail" aria-label="商店分类">
     <button type="button" class="metaRailBtn active" data-meta-screen="shop" data-meta-group="ship">
-      <strong>鑸拌浇绯荤粺</strong><span>椋炶埞涓庡弽搴旂倝鑺墖</span>
+      <strong>舰载系统</strong><span>飞船与反应炉芯片</span>
     </button>
     <button type="button" class="metaRailBtn" data-meta-screen="shop" data-meta-group="tower">
-      <strong>闃插尽濉?/strong><span>濉斾笓绮捐姱鐗?/span>
+      <strong>防御塔</strong><span>塔专精芯片</span>
     </button>
   </aside>
   <section class="metaWorkspace">
     <div class="metaSectionHead">
       <div>
-        <h3 id="metaShopTitle">鑸拌浇绯荤粺</h3>
-        <p id="metaShopHint">璐拱鑺墖鍚庯紝闇€瑕佽繘鍏ユ暣澶囪埍瑁呭鎵嶄細鐢熸晥銆?/p>
+        <h3 id="metaShopTitle">舰载系统</h3>
+        <p id="metaShopHint">购买芯片后，需要进入整备舱装备才会生效。</p>
       </div>
-      <span class="metaBadge" id="metaShopSummary">0 鍙喘涔?/span>
+      <span class="metaBadge" id="metaShopSummary">0 可购买</span>
     </div>
     <div class="metaGrid active" id="shopShipGrid" data-meta-group-panel="ship"></div>
     <div class="metaGrid" id="shopTowerGrid" data-meta-group-panel="tower"></div>
@@ -305,14 +315,14 @@
 </div>
 <div class="page" id="gamePage" style="display:none;flex-direction:column">
 <div id="hud">
-  <div class="hud-item">鈿?span id="hudEnergy">200</span> <span style="color:#44ff88">+<span id="hudIncome">5</span>/s</span></div>
-  <div class="hud-item">鏍稿績 <span id="hudReactor">200</span></div>
-  <div class="hud-item">灏忓弽搴旂倝 <span id="hudSmallReactors">0/5</span></div>
-  <div class="hud-item">娉㈡ <span id="hudWave">1</span></div>
-  <div class="hud-item">瀹屾垚 <span id="hudCompleted">0</span></div>
+  <div class="hud-item">⚡<span id="hudEnergy">200</span> <span style="color:#44ff88">+<span id="hudIncome">5</span>/s</span></div>
+  <div class="hud-item">核心 <span id="hudReactor">200</span></div>
+  <div class="hud-item">小反应炉 <span id="hudSmallReactors">0/5</span></div>
+  <div class="hud-item">波次 <span id="hudWave">1</span></div>
+  <div class="hud-item">完成 <span id="hudCompleted">0</span></div>
   <div class="hud-item">残敌 <span id="hudEnemies">0</span></div>
-  <div class="hud-item">濉?<span id="hudTowers">0</span></div>
-  <div class="hud-item"><span id="hudPhase">鍑嗗 10.0s</span></div>
+  <div class="hud-item">塔 <span id="hudTowers">0</span></div>
+  <div class="hud-item"><span id="hudPhase">准备 10.0s</span></div>
   <div class="hud-item">FPS <span id="hudFps">--</span></div>
 </div>
 <div id="miniMapWrap">
@@ -320,28 +330,28 @@
   <div class="miniMapLabel">TACTICAL MAP</div>
 </div>
 <div id="controlHints">
-  <span>鍙抽敭</span>绉诲姩 路 <span>B</span>寤洪€?路 <span>1-0</span>閫夊 路 <span>R</span>灏忓弽搴旂倝 路 <span>婊氳疆</span>鍒囨崲 路 <span>V/U</span>鍗囩骇 路 <span>X</span>鍑哄敭 路 <span>Esc/绌烘牸</span>鏆傚仠
+  <span>右键</span>移动 · <span>B</span>建造 · <span>1-0</span>选塔 · <span>R</span>小反应炉 · <span>滚轮</span>切换 · <span>V/U</span>升级 · <span>X</span>出售 · <span>Esc/空格</span>暂停
 </div>
 <div id="enemyTestPanel">
   <div class="enemyTestHead">
-    <strong>鎬墿鏀诲嚮娌欑洅</strong>
-    <span>绾矙鐩?/span>
+    <strong>怪物攻击沙盒</strong>
+    <span>纯沙盒</span>
   </div>
-  <label>鎬墿
+  <label>怪物
     <select id="enemyTestEnemy"></select>
   </label>
-  <label>鏁伴噺
+  <label>数量
     <input id="enemyTestCount" type="number" min="1" max="200" value="10">
   </label>
-  <label>鍑烘€棿闅?ms
+  <label>出怪间隔 ms
     <input id="enemyTestInterval" type="number" min="80" max="3000" step="10" value="450">
   </label>
   <div class="enemyTestInfo" id="enemyTestInfo"></div>
   <div class="enemyTestActions">
-    <button type="button" id="enemyTestStart">寮€濮?/button>
-    <button type="button" id="enemyTestStop">缁撴潫</button>
-    <button type="button" id="enemyTestClear">娓呮€?/button>
-    <button type="button" id="enemyTestReset">閲嶇疆娌欑洅</button>
+    <button type="button" id="enemyTestStart">开始</button>
+    <button type="button" id="enemyTestStop">结束</button>
+    <button type="button" id="enemyTestClear">清怪</button>
+    <button type="button" id="enemyTestReset">重置沙盒</button>
   </div>
   <div class="enemyTestHp" id="enemyTestHp"></div>
   <div class="enemyTestLog" id="enemyTestLog"></div>
@@ -350,55 +360,55 @@
 <div id="twPanel">
   <div class="twPanelHead">
     <h3 id="twName">-</h3>
-    <button type="button" class="panelClose" id="btnCloseTw" title="鍏抽棴闈㈡澘">脳</button>
+    <button type="button" class="panelClose" id="btnCloseTw" title="关闭面板">×</button>
   </div>
   <div id="twStats"></div>
   <div id="twUpgradePreview"></div>
-  <button type="button" class="drone-energy on" id="btnDroneEnergy">鑷姩琛ュ憳鑰楄兘锛氬厑璁?/button>
+  <button type="button" class="drone-energy on" id="btnDroneEnergy">自动补员耗能：允许</button>
   <button type="button" class="upg" id="btnUpgrade">
-    鍗囩骇 <span id="twUpCost">-</span><span class="key">V</span>
+    升级 <span id="twUpCost">-</span><span class="key">V</span>
   </button>
   <div class="tw-action-hint" id="twActionHint"></div>
   <button type="button" class="sell" id="btnSell">
-    鍑哄敭 <span id="twSell">-</span><span class="key">X</span>
+    出售 <span id="twSell">-</span><span class="key">X</span>
   </button>
 </div>
 <div id="channelPanel">
   <div class="channelHead">
-    <span id="channelLabel">姝ｅ湪寤洪€?/span>
+    <span id="channelLabel">正在建造</span>
     <span id="channelTime">0.0s</span>
   </div>
   <div class="channelTrack"><div class="channelFill" id="channelFill"></div></div>
-  <div class="channelHint">绂诲紑鎿嶄綔鑼冨洿浼氫腑鏂?路 Esc 鍙栨秷璇绘潯</div>
+  <div class="channelHint">离开操作范围会中断 · Esc 取消读条</div>
 </div>
 </div>
 <div id="gameOverPanel">
   <div class="gameOverCard">
-    <h2>闃茬嚎澶卞畧</h2>
-    <p>瀹屾暣鎾戣繃 <strong id="resultWaves">0</strong> 娉?/p>
-    <p class="reward">鏈眬鑾峰緱 鈼?<span id="resultReward">0</span> 鏄熸牳</p>
-    <p>鐜版湁鏄熸牳锛?strong id="resultCores">0</strong></p>
-    <button class="menuBtn" id="btnReturnHome">杩斿洖涓婚〉闈?/button>
+    <h2>防线失守</h2>
+    <p>完整撑过 <strong id="resultWaves">0</strong> 波</p>
+    <p class="reward">本局获得 ◈ <span id="resultReward">0</span> 星核</p>
+    <p>现有星核：<strong id="resultCores">0</strong></p>
+    <button class="menuBtn" id="btnReturnHome">返回主页面</button>
   </div>
 </div>
 <div id="pausePanel">
   <div class="pauseCard">
-    <h2>娓告垙宸叉殏鍋?/h2>
-    <p>Esc 鎴栫┖鏍奸敭鍙户缁父鎴?/p>
+    <h2>游戏已暂停</h2>
+    <p>Esc 或空格键可继续游戏</p>
     <div class="pauseSettings">
       <div class="settingsRow">
         <div>
-          <strong>褰撳墠瑙嗚锛?span id="pauseViewMode">灞€閮ㄨ瑙?/span></strong>
-          <div class="settingsHint">鏆傚仠鏃朵篃鍙互鐩存帴鍒囨崲灞€閮?鍏ㄥ眬瑙嗚銆?/div>
+          <strong>当前视角：<span id="pauseViewMode">局部视角</span></strong>
+          <div class="settingsHint">暂停时也可以直接切换局部/全局视角。</div>
         </div>
-        <button type="button" class="settingBtn" id="btnPauseViewToggle" data-view-toggle onclick="ViewModeController.handleButton(this,event)">瑙嗚鍒囨崲</button>
+        <button type="button" class="settingBtn" id="btnPauseViewToggle" data-view-toggle onclick="ViewModeController.handleButton(this,event)">视角切换</button>
       </div>
     </div>
     <div class="pauseActions">
-      <button class="menuBtn" id="btnPauseContinue">缁х画娓告垙</button>
-      <button class="menuBtn danger" id="btnPauseHome">杩斿洖涓婚〉闈?/button>
+      <button class="menuBtn" id="btnPauseContinue">继续游戏</button>
+      <button class="menuBtn danger" id="btnPauseHome">返回主页面</button>
     </div>
-</div>
+  </div>
 </div>
 <script>
 window.addEventListener('error',function(event){
@@ -411,56 +421,56 @@ window.addEventListener('error',function(event){
     panel.style.cssText='position:fixed;inset:16px;z-index:10000;padding:18px;background:#080d16ee;color:#d8f6ff;border:1px solid #7ec8e3;border-radius:10px;font:14px/1.6 sans-serif';
     document.body.appendChild(panel);
   }
-  panel.textContent='R-32 启动资源加载失败，请刷新页面或检查网络：'+(target.getAttribute('src')||'unknown script');
+  panel.textContent='R-32 ????????????????????'+(target.getAttribute('src')||'unknown script');
 },true);
 </script>
-<script src="vendor/phaser.min.js?v=20260630-2"></script>
-<script src="src/data/towers.js?v=20260630-2"></script>
-<script src="src/data/enemies.js?v=20260630-2"></script>
-<script src="src/data/archive.js?v=20260630-2"></script>
-<script src="src/data/meta.js?v=20260630-2"></script>
-<script src="src/data/game-config.js?v=20260630-2"></script>
-<script src="src/data/levels.js?v=20260630-2"></script>
-<script src="src/data/imported-level-maps.js?v=20260630-2"></script>
-<script src="src/core/map-utils.js?v=20260630-2"></script>
-<script src="src/core/pathfinding.js?v=20260630-2"></script>
-<script src="src/core/game-instance.js?v=20260630-2"></script>
-<script src="src/core/debug-tools.js?v=20260630-2"></script>
-<script src="src/ui/archive-ui.js?v=20260630-2"></script>
-<script src="src/render/blueprint-art.js?v=20260630-2"></script>
-<script src="src/render/texture-factory.js?v=20260630-2"></script>
-<script src="src/game/scene-setup.js?v=20260630-2"></script>
-<script src="src/game/minimap.js?v=20260630-2"></script>
-<script src="src/game/input-controller.js?v=20260630-2"></script>
-<script src="src/game/build-panel.js?v=20260630-2"></script>
-<script src="src/game/placement-controller.js?v=20260630-2"></script>
-<script src="src/game/tower-panel.js?v=20260630-2"></script>
-<script src="src/game/drone-controller.js?v=20260630-2"></script>
-<script src="src/game/combat-utils.js?v=20260630-2"></script>
-<script src="src/game/tower-runtime.js?v=20260630-2"></script>
-<script src="src/game/tower-healing.js?v=20260630-2"></script>
-<script src="src/game/tower-special-attacks.js?v=20260630-2"></script>
-<script src="src/game/tower-basic-attacks.js?v=20260630-2"></script>
-<script src="src/game/tower-combat.js?v=20260630-2"></script>
-<script src="src/game/projectile-controller.js?v=20260630-2"></script>
-<script src="src/game/enemy-navigation.js?v=20260630-2"></script>
-<script src="src/game/enemy-targeting.js?v=20260630-2"></script>
-<script src="src/game/enemy-structures.js?v=20260630-2"></script>
-<script src="src/game/enemy-status.js?v=20260630-2"></script>
-<script src="src/game/enemy-combat.js?v=20260630-2"></script>
-<script src="src/game/enemy-waves.js?v=20260630-2"></script>
-<script src="src/game/enemy-controller.js?v=20260630-2"></script>
-<script src="src/game/enemy-test-lab.js?v=20260630-2"></script>
-<script src="src/game/player-runtime.js?v=20260630-2"></script>
-<script src="src/game/hud-overlay.js?v=20260630-2"></script>
-<script src="src/core/meta-store.js?v=20260630-2"></script>
-<script src="src/core/runtime-maps.js?v=20260630-2"></script>
-<script src="src/ui/view-settings.js?v=20260630-2"></script>
-<script src="src/ui/draggable-panels.js?v=20260630-2"></script>
-<script src="src/ui/meta-ui.js?v=20260630-2"></script>
-<script src="src/ui/home-ui.js?v=20260630-2"></script>
-<script src="src/ui/page-flow.js?v=20260630-2"></script>
-<script src="src/game/game-scene.js?v=20260630-2"></script>
-<script src="src/game/bootstrap.js?v=20260630-2"></script>
+<script src="vendor/phaser.min.js?v=20260630-3"></script>
+<script src="src/data/towers.js?v=20260630-3"></script>
+<script src="src/data/enemies.js?v=20260630-3"></script>
+<script src="src/data/archive.js?v=20260630-3"></script>
+<script src="src/data/meta.js?v=20260630-3"></script>
+<script src="src/data/game-config.js?v=20260630-3"></script>
+<script src="src/data/levels.js?v=20260630-3"></script>
+<script src="src/data/imported-level-maps.js?v=20260630-3"></script>
+<script src="src/core/map-utils.js?v=20260630-3"></script>
+<script src="src/core/pathfinding.js?v=20260630-3"></script>
+<script src="src/core/game-instance.js?v=20260630-3"></script>
+<script src="src/core/debug-tools.js?v=20260630-3"></script>
+<script src="src/ui/archive-ui.js?v=20260630-3"></script>
+<script src="src/render/blueprint-art.js?v=20260630-3"></script>
+<script src="src/render/texture-factory.js?v=20260630-3"></script>
+<script src="src/game/scene-setup.js?v=20260630-3"></script>
+<script src="src/game/minimap.js?v=20260630-3"></script>
+<script src="src/game/input-controller.js?v=20260630-3"></script>
+<script src="src/game/build-panel.js?v=20260630-3"></script>
+<script src="src/game/placement-controller.js?v=20260630-3"></script>
+<script src="src/game/tower-panel.js?v=20260630-3"></script>
+<script src="src/game/drone-controller.js?v=20260630-3"></script>
+<script src="src/game/combat-utils.js?v=20260630-3"></script>
+<script src="src/game/tower-runtime.js?v=20260630-3"></script>
+<script src="src/game/tower-healing.js?v=20260630-3"></script>
+<script src="src/game/tower-special-attacks.js?v=20260630-3"></script>
+<script src="src/game/tower-basic-attacks.js?v=20260630-3"></script>
+<script src="src/game/tower-combat.js?v=20260630-3"></script>
+<script src="src/game/projectile-controller.js?v=20260630-3"></script>
+<script src="src/game/enemy-navigation.js?v=20260630-3"></script>
+<script src="src/game/enemy-targeting.js?v=20260630-3"></script>
+<script src="src/game/enemy-structures.js?v=20260630-3"></script>
+<script src="src/game/enemy-status.js?v=20260630-3"></script>
+<script src="src/game/enemy-combat.js?v=20260630-3"></script>
+<script src="src/game/enemy-waves.js?v=20260630-3"></script>
+<script src="src/game/enemy-controller.js?v=20260630-3"></script>
+<script src="src/game/enemy-test-lab.js?v=20260630-3"></script>
+<script src="src/game/player-runtime.js?v=20260630-3"></script>
+<script src="src/game/hud-overlay.js?v=20260630-3"></script>
+<script src="src/core/meta-store.js?v=20260630-3"></script>
+<script src="src/core/runtime-maps.js?v=20260630-3"></script>
+<script src="src/ui/view-settings.js?v=20260630-3"></script>
+<script src="src/ui/draggable-panels.js?v=20260630-3"></script>
+<script src="src/ui/meta-ui.js?v=20260630-3"></script>
+<script src="src/ui/home-ui.js?v=20260630-3"></script>
+<script src="src/ui/page-flow.js?v=20260630-3"></script>
+<script src="src/game/game-scene.js?v=20260630-3"></script>
+<script src="src/game/bootstrap.js?v=20260630-3"></script>
 </body>
 </html>
