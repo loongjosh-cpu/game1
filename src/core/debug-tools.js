@@ -1,4 +1,4 @@
-const R32_BUILD_ID='build-20260630-5';
+const R32_BUILD_ID='build-20260630-6';
 const R32_DEBUG_ENABLED=(()=>{try{return new URLSearchParams(location.search).get('debug')==='1'||localStorage.getItem('r32Debug')==='1'}catch(_){return false}})();
 
 window.__r32Debug=window.__r32Debug||{

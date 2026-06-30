@@ -9,7 +9,8 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-function createSandbox() {
+function createSandbox(options = {}) {
+  const storage = options.storage || {};
   const sandbox = {
     console,
     Math,
@@ -18,10 +19,11 @@ function createSandbox() {
     Map,
     structuredClone: global.structuredClone,
     localStorage: {
-      getItem() { return null; },
+      getItem(key) { return Object.prototype.hasOwnProperty.call(storage, key) ? storage[key] : null; },
       setItem() {},
       removeItem() {}
     },
+    location: { search: options.search || '' },
     window: { addEventListener() {}, dispatchEvent() {} },
     document: {
       getElementById() { return { style: {}, textContent: '', classList: { add() {}, remove() {}, toggle() {} } }; },
@@ -59,8 +61,8 @@ function createSandbox() {
   return sandbox;
 }
 
-function loadContext(files) {
-  const ctx = createSandbox();
+function loadContext(files, options = {}) {
+  const ctx = createSandbox(options);
   for (const file of files) vm.runInContext(read(file), ctx, { filename: file });
   vm.runInContext(`
     this.__data = {
@@ -78,6 +80,25 @@ function loadContext(files) {
     };
   `, ctx);
   return ctx;
+}
+
+function loadRuntimeMapData(options = {}) {
+  const ctx = loadContext([
+    'src/data/towers.js',
+    'src/data/enemies.js',
+    'src/data/archive.js',
+    'src/data/meta.js',
+    'src/data/game-config.js',
+    'src/data/levels.js',
+    'src/data/imported-level-maps.js',
+    'src/core/map-utils.js',
+    'src/core/pathfinding.js',
+    'src/core/meta-store.js',
+    'src/core/runtime-maps.js',
+    'src/game/enemy-waves.js',
+    'src/game/game-scene.js'
+  ], options);
+  return { ctx, data: ctx.__data };
 }
 
 function demoLocalScripts() {
@@ -212,23 +233,25 @@ function testLaunchEntryReady(data) {
   assert(Object.keys(data.ENDLESS_MAPS).includes('endless1'), 'endless1 map should exist for home endless flow');
 }
 
+function testSavedEditorMapIsolation() {
+  const corruptMap = JSON.stringify({
+    map: {
+      walls: [],
+      spawns: [null],
+      reactor: null,
+      worldSize: { w: 7356, h: 4144 }
+    }
+  });
+  const defaultRun = loadRuntimeMapData({ storage: { 'r32-map': corruptMap } }).data;
+  assert(defaultRun.ENDLESS_MAPS.endless1.map.spawns.length === 8, 'public endless mode should ignore saved editor maps by default');
+
+  const explicitRun = loadRuntimeMapData({ search: '?useSavedMap=1', storage: { 'r32-map': corruptMap } }).data;
+  assert(explicitRun.ENDLESS_MAPS.endless1.map.spawns.length === 8, 'invalid saved editor map should be rejected even when explicitly enabled');
+  assert(explicitRun.ENDLESS_MAPS.endless1.name === '无尽模式一', 'endless map name should remain readable after rejecting saved map');
+}
+
 function main() {
-  const ctx = loadContext([
-    'src/data/towers.js',
-    'src/data/enemies.js',
-    'src/data/archive.js',
-    'src/data/meta.js',
-    'src/data/game-config.js',
-    'src/data/levels.js',
-    'src/data/imported-level-maps.js',
-    'src/core/map-utils.js',
-    'src/core/pathfinding.js',
-    'src/core/meta-store.js',
-    'src/core/runtime-maps.js',
-    'src/game/enemy-waves.js',
-    'src/game/game-scene.js'
-  ]);
-  const data = ctx.__data;
+  const { ctx, data } = loadRuntimeMapData();
   assert(demoLocalScripts().length >= 40, 'demo should keep loading the split local script graph');
   testGameSceneComposition();
   testMapsReachable(data);
@@ -236,7 +259,8 @@ function main() {
   testFixedWaves(data);
   testMetaCombinations(ctx);
   testLaunchEntryReady(data);
-  console.log('integration stress ok: scene composition, map reachability, long-wave rosters, fixed waves and meta combos verified');
+  testSavedEditorMapIsolation();
+  console.log('integration stress ok: scene composition, map reachability, long-wave rosters, fixed waves, saved-map isolation and meta combos verified');
 }
 
 main();

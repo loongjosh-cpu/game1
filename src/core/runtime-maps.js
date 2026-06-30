@@ -1,9 +1,17 @@
 let SAVED_EDITOR_MAP=null;
 
 try{
-  loadSavedEditorMap();
+  if(shouldUseSavedEditorMap())loadSavedEditorMap();
 }catch(err){
-  console.warn('地图存档读取失败，使用内置地图',err);
+  console.warn('忽略本地地图缓存',err);
+}
+
+function shouldUseSavedEditorMap(){
+  try{
+    return new URLSearchParams(location.search).get('useSavedMap')==='1';
+  }catch(_){
+    return false
+  }
 }
 
 function loadSavedEditorMap(){
@@ -12,11 +20,28 @@ function loadSavedEditorMap(){
   const world=src?.worldSize||saved?.worldSize;
   if(!validSavedMap(src,world))return;
   SAVED_EDITOR_MAP=src;
-  applySavedMapToEndless(src,world);
 }
 
 function validSavedMap(src,world){
-  return !!(src?.walls&&src?.spawns&&src?.reactor&&(!world||(world.w===W&&world.h===H)));
+  return !!(
+    src&&
+    Array.isArray(src.walls)&&
+    src.walls.every(validRect)&&
+    Array.isArray(src.spawns)&&
+    src.spawns.length>0&&
+    src.spawns.every(validPoint)&&
+    validPoint(src.reactor)&&
+    (!world||(world.w===W&&world.h===H))
+  );
+}
+
+function validPoint(p){
+  if(Array.isArray(p))return Number.isFinite(Number(p[0]))&&Number.isFinite(Number(p[1]));
+  return !!p&&Number.isFinite(Number(p.x))&&Number.isFinite(Number(p.y));
+}
+
+function validRect(r){
+  return Array.isArray(r)&&r.length>=4&&r.every(v=>Number.isFinite(Number(v)));
 }
 
 function applySavedMapToEndless(src,world){
