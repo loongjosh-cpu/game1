@@ -74,6 +74,7 @@ function finishLaunchAttempt(){
 function startSelectedMode(){
   if(launchInProgress||!selectedTowers.length||selectedModeLocked())return;
   destroyGameInstance();
+  enableGameNavigationGuard();
   hidePage('selectPage');
   hidePage('gameOverPanel');
   hidePage('pausePanel');
@@ -87,6 +88,7 @@ function startSelectedMode(){
 function startEnemyCombatTest(){
   if(launchInProgress)return;
   destroyGameInstance();
+  enableGameNavigationGuard();
   hidePage('selectPage');
   hidePage('gameOverPanel');
   hidePage('pausePanel');
@@ -118,6 +120,7 @@ function launchGameAfterPaint(towers,mode){
 }
 
 function returnToHome(){
+  disableGameNavigationGuard();
   hidePage('gameOverPanel');
   hidePage('pausePanel');
   hidePage('gamePage');
@@ -145,4 +148,66 @@ function destroyGameInstance(){
   gameInstance=null;
   const gamePage=document.getElementById('gamePage');
   if(gamePage)gamePage.querySelectorAll('canvas:not(#miniMap)').forEach(canvas=>canvas.remove());
+}
+
+let gameNavigationGuardActive=false;
+let gameNavigationGuardInstalled=false;
+
+function gameSessionActive(){
+  const gamePage=document.getElementById('gamePage');
+  return !!gameInstance&&gamePage?.style.display!=='none';
+}
+
+function enableGameNavigationGuard(){
+  installGameNavigationGuard();
+  if(gameNavigationGuardActive)return;
+  gameNavigationGuardActive=true;
+  try{
+    if(typeof history!=='undefined'&&history.pushState)history.pushState({r32GameGuard:true},'',location.href);
+  }catch(_){}
+}
+
+function disableGameNavigationGuard(){
+  gameNavigationGuardActive=false;
+}
+
+function installGameNavigationGuard(){
+  if(gameNavigationGuardInstalled)return;
+  gameNavigationGuardInstalled=true;
+  if(typeof window==='undefined')return;
+  window.addEventListener('popstate',event=>{
+    if(!gameNavigationGuardActive||!gameSessionActive())return;
+    try{
+      if(typeof history!=='undefined'&&history.pushState)history.pushState({r32GameGuard:true},'',location.href);
+    }catch(_){}
+    const scene=activeGameScene();
+    scene?.togglePause?.(true);
+    const hud=document.getElementById('hudPhase');
+    if(hud)hud.textContent='已拦截浏览器返回 · 游戏已暂停';
+    event.preventDefault?.();
+  });
+  window.addEventListener('beforeunload',event=>{
+    if(!gameNavigationGuardActive||!gameSessionActive())return;
+    event.preventDefault();
+    event.returnValue='';
+  });
+  document.addEventListener('mousedown',blockBrowserNavigationMouseButton,true);
+  document.addEventListener('mouseup',blockBrowserNavigationMouseButton,true);
+  document.addEventListener('auxclick',blockBrowserNavigationMouseButton,true);
+  document.addEventListener('wheel',blockHorizontalNavigationWheel,{capture:true,passive:false});
+}
+
+function blockBrowserNavigationMouseButton(event){
+  if(!gameNavigationGuardActive||!gameSessionActive())return;
+  if(event.button!==3&&event.button!==4)return;
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+function blockHorizontalNavigationWheel(event){
+  if(!gameNavigationGuardActive||!gameSessionActive())return;
+  const horizontal=Math.abs(event.deltaX||0)>Math.abs(event.deltaY||0)*1.2;
+  if(!horizontal)return;
+  event.preventDefault();
+  event.stopPropagation();
 }

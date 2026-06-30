@@ -382,6 +382,7 @@ function testStaticUiGuards() {
   const css = cssFiles.map(read).join('\n');
   assert(css.includes(':focus-visible'), 'styles should preserve a visible keyboard/controller focus indicator');
   assert(css.includes('@media'), 'styles should contain responsive media rules');
+  assert(css.includes('overscroll-behavior-x:none'), 'page shell should suppress horizontal browser back/forward gestures where supported');
   assert(!/z-index\s*:\s*[0-9]{4,}/i.test(css), 'styles should avoid z-index values over 1000');
   const outlineLines = css.split(/\r?\n/).filter(line => /outline\s*:\s*(none|0)/i.test(line));
   const unsafeOutlineLines = outlineLines.filter(line => !line.includes(':focus-visible'));
@@ -426,6 +427,10 @@ function testStaticUiGuards() {
   assert(pageFlow.includes("querySelectorAll('canvas:not(#miniMap)')"), 'destroying a game instance should only remove Phaser canvases from gamePage');
   assert(pageFlow.includes('launchGameAfterPaint') && pageFlow.includes('requestAnimationFrame'), 'game launch should display loading UI before heavy synchronous map setup');
   assert(pageFlow.includes('finishLaunchAttempt'), 'game launch should reset launch guard after success or failure');
+  assert(pageFlow.includes('enableGameNavigationGuard()'), 'starting a game should arm browser back/gesture protection');
+  assert(pageFlow.includes('beforeunload'), 'game page should warn before refresh or tab close during a run');
+  assert(pageFlow.includes('popstate'), 'game page should intercept browser back navigation during a run');
+  assert(pageFlow.includes('button!==3&&event.button!==4'), 'game page should block mouse back/forward side buttons during a run');
   assert(pageFlow.includes('启动超时'), 'game launch should expose a timeout state for stalled startup diagnostics');
 
   const lab = read('src/game/enemy-test-lab.js');
@@ -446,6 +451,10 @@ function testStaticUiGuards() {
   const debugTools = read('src/core/debug-tools.js');
   ['r32SetLoading', 'r32HideLoading', 'r32LoadingFailed', 'r32LoadingPanel', 'r32DebugRecordRuntime'].forEach(snippet => {
     assert(debugTools.includes(snippet), `debug tools should expose loading diagnostic hook: ${snippet}`);
+  });
+  const placement = read('src/game/placement-controller.js');
+  ['drawPersistentTowerRange', 'fillCircle(tw.x,tw.y,range)', 'tickCount=24'].forEach(snippet => {
+    assert(placement.includes(snippet), `persistent tower range indicator should keep readable blueprint range marks: ${snippet}`);
   });
   const gameScene = read('src/game/game-scene.js');
   ['launchStep', '计算寻路', '反应炉/出生点', '输入与面板', '等待首帧', '启动完成'].forEach(snippet => {

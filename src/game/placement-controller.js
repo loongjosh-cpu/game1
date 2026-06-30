@@ -180,9 +180,34 @@ const PlacementControllerMethods={
   },
   addTowerRangeGraphic(tw,td){
     const rng=this.add.graphics().setDepth(1);
-    rng.lineStyle(1,this.towerRangeColor(td),0.12);
-    rng.strokeCircle(tw.x,tw.y,sd(this.effectiveTowerRange?this.effectiveTowerRange(td,td.upg[0]||{}):(td.upg[0]?.r||td.range)));
+    this.drawPersistentTowerRange(rng,tw,td,td.upg[0]||{});
     tw._rngGfx=rng
+  },
+  drawPersistentTowerRange(gfx,tw,td,up){
+    const color=this.towerRangeColor(td);
+    const range=sd(this.effectiveTowerRange?this.effectiveTowerRange(td,up):(up.r||td.range));
+    gfx.clear();
+    gfx.fillStyle(color,0.018);
+    gfx.fillCircle(tw.x,tw.y,range);
+    gfx.lineStyle(5,color,0.08);
+    gfx.strokeCircle(tw.x,tw.y,range);
+    gfx.lineStyle(2,color,0.34);
+    gfx.strokeCircle(tw.x,tw.y,range);
+    gfx.lineStyle(1,0xffffff,0.28);
+    gfx.strokeCircle(tw.x,tw.y,range*0.985);
+    gfx.lineStyle(2,color,0.28);
+    const tickCount=24;
+    const tickOuter=range;
+    const tickInner=Math.max(0,range-18);
+    for(let i=0;i<tickCount;i++){
+      const a=i*Math.PI*2/tickCount;
+      gfx.lineBetween(
+        tw.x+Math.cos(a)*tickInner,
+        tw.y+Math.sin(a)*tickInner,
+        tw.x+Math.cos(a)*tickOuter,
+        tw.y+Math.sin(a)*tickOuter
+      );
+    }
   },
   registerTowerByType(tw,td){
     if(td.type==='drone'){

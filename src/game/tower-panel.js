@@ -266,9 +266,7 @@ const TowerPanelMethods={
   },
   refreshTowerRangeGraphic(tw,td,up){
     if(!tw._rngGfx)return;
-    tw._rngGfx.clear();
-    tw._rngGfx.lineStyle(1,this.towerRangeColor(td),0.12);
-    tw._rngGfx.strokeCircle(tw.x,tw.y,sd(this.effectiveTowerRange?this.effectiveTowerRange(td,up):(up.r||td.range)))
+    this.drawPersistentTowerRange(tw._rngGfx,tw,td,up)
   },
   sellTower(){
     const tw=this.selTw;
