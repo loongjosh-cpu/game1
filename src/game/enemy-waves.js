@@ -15,10 +15,27 @@ const EnemyWaveMethods={
     }
     return len
   },
+  endlessLaneUnlockCount(){
+    const laneCount=MAP.spawns.length;
+    if(this.wave<=3)return Math.min(laneCount,1);
+    if(this.wave<=6)return Math.min(laneCount,2);
+    if(this.wave<=10)return Math.min(laneCount,Math.ceil(laneCount*0.5));
+    if(this.wave<=15)return Math.min(laneCount,Math.ceil(laneCount*0.75));
+    return laneCount
+  },
+  activeSpawnLane(i,lw=null,spawnOffset=this._spawnOffset||0){
+    const laneCount=MAP.spawns.length;
+    const lanes=lw?.lanes;
+    const laneRaw=lanes?lanes[i%lanes.length]:spawnOffset+i;
+    const normalized=((laneRaw%laneCount)+laneCount)%laneCount;
+    if(lanes||this.levelConfig)return normalized;
+    const unlocked=this.endlessLaneUnlockCount();
+    return (spawnOffset+((normalized-spawnOffset)%unlocked+unlocked)%unlocked)%laneCount
+  },
   naturalWaveDuration(roster,lw,spawnOffset){
     let latest=0;
     roster.forEach((ty,i)=>{
-      const lanes=lw?.lanes,laneRaw=lanes?lanes[i%lanes.length]:(spawnOffset+i),si=((laneRaw%MAP.spawns.length)+MAP.spawns.length)%MAP.spawns.length;
+      const si=this.activeSpawnLane(i,lw,spawnOffset);
       const speed=Math.max(1,sd(EC[ty]?.spd||200));
       latest=Math.max(latest,this.waveSpawnDelay(i)+this.routeLengthForSpawn(si)/speed*1000)
     });
@@ -38,7 +55,7 @@ const EnemyWaveMethods={
     this.wave++;
     this.prepTimer=Math.max(0,(this._waveNaturalDuration||PREP_TIME)-this._waveSpawnElapsed)
   },
-  startWave(){if(this.ended||this._allLevelWavesSpawned)return;this.wActive=true;this._waveSpawnDone=false;const waveNo=this.wave,lw=this.levelWave();this._waveRoster=lw?lw.roster.slice():this.buildWaveRoster();this.wC=this._waveRoster.length;this.wS=0;this._spawnOffset=Phaser.Math.Between(0,MAP.spawns.length-1);this._waveNaturalDuration=this.naturalWaveDuration(this._waveRoster,lw,this._spawnOffset);this._waveSpawnElapsed=this.waveSpawnDelay(Math.max(0,this.wC-1));this._wt=this.time.addEvent({delay:500,loop:true,callback:()=>{if(this.wS>=this.wC){this._wt.remove();this.finishWaveSpawning();return}const lanes=lw?.lanes,laneRaw=lanes?lanes[this.wS%lanes.length]:(this._spawnOffset+this.wS),si=((laneRaw%MAP.spawns.length)+MAP.spawns.length)%MAP.spawns.length,ty=this._waveRoster[this.wS]||'E1';this.spawnE(si,ty,waveNo);this.wS++;if(this.wS>=this.wC){this._wt.remove();this.finishWaveSpawning()}}})},
+  startWave(){if(this.ended||this._allLevelWavesSpawned)return;this.wActive=true;this._waveSpawnDone=false;const waveNo=this.wave,lw=this.levelWave();this._waveRoster=lw?lw.roster.slice():this.buildWaveRoster();this.wC=this._waveRoster.length;this.wS=0;this._spawnOffset=Phaser.Math.Between(0,MAP.spawns.length-1);this._waveNaturalDuration=this.naturalWaveDuration(this._waveRoster,lw,this._spawnOffset);this._waveSpawnElapsed=this.waveSpawnDelay(Math.max(0,this.wC-1));this._wt=this.time.addEvent({delay:500,loop:true,callback:()=>{if(this.wS>=this.wC){this._wt.remove();this.finishWaveSpawning();return}const si=this.activeSpawnLane(this.wS,lw,this._spawnOffset),ty=this._waveRoster[this.wS]||'E1';this.spawnE(si,ty,waveNo);this.wS++;if(this.wS>=this.wC){this._wt.remove();this.finishWaveSpawning()}}})},
   spawnE(si,type,waveNo=null){const cfg=EC[type],[sx,sy]=MAP.spawns[si],e=this.physics.add.image(sx,sy,cfg.key).setDepth(6).setTint(cfg.color||0xffffff);this.enemies.add(e);e.body.enable=true;e._uid=++this.enemySeq;const scaleWave=waveNo??this.wave,sc=this.levelConfig?.waves?.[scaleWave-1]?.scale??(1+(scaleWave-1)*0.1);e._waveNo=scaleWave;e._hp=Math.round(cfg.hp*sc);e._maxhp=e._hp;e._dmg=cfg.dmg;e._spd=cfg.spd;e._atk=cfg.atk;e._at=0;e._firstAttack=true;e._si=si;e._b1tgt=null;e._reactorTarget=null;e._droneTarget=null;e._type=type;e._bt=0;e._slow=0;e._slowT=0;e._state='path';e._hatch=cfg.hatch||0;e._summonTimers=(cfg.summons||[]).map(s=>({type:s.type,interval:s.interval,left:s.interval}));e._hits=0;this.routeToReactor(e,false);e.body.setCircle(Math.min(16,e.width/2));e.body.setBounce(0);return e},
   gameOver(title='防线失守'){if(this.ended)return;this.ended=true;const completed=this.completedWaves??Math.max(0,this.wave-1),levelCleared=!!this.levelConfig&&completed>=this.levelConfig.waves.length,reward=this.levelConfig?(levelCleared?1:0):Math.floor(completed/5);metaSave.cores+=reward;metaSave.bestWave=Math.max(metaSave.bestWave,completed);if(levelCleared&&this.levelConfig?.id){metaSave.levelClears=metaSave.levelClears||{};metaSave.levelClears[this.levelConfig.id]=true}saveMeta();document.querySelector('#gameOverPanel h2').textContent=title;document.getElementById('resultWaves').textContent=completed;document.getElementById('resultReward').textContent=reward;document.getElementById('resultCores').textContent=metaSave.cores;document.getElementById('pausePanel').style.display='none';document.getElementById('gameOverPanel').style.display='flex';this.scene.pause()},
   grantWaveClearBonus(){

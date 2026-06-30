@@ -387,6 +387,23 @@ function testTimedWaveAdvance(ctx, issues) {
   assert(longScene.prepTimer > 25000, 'next-wave countdown should use natural travel time for the slowest current-wave enemy on long paths', issues);
 }
 
+function testEndlessLaneUnlock(ctx, issues) {
+  const mapSpawns = [0, 1, 2, 3, 4, 5, 6, 7].map(i => [i * 100, 0]);
+  const oldMap = global.MAP;
+  global.MAP = { spawns: mapSpawns, reactor: { x: 0, y: 1000 }, unitScale: 1 };
+  const scene = makeScene(ctx, { levelConfig: null, wave: 1 });
+  scene._spawnOffset = 3;
+  const early = [0, 1, 2, 3, 4].map(i => scene.activeSpawnLane(i, null, scene._spawnOffset));
+  assert(new Set(early).size === 1, 'endless waves 1-3 should use only one spawn lane', issues);
+  scene.wave = 5;
+  const mid = [0, 1, 2, 3, 4].map(i => scene.activeSpawnLane(i, null, scene._spawnOffset));
+  assert(new Set(mid).size === 2, 'endless waves 4-6 should unlock two spawn lanes', issues);
+  scene.wave = 16;
+  const late = [0, 1, 2, 3, 4, 5, 6, 7].map(i => scene.activeSpawnLane(i, null, scene._spawnOffset));
+  assert(new Set(late).size === 8, 'endless wave 16+ should unlock all spawn lanes', issues);
+  global.MAP = oldMap;
+}
+
 function testReactorIncome(ctx, issues) {
   const main = reactor(ctx.MAIN_REACTOR, 2);
   const smallA = reactor(ctx.SMALL_REACTOR, 0);
@@ -408,6 +425,7 @@ function main() {
   testFixedLevelWaves(ctx, issues);
   testWaveCompletionAndRewards(ctx, issues);
   testTimedWaveAdvance(ctx, issues);
+  testEndlessLaneUnlock(ctx, issues);
   testReactorIncome(ctx, issues);
   if (issues.length) {
     console.error(`wave/economy verification failed (${issues.length} issues):`);
