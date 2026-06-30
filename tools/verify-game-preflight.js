@@ -2,7 +2,7 @@ const fs = require('fs');
 const vm = require('vm');
 
 const DEMO_FILE = 'demo.html';
-const LOCAL_SCRIPT_RE = /^src\//;
+const LOCAL_SCRIPT_RE = /^(src|vendor)\//;
 
 function read(file) {
   return fs.readFileSync(file, 'utf8');
