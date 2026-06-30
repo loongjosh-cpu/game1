@@ -89,7 +89,7 @@ function simulateEditorBoot(script) {
     'map', 'canvasWrap', 'levelList', 'levelName', 'levelSummary', 'wallCount', 'spawnCount', 'openEnds',
     'pathIssues', 'checkHint', 'pathReport', 'designNotes', 'coord', 'saveState', 'editorBootStatus',
     'snapGrid', 'showRoutes', 'showActualPaths', 'showGrid', 'loadLevel', 'undoBtn', 'clearBtn', 'fitBtn',
-    'testPathBtn', 'exportBtn', 'copyBtn', 'importBtn', 'saveDraftBtn', 'loadDraftBtn', 'sendDemoBtn', 'out'
+    'testPathBtn', 'exportBtn', 'copyBtn', 'importBtn', 'saveDraftBtn', 'loadDraftBtn', 'out'
   ];
   for (const id of needed) ids.set(id, new Element(id, id === 'map' ? 'canvas' : 'div'));
   for (const id of ['snapGrid', 'showRoutes', 'showActualPaths', 'showGrid']) ids.get(id).checked = true;

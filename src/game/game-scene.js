@@ -5,7 +5,7 @@ function launch(sel,mode='endless1'){
   const endlessConfig=ENDLESS_MAPS[mode]||null;
   const testMap=mode===ENEMY_TEST_MODE?ENEMY_TEST_MAP:null;
   if(typeof r32SetLoading==='function')r32SetLoading('准备地图',mode,0.22);
-  MAP=cloneMap(testMap||levelConfig?.map||endlessConfig?.map||ENDLESS_MAP);
+  MAP=cloneMap(testMap||levelConfig?.map||endlessConfig?.map||ENDLESS_MAPS.endless1.map);
   if(typeof r32SetLoading==='function')r32SetLoading('计算寻路',`${MAP.spawns?.length||0} 入口`,0.34);
   const nav=buildNavigation(MAP);
   if(typeof r32SetLoading==='function')r32SetLoading('寻路完成',`${nav.enemyWaypoints?.length||0} 路线`,0.5);

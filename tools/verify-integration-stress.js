@@ -233,7 +233,12 @@ function testLaunchEntryReady(data) {
   assert(Object.keys(data.ENDLESS_MAPS).includes('endless1'), 'endless1 map should exist for home endless flow');
 }
 
-function testSavedEditorMapIsolation() {
+function testRuntimeMapIsolation() {
+  const runtimeMaps = read('src/core/runtime-maps.js');
+  assert(!runtimeMaps.includes('r32-map'), 'runtime maps should not read editor localStorage map drafts');
+  assert(!runtimeMaps.includes('SAVED_EDITOR_MAP'), 'runtime maps should not keep editor-map override state');
+  assert(!runtimeMaps.includes('useSavedMap'), 'public demo should not expose saved-map override query flags');
+
   const corruptMap = JSON.stringify({
     map: {
       walls: [],
@@ -242,12 +247,9 @@ function testSavedEditorMapIsolation() {
       worldSize: { w: 7356, h: 4144 }
     }
   });
-  const defaultRun = loadRuntimeMapData({ storage: { 'r32-map': corruptMap } }).data;
-  assert(defaultRun.ENDLESS_MAPS.endless1.map.spawns.length === 8, 'public endless mode should ignore saved editor maps by default');
-
-  const explicitRun = loadRuntimeMapData({ search: '?useSavedMap=1', storage: { 'r32-map': corruptMap } }).data;
-  assert(explicitRun.ENDLESS_MAPS.endless1.map.spawns.length === 8, 'invalid saved editor map should be rejected even when explicitly enabled');
-  assert(explicitRun.ENDLESS_MAPS.endless1.name === '无尽模式一', 'endless map name should remain readable after rejecting saved map');
+  const defaultRun = loadRuntimeMapData({ search: '?useSavedMap=1', storage: { 'r32-map': corruptMap } }).data;
+  assert(defaultRun.ENDLESS_MAPS.endless1.map.spawns.length === 8, 'endless mode should always use the built-in public map registry');
+  assert(defaultRun.ENDLESS_MAPS.endless1.name === '无尽模式一', 'endless map name should remain readable');
 }
 
 function main() {
@@ -259,8 +261,8 @@ function main() {
   testFixedWaves(data);
   testMetaCombinations(ctx);
   testLaunchEntryReady(data);
-  testSavedEditorMapIsolation();
-  console.log('integration stress ok: scene composition, map reachability, long-wave rosters, fixed waves, saved-map isolation and meta combos verified');
+  testRuntimeMapIsolation();
+  console.log('integration stress ok: scene composition, map reachability, long-wave rosters, fixed waves, runtime-map isolation and meta combos verified');
 }
 
 main();

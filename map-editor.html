@@ -174,10 +174,9 @@
           <button id="importBtn">从 JSON 导入</button>
           <button id="saveDraftBtn">保存草稿</button>
           <button id="loadDraftBtn">读取草稿</button>
-          <button id="sendDemoBtn" class="warn">导出到 Demo 无尽</button>
         </div>
         <textarea id="out" spellcheck="false" placeholder="导出的地图 JSON 会显示在这里"></textarea>
-        <p class="small">“导出到 Demo 无尽”会写入 localStorage 的 <code>r32-map</code>。Demo 只使用 <code>walls</code> 做碰撞/寻路；<code>paths</code> 是路线设计元数据，不等于墙体。</p>
+        <p class="small">地图编辑器只负责浏览、检查和导出 JSON。正式 Demo 只读取内置关卡表，不读取编辑器草稿或浏览器缓存。</p>
       </div>
     </aside>
   </div>
@@ -7835,13 +7834,6 @@
         $('saveState').textContent = `草稿读取失败：${err.message}`;
       }
     };
-    $('sendDemoBtn').onclick = () => {
-      const data = exportData();
-      localStorage.setItem('r32-map', JSON.stringify(data));
-      writeOut(data);
-      $('saveState').textContent = '已写入 r32-map，打开 Demo 无尽模式可测试墙体/出生点/主反应炉';
-    };
-
     try{
       renderLevelList();
       loadLevel(0);

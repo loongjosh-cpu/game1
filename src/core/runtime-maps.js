@@ -1,61 +1,3 @@
-let SAVED_EDITOR_MAP=null;
-
-try{
-  if(shouldUseSavedEditorMap())loadSavedEditorMap();
-}catch(err){
-  console.warn('忽略本地地图缓存',err);
-}
-
-function shouldUseSavedEditorMap(){
-  try{
-    return new URLSearchParams(location.search).get('useSavedMap')==='1';
-  }catch(_){
-    return false
-  }
-}
-
-function loadSavedEditorMap(){
-  const saved=JSON.parse(safeStorageGet('r32-map')||'null');
-  const src=saved?.map||saved;
-  const world=src?.worldSize||saved?.worldSize;
-  if(!validSavedMap(src,world))return;
-  SAVED_EDITOR_MAP=src;
-}
-
-function validSavedMap(src,world){
-  return !!(
-    src&&
-    Array.isArray(src.walls)&&
-    src.walls.every(validRect)&&
-    Array.isArray(src.spawns)&&
-    src.spawns.length>0&&
-    src.spawns.every(validPoint)&&
-    validPoint(src.reactor)&&
-    (!world||(world.w===W&&world.h===H))
-  );
-}
-
-function validPoint(p){
-  if(Array.isArray(p))return Number.isFinite(Number(p[0]))&&Number.isFinite(Number(p[1]));
-  return !!p&&Number.isFinite(Number(p.x))&&Number.isFinite(Number(p.y));
-}
-
-function validRect(r){
-  return Array.isArray(r)&&r.length>=4&&r.every(v=>Number.isFinite(Number(v)));
-}
-
-function applySavedMapToEndless(src,world){
-  ENDLESS_MAP.unitScale=src.unitScale||ENDLESS_MAP.unitScale;
-  ENDLESS_MAP.w=world?.w||src.w||W;
-  ENDLESS_MAP.h=world?.h||src.h||H;
-  ENDLESS_MAP.worldSize={w:ENDLESS_MAP.w,h:ENDLESS_MAP.h};
-  ENDLESS_MAP.walls=src.walls;
-  ENDLESS_MAP.spawns=src.spawns;
-  ENDLESS_MAP.reactor=src.reactor;
-  ENDLESS_MAP.paths=src.paths||src.routes||[];
-  ENDLESS_MAP.pockets=src.pockets||[];
-}
-
 const ADDED_LEVEL_WAVE_COUNT=15;
 
 function addedLevelWaves(seedId='level5'){
@@ -153,26 +95,5 @@ const ENDLESS_MAPS={
     paths:clonePaths(TRIAL_LARGE_ROUTES),
     pockets:[]}}
 };
-
-if(SAVED_EDITOR_MAP)applySavedEditorMapOverride(SAVED_EDITOR_MAP);
-
-function applySavedEditorMapOverride(savedMap){
-  const world=savedMap.worldSize||{w:savedMap.w||W,h:savedMap.h||H};
-  ENDLESS_MAPS.endless1.map={
-    schemaVersion:savedMap.schemaVersion||1,
-    kind:savedMap.kind||'endless-map',
-    id:savedMap.id||'endless1',
-    name:savedMap.name||ENDLESS_MAPS.endless1.name,
-    unitScale:savedMap.unitScale||1,
-    w:world.w,
-    h:world.h,
-    worldSize:{w:world.w,h:world.h},
-    walls:(savedMap.walls||[]).map(w=>[...w]),
-    spawns:(savedMap.spawns||[]).map(p=>pathPoint(p)),
-    reactor:{...savedMap.reactor},
-    paths:clonePaths(savedMap.paths||savedMap.routes||[]),
-    pockets:(savedMap.pockets||[]).map(p=>({...p}))
-  };
-}
 
 let MAP=ENDLESS_MAPS.endless1.map;
