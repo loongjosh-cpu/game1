@@ -11,7 +11,7 @@ function launch(sel,mode='endless1'){
   class GameScene extends Phaser.Scene{
     constructor(){
       super('Game');
-      this.launchContext={selIds,mode,levelConfig,gridPF};
+      this.launchContext={selIds,mode,levelConfig,gridPF,enemyWaypoints};
     }
     preload(){
       genTwTex(this);

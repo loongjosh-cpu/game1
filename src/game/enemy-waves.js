@@ -5,6 +5,25 @@ const EnemyWaveMethods={
   wavePool(){const pool=['E1'];if(this.wave>=2)pool.push('E2');if(this.wave>=3)pool.push('E3');if(this.wave>=4)pool.push('E4','E7');if(this.wave>=5)pool.push('E8');if(this.wave>=6)pool.push('E5','E6');if(this.wave>=7)pool.push('E11');if(this.wave>=8)pool.push('E9','E10');if(this.wave>=9)pool.push('E12');if(this.wave>=10)pool.push('E13');if(this.wave>=12)pool.push('E14');return pool},
   buildWaveRoster(){const budget=5+3*(this.wave-1),pool=this.wavePool(),roster=[],specialCount={},specialMax=budget*0.35,directMin=budget*0.35;let rem=budget,specialSpent=0,directSpent=0;const add=ty=>{roster.push(ty);rem-=THREAT_COST[ty]||1;if(SPECIAL_ENEMY.has(ty)){specialSpent+=THREAT_COST[ty]||1;specialCount[ty]=(specialCount[ty]||0)+1}if(DIRECT_ENEMY.has(ty))directSpent+=THREAT_COST[ty]||1};const can=ty=>{const c=THREAT_COST[ty]||1;if(c>rem)return false;if(SPECIAL_ENEMY.has(ty)&&(specialSpent+c>specialMax||(specialCount[ty]||0)>=2))return false;return true};while(directSpent<directMin&&rem>0){const d=pool.filter(ty=>DIRECT_ENEMY.has(ty)&&can(ty));if(!d.length)break;add(Phaser.Utils.Array.GetRandom(d))}while(rem>0){const opts=pool.filter(can);if(!opts.length){if(can('E1'))add('E1');else break}else add(Phaser.Utils.Array.GetRandom(opts))}return Phaser.Utils.Array.Shuffle(roster)},
   levelWave(){return this.levelConfig?.waves?.[this.wave-1]||null},
+  waveSpawnDelay(i){return 500*(i+1)},
+  routeLengthForSpawn(si){
+    const points=this.enemyWaypoints?.[si]||[MAP.spawns?.[si],MAP.reactor].filter(Boolean).map(pathPoint);
+    let len=0;
+    for(let i=1;i<points.length;i++){
+      const a=points[i-1],b=points[i];
+      len+=Phaser.Math.Distance.Between(a[0],a[1],b[0],b[1])
+    }
+    return len
+  },
+  naturalWaveDuration(roster,lw,spawnOffset){
+    let latest=0;
+    roster.forEach((ty,i)=>{
+      const lanes=lw?.lanes,laneRaw=lanes?lanes[i%lanes.length]:(spawnOffset+i),si=((laneRaw%MAP.spawns.length)+MAP.spawns.length)%MAP.spawns.length;
+      const speed=Math.max(1,sd(EC[ty]?.spd||200));
+      latest=Math.max(latest,this.waveSpawnDelay(i)+this.routeLengthForSpawn(si)/speed*1000)
+    });
+    return Math.max(PREP_TIME,latest)
+  },
   finishWaveSpawning(){
     if(this._waveSpawnDone)return;
     this._waveSpawnDone=true;
@@ -17,9 +36,9 @@ const EnemyWaveMethods={
       return
     }
     this.wave++;
-    this.prepTimer=PREP_TIME
+    this.prepTimer=Math.max(0,(this._waveNaturalDuration||PREP_TIME)-this._waveSpawnElapsed)
   },
-  startWave(){if(this.ended||this._allLevelWavesSpawned)return;this.wActive=true;this._waveSpawnDone=false;const waveNo=this.wave,lw=this.levelWave();this._waveRoster=lw?lw.roster.slice():this.buildWaveRoster();this.wC=this._waveRoster.length;this.wS=0;this._spawnOffset=Phaser.Math.Between(0,MAP.spawns.length-1);this._wt=this.time.addEvent({delay:500,loop:true,callback:()=>{if(this.wS>=this.wC){this._wt.remove();this.finishWaveSpawning();return}const lanes=lw?.lanes,laneRaw=lanes?lanes[this.wS%lanes.length]:(this._spawnOffset+this.wS),si=((laneRaw%MAP.spawns.length)+MAP.spawns.length)%MAP.spawns.length,ty=this._waveRoster[this.wS]||'E1';this.spawnE(si,ty,waveNo);this.wS++;if(this.wS>=this.wC){this._wt.remove();this.finishWaveSpawning()}}})},
+  startWave(){if(this.ended||this._allLevelWavesSpawned)return;this.wActive=true;this._waveSpawnDone=false;const waveNo=this.wave,lw=this.levelWave();this._waveRoster=lw?lw.roster.slice():this.buildWaveRoster();this.wC=this._waveRoster.length;this.wS=0;this._spawnOffset=Phaser.Math.Between(0,MAP.spawns.length-1);this._waveNaturalDuration=this.naturalWaveDuration(this._waveRoster,lw,this._spawnOffset);this._waveSpawnElapsed=this.waveSpawnDelay(Math.max(0,this.wC-1));this._wt=this.time.addEvent({delay:500,loop:true,callback:()=>{if(this.wS>=this.wC){this._wt.remove();this.finishWaveSpawning();return}const lanes=lw?.lanes,laneRaw=lanes?lanes[this.wS%lanes.length]:(this._spawnOffset+this.wS),si=((laneRaw%MAP.spawns.length)+MAP.spawns.length)%MAP.spawns.length,ty=this._waveRoster[this.wS]||'E1';this.spawnE(si,ty,waveNo);this.wS++;if(this.wS>=this.wC){this._wt.remove();this.finishWaveSpawning()}}})},
   spawnE(si,type,waveNo=null){const cfg=EC[type],[sx,sy]=MAP.spawns[si],e=this.physics.add.image(sx,sy,cfg.key).setDepth(6).setTint(cfg.color||0xffffff);this.enemies.add(e);e.body.enable=true;e._uid=++this.enemySeq;const scaleWave=waveNo??this.wave,sc=this.levelConfig?.waves?.[scaleWave-1]?.scale??(1+(scaleWave-1)*0.1);e._waveNo=scaleWave;e._hp=Math.round(cfg.hp*sc);e._maxhp=e._hp;e._dmg=cfg.dmg;e._spd=cfg.spd;e._atk=cfg.atk;e._at=0;e._firstAttack=true;e._si=si;e._b1tgt=null;e._reactorTarget=null;e._droneTarget=null;e._type=type;e._bt=0;e._slow=0;e._slowT=0;e._state='path';e._hatch=cfg.hatch||0;e._summonTimers=(cfg.summons||[]).map(s=>({type:s.type,interval:s.interval,left:s.interval}));e._hits=0;this.routeToReactor(e,false);e.body.setCircle(Math.min(16,e.width/2));e.body.setBounce(0);return e},
   gameOver(title='防线失守'){if(this.ended)return;this.ended=true;const completed=this.completedWaves??Math.max(0,this.wave-1),levelCleared=!!this.levelConfig&&completed>=this.levelConfig.waves.length,reward=this.levelConfig?(levelCleared?1:0):Math.floor(completed/5);metaSave.cores+=reward;metaSave.bestWave=Math.max(metaSave.bestWave,completed);if(levelCleared&&this.levelConfig?.id){metaSave.levelClears=metaSave.levelClears||{};metaSave.levelClears[this.levelConfig.id]=true}saveMeta();document.querySelector('#gameOverPanel h2').textContent=title;document.getElementById('resultWaves').textContent=completed;document.getElementById('resultReward').textContent=reward;document.getElementById('resultCores').textContent=metaSave.cores;document.getElementById('pausePanel').style.display='none';document.getElementById('gameOverPanel').style.display='flex';this.scene.pause()},
   grantWaveClearBonus(){

@@ -149,6 +149,7 @@ function makeScene(ctx, options = {}) {
     _spawned: [],
     _routes: [],
     _events: events,
+    enemyWaypoints: options.enemyWaypoints || [[[0, 0], [100, 0]]],
     reactors: options.reactors || [],
     meta: options.meta || {},
     physics: {
@@ -367,6 +368,14 @@ function testTimedWaveAdvance(ctx, issues) {
   scene.enemies.children.iterate(e => { if (e && e._waveNo === 1) e.active = false; });
   scene.updateWaves(0);
   assert(scene.completedWaves === 1 && scene._pendingWaveClears.length === 1 && scene._pendingWaveClears[0] === 2, 'completed wave count should advance for the cleared wave without waiting for later-wave enemies', issues);
+
+  const longScene = makeScene(ctx, {
+    levelConfig: { waves: [{ lanes: [0], roster: ['E6'] }, { lanes: [0], roster: ['E1'] }] },
+    enemyWaypoints: [[[0, 0], [0, 3600]]]
+  });
+  longScene.startWave();
+  longScene._events[0].callback();
+  assert(longScene.prepTimer > 25000, 'next-wave countdown should use natural travel time for the slowest current-wave enemy on long paths', issues);
 }
 
 function testReactorIncome(ctx, issues) {
