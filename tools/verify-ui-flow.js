@@ -402,6 +402,8 @@ function testStaticUiGuards() {
     assert(!demo.includes(text), `demo should not expose designed level name: ${text}`);
   });
   assert(demo.includes('id="btnEnemyTest"'), 'demo should expose the enemy combat browser test entry');
+  assert(demo.includes('id="hudCompleted"'), 'HUD should show completed waves separately from current wave');
+  assert(demo.includes('残敌 <span id="hudEnemies"'), 'HUD should label active enemies as remaining enemies');
   assert(demo.includes('id="enemyTestPanel"'), 'demo should include the enemy combat test control panel');
   ['id="enemyTestStart"', 'id="enemyTestStop"', 'id="enemyTestCount"', 'id="enemyTestInterval"'].forEach(snippet => {
     assert(demo.includes(snippet), `enemy combat sandbox should include control: ${snippet}`);
@@ -427,6 +429,11 @@ function testStaticUiGuards() {
   });
   assert(css.includes('.floatingDragHandle') && css.includes('cursor:move'), 'draggable panels should show a move cursor affordance');
   assert(css.includes('#twPanel.dragging') && css.includes('#enemyTestPanel.dragging'), 'tower and enemy sandbox panels should share dragging feedback');
+
+  const hud = read('src/game/hud-overlay.js');
+  ['wavePhaseText', '清理残敌', 'hudCompleted'].forEach(snippet => {
+    assert(hud.includes(snippet), `HUD should keep clear wave-progress wording: ${snippet}`);
+  });
 }
 
 function main() {

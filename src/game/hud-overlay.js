@@ -45,16 +45,22 @@ const HudOverlayMethods={
     this.enemies.children.iterate(e=>this.renderEnemyBar(e));
     this.renderReactorBars()
   },
+  wavePhaseText(activeEnemies){
+    if(this.wActive)return '出敌中';
+    if(activeEnemies>0&&!this._allLevelWavesSpawned)return `下一波 ${(this.prepTimer/1000).toFixed(1)}s`;
+    if(activeEnemies>0&&this._allLevelWavesSpawned)return '清理残敌';
+    return `准备 ${(this.prepTimer/1000).toFixed(1)}s`
+  },
   updateHud(t,dt){
     const activeEnemies=this.enemies.countActive();
-    const phase=this.wActive?'出敌中':activeEnemies>0&&!this._allLevelWavesSpawned?`下一波 ${(this.prepTimer/1000).toFixed(1)}s`:`准备 ${(this.prepTimer/1000).toFixed(1)}s`;
-    document.getElementById('hudPhase').textContent=phase;
+    document.getElementById('hudPhase').textContent=this.wavePhaseText(activeEnemies);
     this.spawnMarkers.forEach((m,i)=>m.setAlpha(this.wActive?0.35:0.45+0.45*Math.sin(t*0.006+i)));
     document.getElementById('hudEnergy').textContent=Math.floor(this.en);
     document.getElementById('hudIncome').textContent=this.energyRate();
     document.getElementById('hudReactor').textContent=Math.ceil(this.rxHP);
     document.getElementById('hudSmallReactors').textContent=this.smallReactorCount()+'/'+SMALL_REACTOR.maxCount;
     document.getElementById('hudWave').textContent=this.wave;
+    document.getElementById('hudCompleted').textContent=this.completedWaves||0;
     document.getElementById('hudEnemies').textContent=activeEnemies;
     document.getElementById('hudTowers').textContent=this.towers.countActive()+this.blockers.countActive()+this.drones.countActive();
     if(Math.floor(t/500)!==Math.floor((t-dt)/500))document.getElementById('hudFps').textContent=Math.round(this.game.loop.actualFps);
