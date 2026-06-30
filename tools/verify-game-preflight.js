@@ -17,6 +17,10 @@ function demoScripts() {
   return [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map(m => m[1]);
 }
 
+function stripQuery(path) {
+  return path.split('?')[0];
+}
+
 function syntaxCheck(files) {
   const issues = [];
   for (const file of files) {
@@ -444,7 +448,7 @@ function validateDangerEffects(data, issues) {
 
 function main() {
   const scripts = demoScripts();
-  const localScripts = scripts.filter(s => LOCAL_SCRIPT_RE.test(s));
+  const localScripts = scripts.filter(s => LOCAL_SCRIPT_RE.test(s)).map(stripQuery);
   const syntaxIssues = syntaxCheck(localScripts);
 
   const dataFiles = [
