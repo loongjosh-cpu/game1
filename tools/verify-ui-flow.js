@@ -420,7 +420,8 @@ function testStaticUiGuards() {
   assert(pageFlow.includes('launchGameAfterPaint([],ENEMY_TEST_MODE)'), 'enemy combat test should launch without requiring a tower loadout');
   assert(/function\s+startSelectedMode\(\)[\s\S]*?destroyGameInstance\(\)[\s\S]*?launchGameAfterPaint\(selectedTowers\.slice\(\),selectedMode\)/.test(pageFlow), 'starting a normal mode should destroy any stale Phaser instance before launching');
   assert(/function\s+startEnemyCombatTest\(\)[\s\S]*?destroyGameInstance\(\)[\s\S]*?launchGameAfterPaint\(\[\],ENEMY_TEST_MODE\)/.test(pageFlow), 'starting enemy sandbox should destroy any stale Phaser instance before launching');
-  assert(pageFlow.includes('gamePage.replaceChildren()'), 'destroying a game instance should clear stale canvas children from gamePage');
+  assert(!pageFlow.includes('gamePage.replaceChildren()'), 'destroying a game instance must not remove static HUD or tower-panel DOM');
+  assert(pageFlow.includes("querySelectorAll('canvas:not(#miniMap)')"), 'destroying a game instance should only remove Phaser canvases from gamePage');
   assert(pageFlow.includes('launchGameAfterPaint') && pageFlow.includes('requestAnimationFrame'), 'game launch should display loading UI before heavy synchronous map setup');
   assert(pageFlow.includes('finishLaunchAttempt'), 'game launch should reset launch guard after success or failure');
   assert(pageFlow.includes('启动超时'), 'game launch should expose a timeout state for stalled startup diagnostics');

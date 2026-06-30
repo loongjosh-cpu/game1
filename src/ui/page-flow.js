@@ -144,5 +144,5 @@ function destroyGameInstance(){
   gameInstance.destroy(true);
   gameInstance=null;
   const gamePage=document.getElementById('gamePage');
-  if(gamePage)gamePage.replaceChildren();
+  if(gamePage)gamePage.querySelectorAll('canvas:not(#miniMap)').forEach(canvas=>canvas.remove());
 }
