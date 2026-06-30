@@ -67,6 +67,10 @@ function showSelectPage(){
 
 let launchInProgress=false;
 
+function finishLaunchAttempt(){
+  launchInProgress=false;
+}
+
 function startSelectedMode(){
   if(launchInProgress||!selectedTowers.length||selectedModeLocked())return;
   destroyGameInstance();
@@ -104,7 +108,7 @@ function launchGameAfterPaint(towers,mode){
       try{
         gameInstance=launch(towers,mode);
       }catch(err){
-        launchInProgress=false;
+        finishLaunchAttempt();
         clearTimeout(launchWatchdog);
         if(typeof r32LoadingFailed==='function')r32LoadingFailed(err);
         else throw err;

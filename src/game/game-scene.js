@@ -17,39 +17,65 @@ function launch(sel,mode='endless1'){
       super('Game');
       this.launchContext={selIds,mode,levelConfig,gridPF,enemyWaypoints};
     }
+    launchStep(stage,detail,progress,fn){
+      if(typeof r32SetLoading==='function')r32SetLoading(stage,detail,progress);
+      try{
+        return fn();
+      }catch(err){
+        if(typeof r32LoadingFailed==='function')r32LoadingFailed(err);
+        if(typeof finishLaunchAttempt==='function')finishLaunchAttempt();
+        throw err;
+      }
+    }
     preload(){
-      if(typeof r32SetLoading==='function')r32SetLoading('生成纹理','防御塔/怪物/弹体',0.62);
-      genTwTex(this);
-      this.createShipTexture();
-      this.createRangeTexture();
-      this.createReactorTextures();
-      this.createSpawnTexture();
-      this.createEnemyTextures();
-      this.createProjectileTextures();
+      this.launchStep('生成纹理','防御塔',0.6,()=>genTwTex(this));
+      this.launchStep('生成纹理','飞船/范围/反应炉',0.63,()=>{
+        this.createShipTexture();
+        this.createRangeTexture();
+        this.createReactorTextures();
+      });
+      this.launchStep('生成纹理','出生点/怪物/弹体',0.66,()=>{
+        this.createSpawnTexture();
+        this.createEnemyTextures();
+        this.createProjectileTextures();
+      });
     }
     create(){
-      if(typeof r32SetLoading==='function')r32SetLoading('创建场景','地图与交互',0.76);
-      this.initSceneState();
-      this.time.paused=false;
-      this.tweens.resumeAll();
-      if(typeof initDebugOverlay==='function')initDebugOverlay();
-      this.configureWorldBounds();
-      this.createBackdrop();
-      this.createWalls();
-      this.createGameGroups();
-      this.createMainReactor();
-      this.createSpawnMarkers();
-      this.createShip();
-      this.createRuntimeGraphics();
-      this.setupPhysicsCollisions();
-      this.resetRunState();
-      this.setupInputHandlers();
-      this.bindTowerPanelButtons();
-      this.rebuildPanel();
-      this.initMiniMap();
-      this.applyViewSettings();
-      this.setupEnemyTestLab();
-      if(typeof r32SetLoading==='function')r32SetLoading('等待首帧','启动主循环',0.92);
+      this.launchStep('创建场景','初始化状态',0.68,()=>{
+        this.initSceneState();
+        this.time.paused=false;
+        this.tweens.resumeAll();
+        if(typeof initDebugOverlay==='function')initDebugOverlay();
+      });
+      this.launchStep('创建场景','世界边界/背景',0.72,()=>{
+        this.configureWorldBounds();
+        this.createBackdrop();
+      });
+      this.launchStep('创建场景','墙体/物理组',0.76,()=>{
+        this.createWalls();
+        this.createGameGroups();
+      });
+      this.launchStep('创建场景','反应炉/出生点',0.8,()=>{
+        this.createMainReactor();
+        this.createSpawnMarkers();
+      });
+      this.launchStep('创建场景','飞船/运行图层',0.84,()=>{
+        this.createShip();
+        this.createRuntimeGraphics();
+        this.setupPhysicsCollisions();
+      });
+      this.launchStep('创建场景','输入与面板',0.88,()=>{
+        this.resetRunState();
+        this.setupInputHandlers();
+        this.bindTowerPanelButtons();
+        this.rebuildPanel();
+      });
+      this.launchStep('创建场景','视角/小地图/沙盒',0.92,()=>{
+        this.initMiniMap();
+        this.applyViewSettings();
+        this.setupEnemyTestLab();
+      });
+      if(typeof r32SetLoading==='function')r32SetLoading('等待首帧','启动主循环',0.96);
     }
     smallReactorCount(){return this.reactors.filter(r=>this.reactorAlive(r)&&!r._isMainReactor).length}
     energyRate(){return this.reactors.reduce((sum,r)=>sum+(this.reactorAlive(r)?r._type.upg[r._lv||0].prod:0),0)}
@@ -59,7 +85,7 @@ function launch(sel,mode='endless1'){
         this._firstFrameSeen=true;
         if(typeof r32SetLoading==='function')r32SetLoading('启动完成','进入战区',1);
         if(typeof r32HideLoading==='function')setTimeout(()=>r32HideLoading(),120);
-        if(typeof launchInProgress!=='undefined')launchInProgress=false;
+        if(typeof finishLaunchAttempt==='function')finishLaunchAttempt();
       }
       if(this.isPaused||!dt)return;this.gainEnergy(this.energyRate()*dt/1000);
       this.updateShip(dt);

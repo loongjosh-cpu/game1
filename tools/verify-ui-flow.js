@@ -422,6 +422,7 @@ function testStaticUiGuards() {
   assert(/function\s+startEnemyCombatTest\(\)[\s\S]*?destroyGameInstance\(\)[\s\S]*?launchGameAfterPaint\(\[\],ENEMY_TEST_MODE\)/.test(pageFlow), 'starting enemy sandbox should destroy any stale Phaser instance before launching');
   assert(pageFlow.includes('gamePage.replaceChildren()'), 'destroying a game instance should clear stale canvas children from gamePage');
   assert(pageFlow.includes('launchGameAfterPaint') && pageFlow.includes('requestAnimationFrame'), 'game launch should display loading UI before heavy synchronous map setup');
+  assert(pageFlow.includes('finishLaunchAttempt'), 'game launch should reset launch guard after success or failure');
   assert(pageFlow.includes('启动超时'), 'game launch should expose a timeout state for stalled startup diagnostics');
 
   const lab = read('src/game/enemy-test-lab.js');
@@ -444,7 +445,7 @@ function testStaticUiGuards() {
     assert(debugTools.includes(snippet), `debug tools should expose loading diagnostic hook: ${snippet}`);
   });
   const gameScene = read('src/game/game-scene.js');
-  ['计算寻路', '创建渲染器', '等待首帧', '启动完成'].forEach(snippet => {
+  ['launchStep', '计算寻路', '反应炉/出生点', '输入与面板', '等待首帧', '启动完成'].forEach(snippet => {
     assert(gameScene.includes(snippet), `game scene should mark launch stage: ${snippet}`);
   });
 }
