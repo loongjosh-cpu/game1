@@ -67,6 +67,14 @@ const EnemyWaveMethods={
     this.enemies.children.iterate(e=>{if(e&&e.active&&e._waveNo===waveNo)active=true});
     return active
   },
+  activeEnemyCount(){
+    return this.enemies.countActive()
+  },
+  shortenPrepAfterClear(){
+    if(this.wActive||this._allLevelWavesSpawned)return;
+    if(this.activeEnemyCount()>0)return;
+    this.prepTimer=Math.min(this.prepTimer,CLEAR_FIELD_PREP_TIME)
+  },
   updateWaves(dt){
     if(Array.isArray(this._pendingWaveClears)&&this._pendingWaveClears.length){
       while(this._pendingWaveClears.length&&!this.waveHasActiveEnemies(this._pendingWaveClears[0])){
@@ -77,6 +85,7 @@ const EnemyWaveMethods={
       if(this.levelConfig&&this.completedWaves>=this.levelConfig.waves.length){this.gameOver('关卡完成');return}
     }
     if(!this.wActive&&!this._allLevelWavesSpawned){
+      this.shortenPrepAfterClear();
       this.prepTimer=Math.max(0,this.prepTimer-dt);
       if(this.prepTimer<=0)this.startWave();
       return

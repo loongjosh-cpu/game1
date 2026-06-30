@@ -82,6 +82,7 @@ function loadContext() {
       KILL_REWARD_MULT,
       REACTOR_WAVE_BONUS_LIMIT,
       EN_CAP,
+      CLEAR_FIELD_PREP_TIME,
       MAIN_REACTOR,
       SMALL_REACTOR,
       LEVELS,
@@ -385,6 +386,9 @@ function testTimedWaveAdvance(ctx, issues) {
   longScene.startWave();
   longScene._events[0].callback();
   assert(longScene.prepTimer > 25000, 'next-wave countdown should use natural travel time for the slowest current-wave enemy on long paths', issues);
+  longScene.enemies.children.iterate(e => { if (e) e.active = false; });
+  longScene.updateWaves(0);
+  assert(longScene.prepTimer === ctx.CLEAR_FIELD_PREP_TIME, 'clearing all enemies should shorten long natural countdown to the standard clear-field prep time', issues);
 }
 
 function testEndlessLaneUnlock(ctx, issues) {
