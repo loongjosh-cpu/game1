@@ -263,6 +263,13 @@ function testMetaEffects(ctx, issues) {
 
 function testPersistence(ctx, issues) {
   resetSave(ctx, {
+    cores: 1,
+    ownedChips: { tower_b1: true },
+    equippedChips: { tower_b1: true },
+    settings: { cameraMode: 'local' }
+  });
+  ctx.saveMeta();
+  resetSave(ctx, {
     cores: 4,
     ownedChips: { tower_b7: true },
     equippedChips: { tower_b7: true },
@@ -270,9 +277,12 @@ function testPersistence(ctx, issues) {
   });
   ctx.saveMeta();
   const raw = JSON.parse(ctx.storage[ctx.META_SAVE_KEY]);
-  assert(raw.cores === 4, 'saveMeta should persist cores', issues);
-  assert(raw.ownedChips.tower_b7 && raw.equippedChips.tower_b7 && raw.nodes.tower_b7, 'saveMeta should persist owned, equipped and legacy node alias', issues);
-  assert(raw.settings.cameraMode === 'global', 'saveMeta should persist settings', issues);
+  assert(raw.schemaVersion >= 2 && Number.isFinite(raw.updatedAt), 'saveMeta should wrap saves with schema version and updatedAt', issues);
+  assert(typeof raw.checksum === 'string' && raw.checksum.startsWith('r32-'), 'saveMeta should persist a checksum for corruption detection', issues);
+  assert(raw.data.cores === 4, 'saveMeta should persist cores', issues);
+  assert(raw.data.ownedChips.tower_b7 && raw.data.equippedChips.tower_b7 && raw.data.nodes.tower_b7, 'saveMeta should persist owned, equipped and legacy node alias', issues);
+  assert(raw.data.settings.cameraMode === 'global', 'saveMeta should persist settings', issues);
+  assert(ctx.storage['r32-meta-backup-1'], 'saveMeta should keep an automatic local backup of the previous valid save', issues);
 }
 
 function testCatalogCoverage(ctx, issues) {

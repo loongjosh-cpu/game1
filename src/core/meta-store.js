@@ -1,4 +1,9 @@
 const META_SAVE_KEY='r32-meta-v1';
+const META_SCHEMA_VERSION=2;
+const META_BACKUP_KEYS=['r32-meta-backup-1','r32-meta-backup-2','r32-meta-backup-3','r32-meta-backup-4'];
+const META_IDB_NAME='r32-save-db';
+const META_IDB_STORE='meta';
+const META_IDB_CURRENT='current';
 const DEFAULT_VIEW_SETTINGS={cameraMode:'local'};
 
 function safeStorageGet(key){
@@ -20,14 +25,66 @@ function safeStorageSet(key,value){
   }
 }
 
-function loadMetaSave(){
-  try{
-    const raw=JSON.parse(safeStorageGet(META_SAVE_KEY)||'null');
-    return normalizeMetaSave(raw);
-  }catch(err){
-    console.warn('专精芯片存档读取失败',err);
-    return emptyMetaSave();
+function stableStringify(value){
+  if(value===null||typeof value!=='object')return JSON.stringify(value);
+  if(Array.isArray(value))return `[${value.map(stableStringify).join(',')}]`;
+  return `{${Object.keys(value).sort().map(key=>`${JSON.stringify(key)}:${stableStringify(value[key])}`).join(',')}}`
+}
+
+function metaChecksum(data){
+  const text=stableStringify(data);
+  let hash=2166136261;
+  for(let i=0;i<text.length;i++){
+    hash^=text.charCodeAt(i);
+    hash=Math.imul(hash,16777619)
   }
+  return `r32-${(hash>>>0).toString(16).padStart(8,'0')}`
+}
+
+function packMetaSave(raw,updatedAt=Date.now()){
+  const data=normalizeMetaSave(raw);
+  if(data.equippedChips)data.nodes={...data.equippedChips};
+  return {
+    schemaVersion:META_SCHEMA_VERSION,
+    updatedAt,
+    checksum:metaChecksum(data),
+    data
+  }
+}
+
+function unpackMetaCandidate(raw,source='unknown'){
+  if(!raw||typeof raw!=='object')return null;
+  if(raw.data&&typeof raw.data==='object'){
+    const data=normalizeMetaSave(raw.data);
+    if(raw.checksum&&raw.checksum!==metaChecksum(data)){
+      console.warn('存档校验失败，已忽略',source);
+      return null
+    }
+    return {data,updatedAt:Math.max(0,Number(raw.updatedAt)||0),source,packaged:true}
+  }
+  return {data:normalizeMetaSave(raw),updatedAt:Math.max(0,Number(raw.updatedAt)||0),source,packaged:false}
+}
+
+function parseMetaCandidate(rawText,source){
+  try{
+    return unpackMetaCandidate(JSON.parse(rawText||'null'),source)
+  }catch(err){
+    console.warn('存档解析失败，已尝试使用其他备份',source,err);
+    return null
+  }
+}
+
+function chooseNewestValidMeta(candidates){
+  return candidates.filter(Boolean).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0]||null
+}
+
+function loadMetaSave(){
+  const candidates=[META_SAVE_KEY,...META_BACKUP_KEYS]
+    .map(key=>parseMetaCandidate(safeStorageGet(key),key));
+  const chosen=chooseNewestValidMeta(candidates);
+  metaSaveLoadedAt=chosen?.updatedAt||0;
+  if(chosen)return chosen.data;
+  return emptyMetaSave();
 }
 
 function emptyMetaSave(){
@@ -78,11 +135,29 @@ function normalizeMetaSave(raw){
   };
 }
 
+let metaSaveLoadedAt=0;
 let metaSave=loadMetaSave();
 
-function saveMeta(){
+function rotateMetaBackups(){
+  const current=safeStorageGet(META_SAVE_KEY);
+  if(!parseMetaCandidate(current,META_SAVE_KEY))return;
+  for(let i=META_BACKUP_KEYS.length-1;i>0;i--){
+    const previous=safeStorageGet(META_BACKUP_KEYS[i-1]);
+    if(previous)safeStorageSet(META_BACKUP_KEYS[i],previous);
+  }
+  safeStorageSet(META_BACKUP_KEYS[0],current);
+}
+
+function saveMeta(options={}){
+  const normalized=normalizeMetaSave(metaSave);
+  Object.keys(metaSave).forEach(key=>delete metaSave[key]);
+  Object.assign(metaSave,normalized);
   if(metaSave?.equippedChips)metaSave.nodes={...metaSave.equippedChips};
-  safeStorageSet(META_SAVE_KEY,JSON.stringify(metaSave));
+  const packed=packMetaSave(metaSave,Date.now());
+  metaSaveLoadedAt=packed.updatedAt;
+  if(!options.skipBackup)rotateMetaBackups();
+  safeStorageSet(META_SAVE_KEY,JSON.stringify(packed));
+  writeMetaIndexedDb(packed);
 }
 
 function syncMetaNodeAlias(){
@@ -140,6 +215,96 @@ function enforceEquippedRequirements(){
 }
 
 enforceEquippedRequirements();
+
+function openMetaIndexedDb(){
+  return new Promise((resolve,reject)=>{
+    if(typeof indexedDB==='undefined'){
+      reject(new Error('IndexedDB unavailable'));
+      return
+    }
+    const request=indexedDB.open(META_IDB_NAME,1);
+    request.onerror=()=>reject(request.error||new Error('IndexedDB open failed'));
+    request.onupgradeneeded=()=>request.result.createObjectStore(META_IDB_STORE,{keyPath:'id'});
+    request.onsuccess=()=>resolve(request.result)
+  })
+}
+
+function idbRequest(request){
+  return new Promise((resolve,reject)=>{
+    request.onerror=()=>reject(request.error);
+    request.onsuccess=()=>resolve(request.result)
+  })
+}
+
+async function readMetaIndexedDb(){
+  const db=await openMetaIndexedDb();
+  try{
+    const tx=db.transaction(META_IDB_STORE,'readonly');
+    const record=await idbRequest(tx.objectStore(META_IDB_STORE).get(META_IDB_CURRENT));
+    return unpackMetaCandidate(record?.payload||record,'indexedDB')
+  }finally{
+    db.close()
+  }
+}
+
+async function writeMetaIndexedDb(packed){
+  try{
+    const db=await openMetaIndexedDb();
+    try{
+      const tx=db.transaction(META_IDB_STORE,'readwrite');
+      await idbRequest(tx.objectStore(META_IDB_STORE).put({id:META_IDB_CURRENT,payload:packed}));
+    }finally{
+      db.close()
+    }
+  }catch(err){
+    if(String(err?.message||err).includes('unavailable'))return;
+    console.warn('IndexedDB存档写入失败，已保留localStorage存档',err)
+  }
+}
+
+function refreshMetaUiAfterRestore(){
+  try{
+    if(typeof refreshStartButton==='function')refreshStartButton();
+    if(typeof renderLoadoutGrids==='function')renderLoadoutGrids();
+    if(typeof renderMeta==='function')renderMeta();
+    if(typeof renderShop==='function')renderShop();
+  }catch(err){
+    console.warn('存档恢复后刷新界面失败',err)
+  }
+}
+
+async function reconcileIndexedDbMetaSave(){
+  try{
+    const candidate=await readMetaIndexedDb();
+    if(!candidate||candidate.updatedAt<=metaSaveLoadedAt)return;
+    const normalized=normalizeMetaSave(candidate.data);
+    Object.keys(metaSave).forEach(key=>delete metaSave[key]);
+    Object.assign(metaSave,normalized);
+    enforceEquippedRequirements();
+    saveMeta({skipBackup:true});
+    refreshMetaUiAfterRestore();
+    console.info('已从IndexedDB恢复较新的玩家存档')
+  }catch(err){
+    if(String(err?.message||err).includes('unavailable'))return;
+    console.warn('IndexedDB存档读取失败，继续使用localStorage存档',err)
+  }
+}
+
+function installMetaLifecycleSaveHandlers(){
+  if(typeof window==='undefined'||!window.addEventListener||installMetaLifecycleSaveHandlers.installed)return;
+  installMetaLifecycleSaveHandlers.installed=true;
+  const persist=()=>saveMeta({skipBackup:true});
+  window.addEventListener('pagehide',persist);
+  window.addEventListener('beforeunload',persist);
+  if(typeof document!=='undefined'&&document.addEventListener){
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='hidden')persist()
+    })
+  }
+}
+
+reconcileIndexedDbMetaSave();
+installMetaLifecycleSaveHandlers();
 
 function metaEffects(){
   const shipSpeedFlat=500
