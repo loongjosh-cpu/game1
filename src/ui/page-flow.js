@@ -65,8 +65,10 @@ function showSelectPage(){
   showHomePane('homeMainPane');
 }
 
+let launchInProgress=false;
+
 function startSelectedMode(){
-  if(!selectedTowers.length||selectedModeLocked())return;
+  if(launchInProgress||!selectedTowers.length||selectedModeLocked())return;
   destroyGameInstance();
   hidePage('selectPage');
   hidePage('gameOverPanel');
@@ -75,10 +77,11 @@ function startSelectedMode(){
   document.getElementById('gamePage').style.display='flex';
   setGameChromeVisible(true);
   if(typeof r32DebugRecordLaunch==='function')r32DebugRecordLaunch(selectedMode,selectedTowers.length);
-  gameInstance=launch(selectedTowers,selectedMode);
+  launchGameAfterPaint(selectedTowers.slice(),selectedMode);
 }
 
 function startEnemyCombatTest(){
+  if(launchInProgress)return;
   destroyGameInstance();
   hidePage('selectPage');
   hidePage('gameOverPanel');
@@ -86,7 +89,28 @@ function startEnemyCombatTest(){
   document.getElementById('gamePage').style.display='flex';
   setGameChromeVisible(true);
   if(typeof r32DebugRecordLaunch==='function')r32DebugRecordLaunch(ENEMY_TEST_MODE,0);
-  gameInstance=launch([],ENEMY_TEST_MODE);
+  launchGameAfterPaint([],ENEMY_TEST_MODE);
+}
+
+function launchGameAfterPaint(towers,mode){
+  launchInProgress=true;
+  if(typeof r32SetLoading==='function')r32SetLoading('准备启动',mode,0.08);
+  const launchWatchdog=setTimeout(()=>{
+    if(!launchInProgress)return;
+    if(typeof r32SetLoading==='function')r32SetLoading('启动超时','请截图 debug 信息或刷新重试',1);
+  },15000);
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{
+      try{
+        gameInstance=launch(towers,mode);
+      }catch(err){
+        launchInProgress=false;
+        clearTimeout(launchWatchdog);
+        if(typeof r32LoadingFailed==='function')r32LoadingFailed(err);
+        else throw err;
+      }
+    },0);
+  });
 }
 
 function returnToHome(){
@@ -111,6 +135,7 @@ function hideEnemyTestPanel(){
 }
 
 function destroyGameInstance(){
+  launchInProgress=false;
   if(!gameInstance)return;
   gameInstance.destroy(true);
   gameInstance=null;

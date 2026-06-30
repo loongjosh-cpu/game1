@@ -417,10 +417,12 @@ function testStaticUiGuards() {
   assert(pageFlow.includes('initDraggablePanels()'), 'page flow should initialize shared draggable panels');
   assert(pageFlow.includes('startEnemyCombatTest'), 'page flow should define an enemy combat test launcher');
   assert(pageFlow.includes('btnEnemyTest'), 'page flow should bind the enemy combat test button');
-  assert(pageFlow.includes('launch([],ENEMY_TEST_MODE)'), 'enemy combat test should launch without requiring a tower loadout');
-  assert(/function\s+startSelectedMode\(\)[\s\S]*?destroyGameInstance\(\)[\s\S]*?launch\(selectedTowers,selectedMode\)/.test(pageFlow), 'starting a normal mode should destroy any stale Phaser instance before launching');
-  assert(/function\s+startEnemyCombatTest\(\)[\s\S]*?destroyGameInstance\(\)[\s\S]*?launch\(\[\],ENEMY_TEST_MODE\)/.test(pageFlow), 'starting enemy sandbox should destroy any stale Phaser instance before launching');
+  assert(pageFlow.includes('launchGameAfterPaint([],ENEMY_TEST_MODE)'), 'enemy combat test should launch without requiring a tower loadout');
+  assert(/function\s+startSelectedMode\(\)[\s\S]*?destroyGameInstance\(\)[\s\S]*?launchGameAfterPaint\(selectedTowers\.slice\(\),selectedMode\)/.test(pageFlow), 'starting a normal mode should destroy any stale Phaser instance before launching');
+  assert(/function\s+startEnemyCombatTest\(\)[\s\S]*?destroyGameInstance\(\)[\s\S]*?launchGameAfterPaint\(\[\],ENEMY_TEST_MODE\)/.test(pageFlow), 'starting enemy sandbox should destroy any stale Phaser instance before launching');
   assert(pageFlow.includes('gamePage.replaceChildren()'), 'destroying a game instance should clear stale canvas children from gamePage');
+  assert(pageFlow.includes('launchGameAfterPaint') && pageFlow.includes('requestAnimationFrame'), 'game launch should display loading UI before heavy synchronous map setup');
+  assert(pageFlow.includes('启动超时'), 'game launch should expose a timeout state for stalled startup diagnostics');
 
   const lab = read('src/game/enemy-test-lab.js');
   ['ENEMY_TEST_MODE', 'ENEMY_TEST_MAP', 'startEnemyTestWave', 'stopEnemyTestWave', 'enemyTestBuildChoices', 'applyEnemyTestCamera', 'makePanelDraggable', 'clearEnemyTestEnemies'].forEach(snippet => {
@@ -436,6 +438,14 @@ function testStaticUiGuards() {
   const hud = read('src/game/hud-overlay.js');
   ['wavePhaseText', '清理残敌', 'hudCompleted'].forEach(snippet => {
     assert(hud.includes(snippet), `HUD should keep clear wave-progress wording: ${snippet}`);
+  });
+  const debugTools = read('src/core/debug-tools.js');
+  ['r32SetLoading', 'r32HideLoading', 'r32LoadingFailed', 'r32LoadingPanel'].forEach(snippet => {
+    assert(debugTools.includes(snippet), `debug tools should expose loading diagnostic hook: ${snippet}`);
+  });
+  const gameScene = read('src/game/game-scene.js');
+  ['计算寻路', '创建渲染器', '等待首帧', '启动完成'].forEach(snippet => {
+    assert(gameScene.includes(snippet), `game scene should mark launch stage: ${snippet}`);
   });
 }
 

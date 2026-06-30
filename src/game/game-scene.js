@@ -1,10 +1,14 @@
 function launch(sel,mode='endless1'){
+  if(typeof r32SetLoading==='function')r32SetLoading('读取配置',mode,0.14);
   const selIds=sel.map(i=>ALL_TOWERS[i]);
   const levelConfig=LEVELS[mode]||null;
   const endlessConfig=ENDLESS_MAPS[mode]||null;
   const testMap=mode===ENEMY_TEST_MODE?ENEMY_TEST_MAP:null;
+  if(typeof r32SetLoading==='function')r32SetLoading('准备地图',mode,0.22);
   MAP=cloneMap(testMap||levelConfig?.map||endlessConfig?.map||ENDLESS_MAP);
+  if(typeof r32SetLoading==='function')r32SetLoading('计算寻路',`${MAP.spawns?.length||0} 入口`,0.34);
   const nav=buildNavigation(MAP);
+  if(typeof r32SetLoading==='function')r32SetLoading('寻路完成',`${nav.enemyWaypoints?.length||0} 路线`,0.5);
   const enemyPaths=nav.enemyPaths;
   const enemyWaypoints=nav.enemyWaypoints;
   const gridPF=nav.gridPF;
@@ -14,6 +18,7 @@ function launch(sel,mode='endless1'){
       this.launchContext={selIds,mode,levelConfig,gridPF,enemyWaypoints};
     }
     preload(){
+      if(typeof r32SetLoading==='function')r32SetLoading('生成纹理','防御塔/怪物/弹体',0.62);
       genTwTex(this);
       this.createShipTexture();
       this.createRangeTexture();
@@ -23,6 +28,7 @@ function launch(sel,mode='endless1'){
       this.createProjectileTextures();
     }
     create(){
+      if(typeof r32SetLoading==='function')r32SetLoading('创建场景','地图与交互',0.76);
       this.initSceneState();
       this.time.paused=false;
       this.tweens.resumeAll();
@@ -43,11 +49,18 @@ function launch(sel,mode='endless1'){
       this.initMiniMap();
       this.applyViewSettings();
       this.setupEnemyTestLab();
+      if(typeof r32SetLoading==='function')r32SetLoading('等待首帧','启动主循环',0.92);
     }
     smallReactorCount(){return this.reactors.filter(r=>this.reactorAlive(r)&&!r._isMainReactor).length}
     energyRate(){return this.reactors.reduce((sum,r)=>sum+(this.reactorAlive(r)?r._type.upg[r._lv||0].prod:0),0)}
     gainEnergy(v){this.en=Math.min(EN_CAP,this.en+v)}
     update(t,dt){
+      if(!this._firstFrameSeen){
+        this._firstFrameSeen=true;
+        if(typeof r32SetLoading==='function')r32SetLoading('启动完成','进入战区',1);
+        if(typeof r32HideLoading==='function')setTimeout(()=>r32HideLoading(),120);
+        if(typeof launchInProgress!=='undefined')launchInProgress=false;
+      }
       if(this.isPaused||!dt)return;this.gainEnergy(this.energyRate()*dt/1000);
       this.updateShip(dt);
       this.updateChannel(dt);
@@ -81,6 +94,7 @@ function launch(sel,mode='endless1'){
   const gameWidth=testMap?.worldSize?.w||W;
   const gameHeight=testMap?.worldSize?.h||H;
   const scaleMode=testMap?Phaser.Scale.FIT:Phaser.Scale.ENVELOP;
+  if(typeof r32SetLoading==='function')r32SetLoading('创建渲染器',`${gameWidth}×${gameHeight}`,0.56);
   const game=new Phaser.Game({type:Phaser.AUTO,width:gameWidth,height:gameHeight,backgroundColor:'#0d1219',parent:'gamePage',scale:{mode:scaleMode,autoCenter:Phaser.Scale.CENTER_BOTH},physics:{default:'arcade',arcade:{gravity:{y:0}}},scene:GameScene});
   setTimeout(()=>document.querySelector('canvas')?.focus(),500);
   return game;
