@@ -313,6 +313,15 @@ function testFixedLevelWaves(ctx, issues) {
   event.callback();
   assert(scene._spawned.length === 0, 'test scene should not record spawns unless spawnE is wrapped', issues);
   assert(scene.wS === 2 && scene.wC === 3, 'startWave event should advance fixed roster spawn count', issues);
+
+  for (const [id, level] of Object.entries(ctx.LEVELS)) {
+    const spawnCount = level.map?.spawns?.length || 0;
+    if (spawnCount <= 1) continue;
+    const laneCounts = level.waves.map(w => new Set(w.lanes || []).size);
+    assert(laneCounts[0] === 1, `${id}: first wave should use exactly one spawn lane`, issues);
+    assert(Math.max(...laneCounts) > laneCounts[0], `${id}: later waves should unlock additional spawn lanes`, issues);
+    assert(laneCounts.every(count => count <= spawnCount), `${id}: active lane count should not exceed map spawn count`, issues);
+  }
 }
 
 function testWaveCompletionAndRewards(ctx, issues) {
