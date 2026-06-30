@@ -1,3 +1,25 @@
+function gameViewportSize(){
+  const root=document.documentElement||{};
+  const width=Math.max(320,Math.floor(window.innerWidth||root.clientWidth||1280));
+  const height=Math.max(240,Math.floor(window.innerHeight||root.clientHeight||720));
+  return {width,height};
+}
+
+function requestedRendererType(){
+  try{
+    return new URLSearchParams(location.search).get('renderer')==='canvas'?Phaser.CANVAS:Phaser.AUTO;
+  }catch(_){
+    return Phaser.AUTO
+  }
+}
+
+function rendererTypeName(type){
+  if(type===Phaser.CANVAS)return 'CANVAS';
+  if(type===Phaser.WEBGL)return 'WEBGL';
+  if(type===Phaser.AUTO)return 'AUTO';
+  return String(type);
+}
+
 function launch(sel,mode='endless1'){
   if(typeof r32SetLoading==='function')r32SetLoading('读取配置',mode,0.14);
   const selIds=sel.map(i=>ALL_TOWERS[i]);
@@ -74,6 +96,12 @@ function launch(sel,mode='endless1'){
         this.initMiniMap();
         this.applyViewSettings();
         this.setupEnemyTestLab();
+        if(typeof r32DebugRecordRuntime==='function')r32DebugRecordRuntime({
+          renderer:rendererTypeName(this.game?.renderer?.type),
+          canvas:`${this.game?.canvas?.width||0}×${this.game?.canvas?.height||0}`,
+          display:`${this.scale?.width||0}×${this.scale?.height||0}`,
+          zoom:Number(this.cameras.main.zoom||0).toFixed(4)
+        });
       });
       if(typeof r32SetLoading==='function')r32SetLoading('等待首帧','启动主循环',0.96);
     }
@@ -117,11 +145,18 @@ function launch(sel,mode='endless1'){
 
   }
   Object.assign(GameScene.prototype,TextureFactoryMethods,SceneSetupMethods,MiniMapMethods,InputControllerMethods,BuildPanelMethods,PlacementControllerMethods,TowerPanelMethods,DroneControllerMethods,CombatUtilMethods,TowerCombatMethods,ProjectileControllerMethods,EnemyControllerMethods,PlayerRuntimeMethods,HudOverlayMethods,EnemyTestLabMethods);
-  const gameWidth=testMap?.worldSize?.w||W;
-  const gameHeight=testMap?.worldSize?.h||H;
-  const scaleMode=testMap?Phaser.Scale.FIT:Phaser.Scale.ENVELOP;
-  if(typeof r32SetLoading==='function')r32SetLoading('创建渲染器',`${gameWidth}×${gameHeight}`,0.56);
-  const game=new Phaser.Game({type:Phaser.AUTO,width:gameWidth,height:gameHeight,backgroundColor:'#0d1219',parent:'gamePage',scale:{mode:scaleMode,autoCenter:Phaser.Scale.CENTER_BOTH},physics:{default:'arcade',arcade:{gravity:{y:0}}},scene:GameScene});
+  const viewport=gameViewportSize();
+  const rendererType=requestedRendererType();
+  if(typeof r32DebugRecordRuntime==='function')r32DebugRecordRuntime({
+    rendererRequest:rendererTypeName(rendererType),
+    viewport:`${viewport.width}×${viewport.height}`,
+    world:`${mapW()}×${mapH()}`,
+    dpr:window.devicePixelRatio||1,
+    userAgent:typeof navigator!=='undefined'?navigator.userAgent||'':''
+  });
+  if(typeof r32SetLoading==='function')r32SetLoading('创建渲染器',`视口 ${viewport.width}×${viewport.height} / 世界 ${mapW()}×${mapH()}`,0.56);
+  const scaleMode=Phaser.Scale.RESIZE||Phaser.Scale.FIT||Phaser.Scale.ENVELOP;
+  const game=new Phaser.Game({type:rendererType,width:viewport.width,height:viewport.height,backgroundColor:'#0d1219',parent:'gamePage',scale:{mode:scaleMode,autoCenter:Phaser.Scale.CENTER_BOTH},physics:{default:'arcade',arcade:{gravity:{y:0}}},scene:GameScene});
   setTimeout(()=>document.querySelector('canvas')?.focus(),500);
   return game;
 }

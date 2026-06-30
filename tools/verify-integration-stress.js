@@ -34,7 +34,9 @@ function createSandbox(options = {}) {
     Element: function Element() {},
     Phaser: {
       AUTO: 'AUTO',
-      Scale: { ENVELOP: 'ENVELOP', CENTER_BOTH: 'CENTER_BOTH' },
+      CANVAS: 'CANVAS',
+      WEBGL: 'WEBGL',
+      Scale: { ENVELOP: 'ENVELOP', FIT: 'FIT', RESIZE: 'RESIZE', CENTER_BOTH: 'CENTER_BOTH' },
       Scene: class Scene {},
       Game: class Game {},
       Curves: {
@@ -138,6 +140,11 @@ function testGameSceneComposition() {
     if (ignored.has(name)) return;
     assert(defined.has(name), `GameScene calls this.${name}(), but no method definition was found in game modules`);
   });
+
+  assert(source.includes('gameViewportSize()'), 'game scene should size Phaser canvas from the browser viewport');
+  assert(source.includes('Phaser.Scale.RESIZE'), 'game scene should resize the canvas with the browser viewport');
+  assert(!source.includes('width:W') && !source.includes('height:H'), 'game scene should not use full world size as Phaser canvas size');
+  assert(source.includes("get('renderer')==='canvas'"), 'game scene should expose a Canvas renderer diagnostic option');
 }
 
 function testMapsReachable(data) {

@@ -1,10 +1,11 @@
-const R32_BUILD_ID='build-20260630-8';
+const R32_BUILD_ID='build-20260630-9';
 const R32_DEBUG_ENABLED=(()=>{try{return new URLSearchParams(location.search).get('debug')==='1'||localStorage.getItem('r32Debug')==='1'}catch(_){return false}})();
 
 window.__r32Debug=window.__r32Debug||{
   errors:[],
   launches:[],
   loading:[],
+  runtime:{},
   lastScene:null,
   lastUpdateAt:0,
   frames:0
@@ -24,6 +25,12 @@ function r32DebugRecordLaunch(mode,selectedCount){
   if(!window.__r32Debug)return;
   window.__r32Debug.launches.unshift({mode,selectedCount,time:new Date().toLocaleTimeString()});
   window.__r32Debug.launches=window.__r32Debug.launches.slice(0,5);
+}
+
+function r32DebugRecordRuntime(info={}){
+  if(!window.__r32Debug)return;
+  window.__r32Debug.runtime={...window.__r32Debug.runtime,...info};
+  r32RenderLoadingDebug();
 }
 
 function r32EnsureLoadingPanel(){
@@ -85,6 +92,8 @@ function r32RenderLoadingDebug(){
   });
   const err=window.__r32Debug.errors[0];
   if(err)lines.push(`lastError ${err.time} ${err.label}: ${err.msg}`);
+  const rt=window.__r32Debug.runtime||{};
+  if(Object.keys(rt).length)lines.push(`runtime ${Object.entries(rt).map(([k,v])=>`${k}=${v}`).join(' ')}`);
   el.textContent=lines.join('\n');
 }
 
@@ -141,10 +150,12 @@ function updateDebugOverlay(scene,t=0,dt=0){
   const launch=dbg.launches[0];
   const err=dbg.errors[0];
   const loading=dbg.loading.at?.(-1)||dbg.loading[dbg.loading.length-1];
+  const rt=dbg.runtime||{};
   panel.textContent=[
     `R-32 ${R32_BUILD_ID}`,
     `url=${location.href}`,
     `launch=${launch?`${launch.mode} towers=${launch.selectedCount} at ${launch.time}`:'-'}`,
+    `runtime=${Object.keys(rt).length?Object.entries(rt).map(([k,v])=>`${k}=${v}`).join(' '):'-'}`,
     `loading=${loading?`${loading.stage} ${loading.detail}`:'-'}`,
     `sceneActive=${!!scene.scene?.isActive?.()} paused=${!!scene.isPaused} ended=${!!scene.ended} timePaused=${!!scene.time?.paused}`,
     `mode=${scene.mode} wave=${scene.wave} completed=${scene.completedWaves} prep=${((scene.prepTimer||0)/1000).toFixed(1)}s wActive=${!!scene.wActive}`,

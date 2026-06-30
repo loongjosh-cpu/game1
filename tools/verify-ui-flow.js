@@ -256,7 +256,8 @@ function testMinimap(ctx) {
   assert(scene.shouldShowMiniMap() === true, 'local view should show minimap');
   assert(scene.miniMapWrap.style.display === 'block', 'local view should display minimap wrapper');
   assert(calls.some(c => c[0] === 'follow'), 'local view should follow player ship');
-  assert(calls.some(c => c[0] === 'zoom' && c[1] > 1), 'local view should zoom in');
+  const localZoom = calls.find(c => c[0] === 'zoom')?.[1] || 0;
+  assert(localZoom > 0, 'local view should set a positive dynamic zoom');
 
   calls.length = 0;
   ui.setMeta({ settings: { cameraMode: 'global' } });
@@ -265,7 +266,8 @@ function testMinimap(ctx) {
   assert(scene.miniMapWrap.style.display === 'none', 'global view should hide minimap wrapper');
   assert(calls.some(c => c[0] === 'stopFollow'), 'global view should stop following ship');
   assert(calls.some(c => c[0] === 'centerOn'), 'global view should center map');
-  assert(calls.some(c => c[0] === 'zoom' && c[1] > 0 && c[1] < 1), 'global view should zoom out to show more map');
+  const globalZoom = calls.find(c => c[0] === 'zoom')?.[1] || 0;
+  assert(globalZoom > 0 && globalZoom < localZoom, 'global view should fit the map and zoom out relative to local view');
 }
 
 function testEscapeAndPause(ctx) {
@@ -442,7 +444,7 @@ function testStaticUiGuards() {
     assert(hud.includes(snippet), `HUD should keep clear wave-progress wording: ${snippet}`);
   });
   const debugTools = read('src/core/debug-tools.js');
-  ['r32SetLoading', 'r32HideLoading', 'r32LoadingFailed', 'r32LoadingPanel'].forEach(snippet => {
+  ['r32SetLoading', 'r32HideLoading', 'r32LoadingFailed', 'r32LoadingPanel', 'r32DebugRecordRuntime'].forEach(snippet => {
     assert(debugTools.includes(snippet), `debug tools should expose loading diagnostic hook: ${snippet}`);
   });
   const gameScene = read('src/game/game-scene.js');

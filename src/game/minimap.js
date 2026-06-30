@@ -16,20 +16,30 @@ const MiniMapMethods={
     const cam=this.cameras.main;
     if(this.view.cameraMode==='local'){
       cam.setBounds(0,0,mapW(),mapH());
-      cam.setZoom(LOCAL_CAMERA_ZOOM);
+      cam.setZoom(this.localCameraZoom(cam));
       cam.startFollow(this.ship,true,0.12,0.12);
       cam.setDeadzone(cam.width*0.08,cam.height*0.08);
     }else{
       cam.stopFollow();
       cam.setDeadzone(0,0);
-      cam.setZoom(GLOBAL_CAMERA_ZOOM);
-      const visibleW=cam.width/GLOBAL_CAMERA_ZOOM;
-      const visibleH=cam.height/GLOBAL_CAMERA_ZOOM;
+      const zoom=this.globalCameraZoom(cam);
+      cam.setZoom(zoom);
+      const visibleW=cam.width/zoom;
+      const visibleH=cam.height/zoom;
       const padX=Math.max(0,(visibleW-mapW())/2);
       const padY=Math.max(0,(visibleH-mapH())/2);
       cam.setBounds(-padX,-padY,mapW()+padX*2,mapH()+padY*2);
       cam.centerOn(mapW()/2,mapH()/2);
     }
+  },
+  mapFitZoom(cam=this.cameras.main){
+    return Math.min(cam.width/mapW(),cam.height/mapH());
+  },
+  globalCameraZoom(cam=this.cameras.main){
+    return Math.max(0.03,this.mapFitZoom(cam)*MAP_DISPLAY_SCALE);
+  },
+  localCameraZoom(cam=this.cameras.main){
+    return Math.max(this.globalCameraZoom(cam)*LOCAL_CAMERA_ZOOM_FACTOR,0.08);
   },
   shouldShowMiniMap(){
     return this.view?.cameraMode==='local';
