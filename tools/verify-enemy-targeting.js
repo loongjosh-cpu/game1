@@ -177,7 +177,11 @@ function testChooseBlockerPriority(ctx, issues) {
   assert(scene2.chooseBlocker(e) === sameB, 'held same-danger blocker should not be replaced by nearer same-danger blocker', issues);
 
   sameB.x = 1000;
-  assert(scene2.chooseBlocker(e) === sameA, 'held blocker should be dropped after leaving taunt range', issues);
+  assert(scene2.chooseBlocker(e) === sameB, 'held blocker should stay locked after leaving taunt range unless a higher danger target appears', issues);
+
+  const higher = tower(b2, 100, 0, 0); // B2 danger 3
+  const scene3 = makeScene(ctx, [sameB, higher]);
+  assert(scene3.chooseBlocker(e) === higher, 'higher danger blocker should override a held lower danger blocker', issues);
 }
 
 function testReactorFallback(ctx, issues) {
@@ -191,21 +195,28 @@ function testReactorFallback(ctx, issues) {
   assert(scene.chooseReactor(e) === scene.reactors[0], 'dead reactor should not be selected as fallback target', issues);
 }
 
-function testTargetScanReleasesOutOfRange(ctx, issues) {
+function testTargetScanKeepsHistoricalLock(ctx, issues) {
   const b1 = ctx.BLOCK_TOWERS.find(t => t.id === 'B1');
+  const b3 = ctx.BLOCK_TOWERS.find(t => t.id === 'B3');
   const held = tower(b1, 1000, 0, 0);
-  const scene = makeScene(ctx, [held]);
-  const e = enemy('E2', 0, 0, { _b1tgt: held, _scan: 0 });
+  const lower = tower(b3, 100, 0, 0);
+  const scene = makeScene(ctx, [held, lower]);
+  const e = enemy('E2', 0, 0, { _b1tgt: held, _tauntLockDanger: 2, _scan: 0 });
   scene.updateEnemyTargetScan(e, ctx.EC.E2, 250);
-  assert(e._b1tgt === null, 'target scan should clear blocker target after it leaves range', issues);
-  assert(scene._rejoined, 'target scan should rejoin path after losing blocker target', issues);
+  assert(e._b1tgt === held, 'target scan should keep historical blocker lock after it leaves range', issues);
+  assert(!scene._rejoined, 'target scan should not rejoin path while historical blocker lock is alive', issues);
+  assert(e._tauntLockDanger === 2, 'target scan should preserve the remembered taunt danger level', issues);
+
+  held.active = false;
+  scene.updateEnemyTargetScan(e, ctx.EC.E2, 250);
+  assert(e._b1tgt === lower, 'target scan should select a new blocker after historical target is destroyed', issues);
 }
 
 function testE11DronePriorityObeysBlocker(ctx, issues) {
   const source = read('src/game/enemy-combat.js');
   assert(
-    /if\(e\._b1tgt&&this\.enemyCanBeTauntedBy\(e,cfg,e\._b1tgt\)\)return false;/.test(source),
-    'E11 drone-priority branch must yield when a valid blocker target is active',
+    /if\(this\.enemyHasBlockerLock\(e\)\)return false;/.test(source),
+    'E11 drone-priority branch must yield when a historical blocker target is active',
     issues
   );
 
@@ -235,7 +246,7 @@ function main() {
   testDangerAndRange(ctx, issues);
   testChooseBlockerPriority(ctx, issues);
   testReactorFallback(ctx, issues);
-  testTargetScanReleasesOutOfRange(ctx, issues);
+  testTargetScanKeepsHistoricalLock(ctx, issues);
   testE11DronePriorityObeysBlocker(ctx, issues);
   testSourceOrder(ctx, issues);
   if (issues.length) {

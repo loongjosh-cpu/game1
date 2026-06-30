@@ -19,6 +19,10 @@ const EnemyTargetingMethods={
     const range=sd(tw._type.upg[tw._lv||0].r||tw._type.range);
     return Phaser.Math.Distance.Between(e.x,e.y,tw.x,tw.y)<=range
   },
+  enemyHasBlockerLock(e){
+    const target=e._b1tgt;
+    return !!(target&&target.active&&target._hp>0)
+  },
   considerEnemyBuildingTarget(e,cfg,tw,state){
     if(!this.enemyCanBeTauntedBy(e,cfg,tw))return state;
     const danger=this.towerDanger(tw),d=Phaser.Math.Distance.Between(e.x,e.y,tw.x,tw.y);
@@ -30,8 +34,9 @@ const EnemyTargetingMethods={
     return state
   },
   chooseBlocker(e){
-    const cfg=EC[e._type],held=this.enemyCanBeTauntedBy(e,cfg,e._b1tgt)?e._b1tgt:null;
-    const state={best:held,bestDanger:held?this.towerDanger(held):-1,bestDist:held?Phaser.Math.Distance.Between(e.x,e.y,held.x,held.y):Infinity,held};
+    const cfg=EC[e._type],held=this.enemyHasBlockerLock(e)?e._b1tgt:null;
+    const heldDanger=held?Math.max(e._tauntLockDanger||0,this.towerDanger(held)):-1;
+    const state={best:held,bestDanger:heldDanger,bestDist:held?Phaser.Math.Distance.Between(e.x,e.y,held.x,held.y):Infinity,held};
     this.blockers.children.iterate(tw=>this.considerEnemyBuildingTarget(e,cfg,tw,state));
     this.drones.children.iterate(tw=>this.considerEnemyBuildingTarget(e,cfg,tw,state));
     return state.best
@@ -54,6 +59,7 @@ const EnemyTargetingMethods={
     const next=this.chooseBlocker(e);
     if(next===e._b1tgt)return;
     e._b1tgt=next;
+    e._tauntLockDanger=next?Math.max(e._tauntLockDanger||0,this.towerDanger(next)):0;
     e._at=0;
     e._firstAttack=true;
     if(next){

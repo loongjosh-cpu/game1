@@ -5,7 +5,7 @@ const EnemyNavigationMethods={
   reactorAlive(r){return !!(r&&r.active&&r._hp>0)},
   chooseReactor(e){let best=null,bestDist=Infinity;for(const r of this.reactors){if(!this.reactorAlive(r))continue;const d=Phaser.Math.Distance.Between(e.x,e.y,r.x,r.y);if(d<bestDist){best=r;bestDist=d}}return best},
   routeToReactor(e,keepCurrent=true){const current=keepCurrent&&this.reactorAlive(e._reactorTarget)?e._reactorTarget:null,target=current||this.chooseReactor(e);e._reactorTarget=target;e._state='path';if(target)this.setRoute(e,this.makeRoute(e.x,e.y,target.x,target.y));else this.setRoute(e,[[e.x,e.y]])},
-  rejoinPath(e){e._b1tgt=null;e._reactorTarget=null;e._state='path';e._at=0;e._firstAttack=true;this.routeToReactor(e,false)},
+  rejoinPath(e){e._b1tgt=null;e._tauntLockDanger=0;e._reactorTarget=null;e._state='path';e._at=0;e._firstAttack=true;this.routeToReactor(e,false)},
   stopEnemyAndFace(e,target){
     this.moveEnemy(e,0,0,55);
     e.setRotation(Math.atan2(target.y-e.y,target.x-e.x)+Math.PI/2)
