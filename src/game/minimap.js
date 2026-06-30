@@ -22,7 +22,7 @@ const MiniMapMethods={
     }else{
       cam.stopFollow();
       cam.setDeadzone(0,0);
-      cam.setZoom(1);
+      cam.setZoom(GLOBAL_CAMERA_ZOOM);
       cam.centerOn(mapW()/2,mapH()/2);
     }
   },

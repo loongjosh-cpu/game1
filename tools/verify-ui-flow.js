@@ -265,7 +265,7 @@ function testMinimap(ctx) {
   assert(scene.miniMapWrap.style.display === 'none', 'global view should hide minimap wrapper');
   assert(calls.some(c => c[0] === 'stopFollow'), 'global view should stop following ship');
   assert(calls.some(c => c[0] === 'centerOn'), 'global view should center map');
-  assert(calls.some(c => c[0] === 'zoom' && c[1] === 1), 'global view should reset zoom');
+  assert(calls.some(c => c[0] === 'zoom' && c[1] > 0 && c[1] < 1), 'global view should zoom out to show more map');
 }
 
 function testEscapeAndPause(ctx) {
