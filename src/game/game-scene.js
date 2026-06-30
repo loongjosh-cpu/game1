@@ -26,6 +26,7 @@ function launch(sel,mode='endless1'){
       this.initSceneState();
       this.time.paused=false;
       this.tweens.resumeAll();
+      if(typeof initDebugOverlay==='function')initDebugOverlay();
       this.configureWorldBounds();
       this.createBackdrop();
       this.createWalls();
@@ -72,6 +73,7 @@ function launch(sel,mode='endless1'){
       this.updateHud(t,dt);
       this.updateMiniMap(dt);
       this.updateEnemyTestLab(dt);
+      if(typeof updateDebugOverlay==='function')updateDebugOverlay(this,t,dt);
     }
 
   }

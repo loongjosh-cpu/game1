@@ -74,6 +74,7 @@ function startSelectedMode(){
   hideEnemyTestPanel();
   document.getElementById('gamePage').style.display='flex';
   setGameChromeVisible(true);
+  if(typeof r32DebugRecordLaunch==='function')r32DebugRecordLaunch(selectedMode,selectedTowers.length);
   gameInstance=launch(selectedTowers,selectedMode);
 }
 
@@ -84,6 +85,7 @@ function startEnemyCombatTest(){
   hidePage('pausePanel');
   document.getElementById('gamePage').style.display='flex';
   setGameChromeVisible(true);
+  if(typeof r32DebugRecordLaunch==='function')r32DebugRecordLaunch(ENEMY_TEST_MODE,0);
   gameInstance=launch([],ENEMY_TEST_MODE);
 }
 
