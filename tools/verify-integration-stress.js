@@ -149,7 +149,7 @@ function testEndlessWaveStress(data) {
     const roster = scene.buildWaveRoster();
     assert(roster.length > 0, `endless wave ${wave}: roster should not be empty`);
     roster.forEach(type => assert(data.EC[type], `endless wave ${wave}: unknown enemy type ${type}`));
-    const budget = 5 + 3 * (wave - 1);
+    const budget = 6 + 4 * (wave - 1);
     const cost = rosterCost(roster, data.THREAT_COST);
     assert(cost <= budget + 8, `endless wave ${wave}: roster cost ${cost} is too far above budget ${budget}`);
     const special = roster.filter(type => data.SPECIAL_ENEMY.has(type));

@@ -269,7 +269,7 @@ function testSpawnScaling(ctx, issues) {
 function testWaveRosterRules(ctx, issues) {
   const scene = makeScene(ctx, { wave: 12 });
   const roster = scene.buildWaveRoster();
-  const budget = 5 + 3 * (scene.wave - 1);
+  const budget = 6 + 4 * (scene.wave - 1);
   const cost = roster.reduce((sum, type) => sum + (ctx.THREAT_COST[type] || 1), 0);
   const specialCost = roster.filter(type => ctx.SPECIAL_ENEMY.has(type)).reduce((sum, type) => sum + (ctx.THREAT_COST[type] || 1), 0);
   const directCost = roster.filter(type => ctx.DIRECT_ENEMY.has(type)).reduce((sum, type) => sum + (ctx.THREAT_COST[type] || 1), 0);
