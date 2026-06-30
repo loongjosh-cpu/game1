@@ -67,8 +67,10 @@ function showSelectPage(){
 
 function startSelectedMode(){
   if(!selectedTowers.length||selectedModeLocked())return;
+  destroyGameInstance();
   hidePage('selectPage');
   hidePage('gameOverPanel');
+  hidePage('pausePanel');
   hideEnemyTestPanel();
   document.getElementById('gamePage').style.display='flex';
   setGameChromeVisible(true);
@@ -76,8 +78,10 @@ function startSelectedMode(){
 }
 
 function startEnemyCombatTest(){
+  destroyGameInstance();
   hidePage('selectPage');
   hidePage('gameOverPanel');
+  hidePage('pausePanel');
   document.getElementById('gamePage').style.display='flex';
   setGameChromeVisible(true);
   gameInstance=launch([],ENEMY_TEST_MODE);
@@ -108,4 +112,6 @@ function destroyGameInstance(){
   if(!gameInstance)return;
   gameInstance.destroy(true);
   gameInstance=null;
+  const gamePage=document.getElementById('gamePage');
+  if(gamePage)gamePage.replaceChildren();
 }

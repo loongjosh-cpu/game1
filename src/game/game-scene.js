@@ -24,6 +24,8 @@ function launch(sel,mode='endless1'){
     }
     create(){
       this.initSceneState();
+      this.time.paused=false;
+      this.tweens.resumeAll();
       this.configureWorldBounds();
       this.createBackdrop();
       this.createWalls();

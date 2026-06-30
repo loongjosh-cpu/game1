@@ -418,6 +418,9 @@ function testStaticUiGuards() {
   assert(pageFlow.includes('startEnemyCombatTest'), 'page flow should define an enemy combat test launcher');
   assert(pageFlow.includes('btnEnemyTest'), 'page flow should bind the enemy combat test button');
   assert(pageFlow.includes('launch([],ENEMY_TEST_MODE)'), 'enemy combat test should launch without requiring a tower loadout');
+  assert(/function\s+startSelectedMode\(\)[\s\S]*?destroyGameInstance\(\)[\s\S]*?launch\(selectedTowers,selectedMode\)/.test(pageFlow), 'starting a normal mode should destroy any stale Phaser instance before launching');
+  assert(/function\s+startEnemyCombatTest\(\)[\s\S]*?destroyGameInstance\(\)[\s\S]*?launch\(\[\],ENEMY_TEST_MODE\)/.test(pageFlow), 'starting enemy sandbox should destroy any stale Phaser instance before launching');
+  assert(pageFlow.includes('gamePage.replaceChildren()'), 'destroying a game instance should clear stale canvas children from gamePage');
 
   const lab = read('src/game/enemy-test-lab.js');
   ['ENEMY_TEST_MODE', 'ENEMY_TEST_MAP', 'startEnemyTestWave', 'stopEnemyTestWave', 'enemyTestBuildChoices', 'applyEnemyTestCamera', 'makePanelDraggable', 'clearEnemyTestEnemies'].forEach(snippet => {
