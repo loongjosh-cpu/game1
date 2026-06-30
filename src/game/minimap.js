@@ -14,8 +14,8 @@ const MiniMapMethods={
   applyCameraMode(){
     if(!this.ship)return;
     const cam=this.cameras.main;
-    cam.setBounds(0,0,mapW(),mapH());
     if(this.view.cameraMode==='local'){
+      cam.setBounds(0,0,mapW(),mapH());
       cam.setZoom(LOCAL_CAMERA_ZOOM);
       cam.startFollow(this.ship,true,0.12,0.12);
       cam.setDeadzone(cam.width*0.08,cam.height*0.08);
@@ -23,6 +23,11 @@ const MiniMapMethods={
       cam.stopFollow();
       cam.setDeadzone(0,0);
       cam.setZoom(GLOBAL_CAMERA_ZOOM);
+      const visibleW=cam.width/GLOBAL_CAMERA_ZOOM;
+      const visibleH=cam.height/GLOBAL_CAMERA_ZOOM;
+      const padX=Math.max(0,(visibleW-mapW())/2);
+      const padY=Math.max(0,(visibleH-mapH())/2);
+      cam.setBounds(-padX,-padY,mapW()+padX*2,mapH()+padY*2);
       cam.centerOn(mapW()/2,mapH()/2);
     }
   },
