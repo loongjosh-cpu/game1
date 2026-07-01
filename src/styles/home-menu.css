@@ -64,6 +64,21 @@
 .loadoutHeader .sub{margin-bottom:0!important}
 .loadoutCounter{color:#7ec8e3;border:1px solid #315878;background:#0d1826;border-radius:999px;padding:4px 10px;font-size:11px;white-space:nowrap}
 .homeStack{display:flex;flex-direction:column;gap:12px}
+.homePane[data-flow-stage="mode"] [data-flow-step="loadout"],.homePane[data-flow-stage="loadout"] [data-flow-step="mode"]{display:none}
+.homePane[data-flow-stage="mode"] .homeStack,.homePane[data-flow-stage="loadout"] .homeStack{min-height:min(680px,calc(100vh - 150px))}
+.homeStagePanel{min-height:min(610px,calc(100vh - 230px));max-height:calc(100vh - 190px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#315878 #0d1826}
+.homeStagePanel::-webkit-scrollbar{width:8px}
+.homeStagePanel::-webkit-scrollbar-track{background:#0d1826;border-radius:999px}
+.homeStagePanel::-webkit-scrollbar-thumb{background:#315878;border-radius:999px}
+.homeLoadoutPanel{display:flex;flex-direction:column}
+.homeLoadoutPanel .towerGrid{max-width:none;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));align-content:start;padding-right:4px}
+.modeFlowActions{position:sticky;bottom:0;margin-top:14px;padding-top:12px;border-top:1px solid #1d3549;background:linear-gradient(180deg,#10203300,#102033 24%)}
+.modeFlowActions{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.modeFlowHint{color:#8fa5b5;font-size:12px;line-height:1.5}
+.modeNextBtn{min-width:136px}
+.flowBackBtn{flex:0 0 auto}
+.selectedModeBanner{border:1px solid #315878;border-radius:10px;background:#0d1826;color:#8fa5b5;padding:10px 12px;margin-bottom:12px;font-size:12px}
+.selectedModeBanner strong{color:#dff7ff;font-weight:400}
 .startDock{border-color:#315878;background:linear-gradient(180deg,#10243add,#081521dd)}
 .startDock .sub{margin:0 0 8px!important;line-height:1.5}
 .levelChapter{grid-column:1/-1;border:1px solid #1d3549;border-radius:10px;background:#0b1724aa;padding:10px}

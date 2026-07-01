@@ -34,6 +34,67 @@ function bindHomePaneNavigation(){
   });
 }
 
+function modePaneForMode(mode){
+  return isLevelMode(mode)?'homeLevelPane':mode&&mode.startsWith('endless')?'homeEndlessPane':'';
+}
+
+function setHomeFlowStage(paneId,stage='mode'){
+  const pane=document.getElementById(paneId);
+  if(!pane)return;
+  pane.dataset.flowStage=stage;
+  const title=pane.querySelector('[data-flow-selected-title]');
+  if(title)title.textContent=modeLabel();
+  refreshStartButton();
+}
+
+function prepareModeFlowPane(paneId){
+  const pane=document.getElementById(paneId);
+  if(!pane||pane.dataset.flowPrepared==='1')return;
+  pane.dataset.flowPrepared='1';
+  pane.dataset.flowStage='mode';
+  const sections=[...pane.querySelectorAll('.homeStack > .homeSection')];
+  const [modeSection,loadoutSection,startSection]=sections;
+  if(modeSection){
+    modeSection.dataset.flowStep='mode';
+    modeSection.classList.add('homeStagePanel');
+    const actions=document.createElement('div');
+    actions.className='modeFlowActions';
+    actions.innerHTML='<span class="modeFlowHint">选择作战地图后进入塔组整备。</span><button type="button" class="menuBtn modeNextBtn" data-flow-next>选择塔组</button>';
+    modeSection.appendChild(actions);
+    actions.querySelector('[data-flow-next]')?.addEventListener('click',()=>setHomeFlowStage(paneId,'loadout'));
+  }
+  if(loadoutSection){
+    loadoutSection.dataset.flowStep='loadout';
+    loadoutSection.classList.add('homeStagePanel','homeLoadoutPanel');
+    const head=loadoutSection.querySelector('.sectionHead');
+    if(head&&!head.querySelector('[data-flow-back]')){
+      const back=document.createElement('button');
+      back.type='button';
+      back.className='menuBtn flowBackBtn';
+      back.dataset.flowBack='1';
+      back.textContent='重新选择地图';
+      back.addEventListener('click',()=>setHomeFlowStage(paneId,'mode'));
+      head.appendChild(back);
+    }
+  }
+  if(startSection){
+    startSection.dataset.flowStep='loadout';
+    startSection.classList.add('homeConfirmPanel');
+    const hint=startSection.querySelector('.modeHint');
+    if(hint&&!startSection.querySelector('[data-flow-selected-title]')){
+      const selected=document.createElement('div');
+      selected.className='selectedModeBanner';
+      selected.innerHTML='当前地图：<strong data-flow-selected-title></strong>';
+      startSection.insertBefore(selected,startSection.firstChild);
+    }
+  }
+}
+
+function prepareModeFlowPanes(){
+  prepareModeFlowPane('homeLevelPane');
+  prepareModeFlowPane('homeEndlessPane');
+}
+
 function renderHome(){
   setGameChromeVisible(false);
   syncViewSettingsUI();
@@ -89,6 +150,11 @@ function refreshStartButton(){
     btn.disabled=selectedTowers.length===0||locked;
     btn.textContent=locked?'关卡未解锁':startButtonText(label);
   });
+  document.querySelectorAll('[data-flow-next]').forEach(btn=>{
+    btn.disabled=locked;
+    btn.textContent=locked?'关卡未解锁':'选择塔组';
+  });
+  document.querySelectorAll('[data-flow-selected-title]').forEach(el=>{el.textContent=label});
   setTextAll('.modeHint',locked?'该关卡尚未解锁，请先通关上一关。':'选择'+label+'出击塔（最多10个）');
   syncTowerSelectionCards();
 }
@@ -188,6 +254,8 @@ function selectModeCard(card){
   if(card.classList.contains('locked'))return;
   selectedMode=card.dataset.mode;
   document.querySelectorAll('[data-mode]').forEach(c=>c.classList.toggle('active',c.dataset.mode===selectedMode));
+  const paneId=modePaneForMode(selectedMode);
+  if(paneId)setHomeFlowStage(paneId,'loadout');
   refreshStartButton();
 }
 
@@ -204,6 +272,7 @@ function ensureModeForPane(paneId){
 function showHomePane(paneId='homeMainPane'){
   document.querySelectorAll('.homePane').forEach(p=>p.classList.toggle('active',p.id===paneId));
   ensureModeForPane(paneId);
+  if(paneId==='homeLevelPane'||paneId==='homeEndlessPane')setHomeFlowStage(paneId,'mode');
   const selectPage=document.getElementById('selectPage');
   const homeShell=document.querySelector('.homeShell');
   if(homeShell)homeShell.classList.toggle('subPaneShell',paneId!=='homeMainPane');
@@ -225,6 +294,7 @@ function initHomeUi(){
   bindViewSettingsUI();
   bindArchiveTabs();
   renderLevelChapters();
+  prepareModeFlowPanes();
   renderLoadoutGrids();
   bindModeCards();
 }
