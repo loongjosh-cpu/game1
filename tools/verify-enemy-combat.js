@@ -542,6 +542,20 @@ function testLockedTargetKeepsApproachingAfterRouteEnds(ctx, issues) {
   const handled = scene.handleEnemyBlockerCombat(enemy, ctx.EC.E1, 16, 120);
   assert(handled === true, 'locked blocker combat should consume the frame while the enemy is still approaching', issues);
   assert((enemy.body.vx || 0) !== 0 || (enemy.body.vy || 0) !== 0, 'enemy with a locked blocker should keep moving after its old route is exhausted but melee range is not reached', issues);
+  assert(enemy._combatDebug?.reason === 'approach', 'approaching a locked blocker should record an approach combat debug reason', issues);
+  assert(enemy._combatDebug?.target === 'B1', 'approaching a locked blocker should record the target id in combat debug', issues);
+}
+
+function testCombatDebugReasons(ctx, issues) {
+  const blocker = makeBlocker(ctx, 'B1', 0, 0);
+  const enemy = makeEnemy(ctx, 'E1', 40, 0);
+  enemy._b1tgt = blocker;
+  const scene = makeScene(ctx, { blockers: [blocker], enemies: [enemy] });
+  scene.handleEnemyBlockerCombat(enemy, ctx.EC.E1, 100);
+  assert(enemy._combatDebug?.reason === 'cooldown', 'enemy should record cooldown when target is in range but first-hit delay has not elapsed', issues);
+  assert(enemy._combatDebug?.phase === 'blocker-melee', 'enemy should record the blocker melee phase while waiting for cooldown', issues);
+  scene.handleEnemyBlockerCombat(enemy, ctx.EC.E1, 550);
+  assert(enemy._combatDebug?.reason === 'hit', 'enemy should record hit after a successful melee attack', issues);
 }
 
 function main() {
@@ -566,6 +580,7 @@ function main() {
   testFriendlyHitFeedback(ctx, issues);
   testShieldAbsorbFeedback(ctx, issues);
   testLockedTargetKeepsApproachingAfterRouteEnds(ctx, issues);
+  testCombatDebugReasons(ctx, issues);
 
   if (issues.length) {
     console.error(`enemy combat verification failed (${issues.length} issues):`);

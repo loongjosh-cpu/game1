@@ -27,6 +27,40 @@ const HudOverlayMethods={
     const pct=Math.max(0,e._hp/e._maxhp);
     this.drawMiniBar(this.overlay,e.x-15,e.y-28,30,4,pct,pct>0.5?0x22cc66:pct>0.25?0xddcc44:0xe94560)
   },
+  enemyCombatDebugEnabled(){
+    return !!((typeof R32_DEBUG_ENABLED!=='undefined'&&R32_DEBUG_ENABLED)||this.isEnemyTestMode?.())
+  },
+  updateEnemyCombatDebugLabels(){
+    if(!this.enemyCombatDebugEnabled()){
+      if(this._enemyDebugLabels){
+        this._enemyDebugLabels.forEach(label=>label.destroy());
+        this._enemyDebugLabels=[];
+      }
+      return
+    }
+    this._enemyDebugLabels=this._enemyDebugLabels||[];
+    const active=[];
+    this.enemies.children.iterate(e=>{if(e&&e.active)active.push(e)});
+    const maxLabels=Math.min(active.length,30);
+    while(this._enemyDebugLabels.length<maxLabels){
+      this._enemyDebugLabels.push(
+        this.add.text(0,0,'',textStyle(11,'#d8f6ff'))
+          .setDepth(30)
+          .setOrigin(0.5)
+          .setShadow(0,1,'#001018',3)
+      )
+    }
+    while(this._enemyDebugLabels.length>maxLabels)this._enemyDebugLabels.pop().destroy();
+    for(let i=0;i<maxLabels;i++){
+      const e=active[i],dbg=e._combatDebug||{};
+      const line1=`${e._type} ${dbg.phase||e._state||'-'} ${dbg.reason||'-'}`;
+      const line2=`T:${dbg.target||'-'} D:${dbg.dist??'-'}/${dbg.range??'-'} CD:${dbg.at??0}/${dbg.delay??e._atk}`;
+      this._enemyDebugLabels[i]
+        .setPosition(e.x,e.y-48)
+        .setText(`${line1}\n${line2}`)
+        .setVisible(true)
+    }
+  },
   renderReactorBars(){
     this.rxBar.clear();
     for(const r of this.reactors){
@@ -43,7 +77,8 @@ const HudOverlayMethods={
     this.drones.children.iterate(tw=>this.renderBlockerBar(tw));
     this.droneHelpers.children.iterate(d=>this.renderDroneBar(d));
     this.enemies.children.iterate(e=>this.renderEnemyBar(e));
-    this.renderReactorBars()
+    this.renderReactorBars();
+    this.updateEnemyCombatDebugLabels()
   },
   wavePhaseText(activeEnemies){
     if(this.wActive)return '出敌中';

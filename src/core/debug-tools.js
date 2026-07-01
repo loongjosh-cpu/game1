@@ -137,6 +137,18 @@ function initDebugOverlay(){
   document.body.appendChild(panel);
 }
 
+function r32EnemyCombatSummary(scene){
+  const counts={};
+  scene.enemies?.children?.iterate?.(e=>{
+    if(!e||!e.active)return;
+    const dbg=e._combatDebug;
+    const key=dbg?`${dbg.phase}:${dbg.reason}`:'no-debug';
+    counts[key]=(counts[key]||0)+1;
+  });
+  const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  return entries.length?entries.map(([k,v])=>`${k}=${v}`).join(' '):'-'
+}
+
 function updateDebugOverlay(scene,t=0,dt=0){
   if(!R32_DEBUG_ENABLED)return;
   initDebugOverlay();
@@ -160,6 +172,7 @@ function updateDebugOverlay(scene,t=0,dt=0){
     `sceneActive=${!!scene.scene?.isActive?.()} paused=${!!scene.isPaused} ended=${!!scene.ended} timePaused=${!!scene.time?.paused}`,
     `mode=${scene.mode} wave=${scene.wave} completed=${scene.completedWaves} prep=${((scene.prepTimer||0)/1000).toFixed(1)}s wActive=${!!scene.wActive}`,
     `dt=${Math.round(dt)}ms frames=${dbg.frames} energy=${Math.floor(scene.en||0)} enemies=${activeEnemies}`,
+    `combat=${r32EnemyCombatSummary(scene)}`,
     `level=${scene.levelConfig?.id||'-'} allSpawned=${!!scene._allLevelWavesSpawned}`,
     `lastError=${err?`${err.time} ${err.label}: ${err.msg}`:'-'}`
   ].join('\n');

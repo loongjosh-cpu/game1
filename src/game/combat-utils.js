@@ -19,7 +19,8 @@ const CombatUtilMethods={
     const targetRadius=this.combatRadiusOf(target,24);
     return Math.max(sd(base),enemyRadius+targetRadius+sd(18))
   },
-  enemyAttackReady(e,dt){e._at=(e._at||0)+dt;const delay=e._firstAttack?650:e._atk;if(e._at<delay)return false;e._at=0;e._firstAttack=false;return true},
+  enemyAttackDelay(e){return e._firstAttack?650:e._atk},
+  enemyAttackReady(e,dt){e._at=(e._at||0)+dt;const delay=this.enemyAttackDelay(e);if(e._at<delay)return false;e._at=0;e._firstAttack=false;return true},
   enemyAttackEffect(e,mainTarget=null){const cfg=EC[e._type];if(cfg.leechPct)e._hp=Math.min(e._maxhp,e._hp+e._maxhp*cfg.leechPct);else if(cfg.leech)e._hp=Math.min(e._maxhp,e._hp+cfg.leech);if(cfg.summonEvery&&++e._hits%cfg.summonEvery===0)this.spawnAt('E4',e.x+30,e.y,e._si,true,e._waveNo);if(cfg.meleeSplash)this.enemySplash(e,mainTarget,e.x,e.y,e._dmg*cfg.meleeSplash,sd(cfg.meleeSplashRange||50),true,{kind:'aoe',aoe:true})},
   enemySelfDestruct(e,mainTarget=null){
     if(!e||!e.active||e._detonating)return;
