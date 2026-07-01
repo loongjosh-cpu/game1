@@ -531,6 +531,19 @@ function testShieldAbsorbFeedback(ctx, issues) {
   assert(fx === 1, 'full shield absorb should still trigger friendly hit feedback', issues);
 }
 
+function testLockedTargetKeepsApproachingAfterRouteEnds(ctx, issues) {
+  const blocker = makeBlocker(ctx, 'B1', 200, 0);
+  const enemy = makeEnemy(ctx, 'E1', 0, 0, {
+    _route: [[0, 0]],
+    _routeI: 1
+  });
+  enemy._b1tgt = blocker;
+  const scene = makeScene(ctx, { blockers: [blocker], enemies: [enemy] });
+  const handled = scene.handleEnemyBlockerCombat(enemy, ctx.EC.E1, 16, 120);
+  assert(handled === true, 'locked blocker combat should consume the frame while the enemy is still approaching', issues);
+  assert((enemy.body.vx || 0) !== 0 || (enemy.body.vy || 0) !== 0, 'enemy with a locked blocker should keep moving after its old route is exhausted but melee range is not reached', issues);
+}
+
 function main() {
   const issues = [];
   const ctx = loadContext();
@@ -552,6 +565,7 @@ function main() {
   testCombatHoldDoesNotUseSeparationMove(issues);
   testFriendlyHitFeedback(ctx, issues);
   testShieldAbsorbFeedback(ctx, issues);
+  testLockedTargetKeepsApproachingAfterRouteEnds(ctx, issues);
 
   if (issues.length) {
     console.error(`enemy combat verification failed (${issues.length} issues):`);

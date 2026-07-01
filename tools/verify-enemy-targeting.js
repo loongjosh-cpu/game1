@@ -237,7 +237,7 @@ function testE11DronePriorityObeysBlocker(ctx, issues) {
 
 function testSourceOrder(ctx, issues) {
   const status = read('src/game/enemy-status.js');
-  assert(/updateEnemyTargetScan\(e,cfg,dt\)[\s\S]*handleEnemyDroneCombat\(e,cfg,dt\)[\s\S]*handleEnemyBlockerCombat\(e,cfg,dt\)[\s\S]*handleEnemyReactorCombat\(e,cfg,dt\)/.test(status), 'enemy update order should scan target before drone/blocker/reactor combat', issues);
+  assert(/updateEnemyTargetScan\(e,cfg,dt\)[\s\S]*handleEnemyDroneCombat\(e,cfg,dt,speed\)[\s\S]*handleEnemyBlockerCombat\(e,cfg,dt,speed\)[\s\S]*handleEnemyReactorCombat\(e,cfg,dt,speed\)/.test(status), 'enemy update order should scan target before drone/blocker/reactor combat', issues);
 }
 
 function main() {

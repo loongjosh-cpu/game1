@@ -10,6 +10,30 @@ const EnemyNavigationMethods={
     if(e?.body)e.body.setVelocity(0,0);
     if(target)e.setRotation(Math.atan2(target.y-e.y,target.x-e.x)+Math.PI/2)
   },
+  advanceEnemyToTarget(e,target,speed,dt){
+    if(!e||!e.active||!target||!target.active)return false;
+    const goalMoved=!e._routeGoal||Phaser.Math.Distance.Between(e._routeGoal.x,e._routeGoal.y,target.x,target.y)>CELL*0.5;
+    e._combatRouteT=(e._combatRouteT||0)-dt;
+    if(!e._route||e._routeI>=e._route.length||goalMoved||e._combatRouteT<=0){
+      this.setRoute(e,this.makeRoute(e.x,e.y,target.x,target.y));
+      e._routeGoal={x:target.x,y:target.y};
+      e._combatRouteT=350
+    }
+    if(e._route&&e._routeI<e._route.length){
+      this.advanceEnemyRoute(e,speed);
+      return true
+    }
+    return this.nudgeEnemyTowardTarget(e,target,speed)
+  },
+  nudgeEnemyTowardTarget(e,target,speed){
+    const stop=this.enemyMeleeRange?this.enemyMeleeRange(e,target):sd(CLOSE_ATTACK_RANGE);
+    const dist=Phaser.Math.Distance.Between(e.x,e.y,target.x,target.y);
+    if(dist>stop+sd(140))return false;
+    const dx=target.x-e.x,dy=target.y-e.y;
+    this.moveEnemy(e,dx,dy,Math.max(45,speed||55));
+    if(dist>0.01)e.setRotation(Math.atan2(dy,dx)+Math.PI/2);
+    return true
+  },
   advanceEnemyRoute(e,speed){
     if(!e._route||e._routeI>=e._route.length)return;
     const wp=e._route[e._routeI],dx=wp[0]-e.x,dy=wp[1]-e.y,dist=Math.hypot(dx,dy);

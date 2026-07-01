@@ -1,5 +1,5 @@
 const EnemyCombatMethods={
-  handleEnemyDroneCombat(e,cfg,dt){
+  handleEnemyDroneCombat(e,cfg,dt,speed=sd(cfg.spd||0)){
     if(cfg.droneRange){
       if(this.enemyHasBlockerLock(e))return false;
       const target=this.chooseDroneInRange(e,sd(cfg.droneRange));
@@ -28,12 +28,10 @@ const EnemyCombatMethods={
       }
       return true
     }
-    if(!e._route||e._routeI>=e._route.length){
-      this.setRoute(e,this.makeRoute(e.x,e.y,droneTarget.x,droneTarget.y))
-    }
-    return false
+    this.advanceEnemyToTarget(e,droneTarget,speed,dt);
+    return true
   },
-  handleEnemyBlockerCombat(e,cfg,dt){
+  handleEnemyBlockerCombat(e,cfg,dt,speed=sd(cfg.spd||0)){
     const target=e._b1tgt&&e._b1tgt.active&&e._b1tgt._hp>0?e._b1tgt:null;
     if(!target)return false;
 
@@ -49,7 +47,10 @@ const EnemyCombatMethods={
       if(this.enemyAttackReady(e,dt))this.fireEnemyShell(e,target);
       return true
     }
-    if(dist>stop)return false;
+    if(dist>stop){
+      this.advanceEnemyToTarget(e,target,speed,dt);
+      return true
+    }
 
     this.stopEnemyAndFace(e,target);
     if(cfg.selfDestruct){
@@ -66,7 +67,7 @@ const EnemyCombatMethods={
       this.areaAttack(target,target._type.upg[target._lv||0],0x66ccff)
     }
   },
-  handleEnemyReactorCombat(e,cfg,dt){
+  handleEnemyReactorCombat(e,cfg,dt,speed=sd(cfg.spd||0)){
     let reactor=this.reactorAlive(e._reactorTarget)?e._reactorTarget:null;
     if(!reactor){
       this.routeToReactor(e,false);
@@ -97,9 +98,8 @@ const EnemyCombatMethods={
       if(this.enemyAttackReady(e,dt))this.enemyHitReactor(e,reactor);
       return true
     }
-    if(e._route&&e._routeI<e._route.length)return false;
-    this.routeToReactor(e,true);
-    return false
+    this.advanceEnemyToTarget(e,reactor,speed,dt);
+    return true
   },
   enemyHitReactor(e,reactor){
     this.applyFriendlyDamage({source:e,target:reactor,amount:e._dmg,kind:'melee'});

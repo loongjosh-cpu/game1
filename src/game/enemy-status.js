@@ -8,9 +8,9 @@ const EnemyStatusMethods={
     if(!this.updateEnemySpawnAndStatus(e,cfg,dt))return;
     this.updateEnemyTargetScan(e,cfg,dt);
     const speed=this.updateEnemySpeed(e,cfg,dt);
-    if(this.handleEnemyDroneCombat(e,cfg,dt))return;
-    if(this.handleEnemyBlockerCombat(e,cfg,dt))return;
-    if(this.handleEnemyReactorCombat(e,cfg,dt))return;
+    if(this.handleEnemyDroneCombat(e,cfg,dt,speed))return;
+    if(this.handleEnemyBlockerCombat(e,cfg,dt,speed))return;
+    if(this.handleEnemyReactorCombat(e,cfg,dt,speed))return;
     this.advanceEnemyRoute(e,speed)
   },
   updateEnemySpawnAndStatus(e,cfg,dt){
