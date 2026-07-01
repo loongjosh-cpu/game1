@@ -301,9 +301,9 @@ function testWaveRosterRules(ctx, issues) {
 function testFixedLevelWaves(ctx, issues) {
   const level1 = ctx.LEVELS.level1;
   assert(level1.waves.length === 10, 'original first five levels should keep 10 fixed waves', issues);
-  for (const id of ['level6', 'level7', 'level8', 'level9']) {
-    if (!ctx.LEVELS[id]) continue;
-    assert(ctx.LEVELS[id].waves.length === 15, `${id} imported level should use 15 waves`, issues);
+  for (const [id, level] of Object.entries(ctx.LEVELS)) {
+    const levelNo = Number(id.replace('level', ''));
+    if (levelNo > 5) assert(level.waves.length === 15, `${id} imported level should use 15 waves`, issues);
   }
 
   const scene = makeScene(ctx, { levelConfig: { waves: [{ lanes: [1, 0], roster: ['E2', 'E7', 'E1'] }] } });
@@ -323,6 +323,15 @@ function testFixedLevelWaves(ctx, issues) {
     assert(Math.max(...laneCounts) > laneCounts[0], `${id}: later waves should unlock additional spawn lanes`, issues);
     assert(laneCounts.every(count => count <= spawnCount), `${id}: active lane count should not exceed map spawn count`, issues);
   }
+}
+
+function testSlowEnemiesSpawnFirst(ctx, issues) {
+  const scene = makeScene(ctx, { levelConfig: { waves: [{ lanes: [0], roster: ['E7', 'E1', 'E6', 'E12', 'E5', 'E14'] }] } });
+  scene.startWave();
+  assert(scene._waveRoster.join(',') === 'E5,E6,E12,E14,E7,E1', 'slow enemies should be moved to the front of the current wave spawn order', issues);
+
+  const mixed = scene.orderWaveRoster(['E1', 'E12', 'E7', 'E6']);
+  assert(mixed.join(',') === 'E12,E6,E1,E7', 'orderWaveRoster should keep all slow enemies before faster escorts without changing counts', issues);
 }
 
 function testWaveCompletionAndRewards(ctx, issues) {
@@ -427,6 +436,7 @@ function main() {
   testSpawnScaling(ctx, issues);
   testWaveRosterRules(ctx, issues);
   testFixedLevelWaves(ctx, issues);
+  testSlowEnemiesSpawnFirst(ctx, issues);
   testWaveCompletionAndRewards(ctx, issues);
   testTimedWaveAdvance(ctx, issues);
   testEndlessLaneUnlock(ctx, issues);

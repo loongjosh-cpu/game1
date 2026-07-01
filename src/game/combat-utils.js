@@ -30,7 +30,9 @@ const CombatUtilMethods={
     if(damage<=0)return 0;
     damage=this.applyFriendlyDamageModifiers(source,target,damage,ctx);
     if(damage<=0)return 0;
+    const beforeShield=damage;
     damage=this.absorbFriendlyShield(target,damage);
+    if(damage<beforeShield)this.playFriendlyHitEffect(target,0x8fe8ff,true);
     if(damage<=0)return 0;
     return this.commitFriendlyDamage(target,damage)
   },
@@ -63,16 +65,39 @@ const CombatUtilMethods={
     if(target._overShield<=0)target._overShield=0;
     return damage-absorbed
   },
+  playFriendlyHitEffect(target,color=0xff6688,shield=false){
+    if(!target||!target.active)return;
+    const baseAlpha=Number.isFinite(target.alpha)?target.alpha:1;
+    if(target.setAlpha&&this.tweens?.add){
+      this.tweens.add({
+        targets:target,
+        alpha:shield?0.72:0.48,
+        duration:80,
+        yoyo:true,
+        onComplete:()=>{if(target.active&&target.setAlpha)target.setAlpha(baseAlpha)}
+      })
+    }
+    if(!this.add?.graphics||!this.tweens?.add)return;
+    const size=Math.max(28,target._size||target.displayWidth||target.width||36);
+    const r=size/2+(shield?14:9);
+    const g=this.add.graphics().setPosition(target.x,target.y).setDepth(18);
+    g.lineStyle(shield?4:3,color,shield?0.85:0.72);
+    g.strokeCircle(0,0,r);
+    g.fillStyle(color,shield?0.05:0.035);
+    g.fillCircle(0,0,r);
+    this.tweens.add({targets:g,alpha:0,scaleX:1.22,scaleY:1.22,duration:180,onComplete:()=>g.destroy()})
+  },
   commitFriendlyDamage(target,damage){
     if(target._owner){
+      this.playFriendlyHitEffect(target,0xff6688,false);
       target._hp-=damage;
       if(target._hp<=0)this.destroyDrone(target);
       return damage
     }
     if(target._isReactor){
+      this.playFriendlyHitEffect(target,0xff6688,false);
       target._hp=Math.max(0,target._hp-damage);
       if(target._isMainReactor)this.rxHP=target._hp;
-      this.tweens.add({targets:target,alpha:0.5,duration:100,yoyo:true});
       if(target._hp<=0){
         if(target._isMainReactor)this.gameOver();
         else this.destroyReactor(target)
@@ -80,14 +105,21 @@ const CombatUtilMethods={
       return damage
     }
     if(target._type&&(target._type.type==='block'||target._type.type==='drone')){
+      this.playFriendlyHitEffect(target,0xff6688,false);
       target._hp-=damage;
-      this.tweens.add({targets:target,alpha:0.5,duration:100,yoyo:true});
       if(target._hp<=0)this.destroyB1(target);
       return damage
     }
     return 0
   },
-  enemySplash(e,mainTarget,x,y,dmg,range,includeDrones=false,options={kind:'aoe',aoe:true}){this.flashArea(x,y,range,EC[e._type].color||0xff8844);this.blockers.children.iterate(t=>{if(t&&t.active&&t!==mainTarget&&Phaser.Math.Distance.Between(x,y,t.x,t.y)<=range)this.damageFriendly(t,dmg,e,options)});this.drones.children.iterate(t=>{if(t&&t.active&&t!==mainTarget&&Phaser.Math.Distance.Between(x,y,t.x,t.y)<=range)this.damageFriendly(t,dmg,e,options)});for(const r of this.reactors){if(r&&r.active&&r!==mainTarget&&Phaser.Math.Distance.Between(x,y,r.x,r.y)<=range)this.damageFriendly(r,dmg,e,options)}if(includeDrones)this.droneHelpers.children.iterate(d=>{if(d&&d.active&&d!==mainTarget&&Phaser.Math.Distance.Between(x,y,d.x,d.y)<=range)this.damageFriendly(d,dmg,e,options)})},
+  enemySplash(e,mainTarget,x,y,dmg,range,includeDrones=false,options={kind:'aoe',aoe:true}){
+    this.flashArea(x,y,range,EC[e._type].color||0xff8844);
+    this.blockers.children.iterate(t=>{if(t&&t.active&&t!==mainTarget&&Phaser.Math.Distance.Between(x,y,t.x,t.y)<=range)this.damageFriendly(t,dmg,e,options)});
+    this.drones.children.iterate(t=>{if(t&&t.active&&t!==mainTarget&&Phaser.Math.Distance.Between(x,y,t.x,t.y)<=range)this.damageFriendly(t,dmg,e,options)});
+    this.droneHelpers.children.iterate(d=>{if(d&&d.active&&d!==mainTarget&&Phaser.Math.Distance.Between(x,y,d.x,d.y)<=range)this.damageFriendly(d,dmg,e,options)});
+    for(const r of this.reactors){if(r&&r.active&&r!==mainTarget&&Phaser.Math.Distance.Between(x,y,r.x,r.y)<=range)this.damageFriendly(r,dmg,e,options)}
+    if(this.ship&&!this.shipDead&&this.ship.active!==false&&this.ship!==mainTarget&&Phaser.Math.Distance.Between(x,y,this.ship.x,this.ship.y)<=range)this.killShip()
+  },
   chooseDroneInRange(e,range){let best=null,bd=Infinity;this.droneHelpers.children.iterate(d=>{if(!d||!d.active||d._hp<=0)return;const dist=Phaser.Math.Distance.Between(e.x,e.y,d.x,d.y);if(dist<=range&&dist<bd){best=d;bd=dist}});return best},
   fireEnemyDart(e,tgt,speed,dmg){const p=this.add.image(e.x,e.y,'bolt').setDepth(8).setTint(EC[e._type].color||0x66d8ff).setScale(2.2),dist=Phaser.Math.Distance.Between(e.x,e.y,tgt.x,tgt.y),tx=tgt.x,ty=tgt.y;p.setRotation(Math.atan2(ty-e.y,tx-e.x));this.tweens.add({targets:p,x:tx,y:ty,duration:Math.max(80,dist/sd(speed||700)*1000),onComplete:()=>{p.destroy();if(!tgt.active)return;if(tgt._owner)this.damageDrone(tgt,dmg,e,{kind:'ranged',projectile:true});else this.damageFriendly(tgt,dmg,e,{kind:'ranged',projectile:true})}})},
   fireEnemyShell(e,tgt){const cfg=EC[e._type],p=this.add.image(e.x,e.y,'msl').setDepth(8).setTint(cfg.color||0xcc7744).setScale(1.5),tx=tgt.x,ty=tgt.y,dist=Phaser.Math.Distance.Between(e.x,e.y,tx,ty);p.setRotation(Math.atan2(ty-e.y,tx-e.x)+Math.PI/2);this.tweens.add({targets:p,x:tx,y:ty,duration:Math.max(120,dist/sd(cfg.shotSpeed||400)*1000),onComplete:()=>{p.destroy();if(tgt.active&&Phaser.Math.Distance.Between(tx,ty,tgt.x,tgt.y)<sd(60))this.damageFriendly(tgt,e._dmg,e,{kind:'ranged',projectile:true});this.enemySplash(e,tgt,tx,ty,e._dmg*(cfg.splashRatio||0.5),sd(cfg.splash||100),false,{kind:'aoe',aoe:true})}})},

@@ -89,7 +89,7 @@ const EnemyCombatMethods={
     const dist=Phaser.Math.Distance.Between(e.x,e.y,reactor.x,reactor.y);
     const stop=reactor._size/2+20;
     if(dist<stop){
-      this.moveEnemy(e,0,0,55);
+      this.stopEnemyAndFace(e,reactor);
       if(cfg.selfDestruct){
         this.enemySelfDestruct(e,reactor);
         return true

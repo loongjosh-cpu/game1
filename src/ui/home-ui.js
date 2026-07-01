@@ -111,6 +111,39 @@ function renderLoadoutGrids(){
   });
 }
 
+function renderLevelChapters(){
+  const grid=document.querySelector('[data-mode-group="level"]');
+  if(!grid||grid.dataset.chapterRendered==='1')return;
+  grid.dataset.chapterRendered='1';
+  grid.innerHTML='';
+  for(let start=0;start<LEVEL_UI_ORDER.length;start+=5){
+    const chapter=document.createElement('section');
+    chapter.className='levelChapter';
+    const chapterNo=Math.floor(start/5)+1;
+    const end=Math.min(start+5,LEVEL_UI_ORDER.length);
+    chapter.innerHTML=`<div class="levelChapterHead"><span>章节 ${chapterNo}</span><strong>关卡${String(start+1).padStart(2,'0')} - 关卡${String(end).padStart(2,'0')}</strong></div>`;
+    const list=document.createElement('div');
+    list.className='levelChapterGrid';
+    LEVEL_UI_ORDER.slice(start,end).forEach(id=>list.appendChild(createLevelModeCard(id)));
+    chapter.appendChild(list);
+    grid.appendChild(chapter);
+  }
+}
+
+function createLevelModeCard(id){
+  const level=LEVELS[id]||{};
+  const n=Number(id.replace('level',''))||levelIndex(id)+1;
+  const card=document.createElement('div');
+  card.className='modeCard';
+  if(id===selectedMode)card.classList.add('active');
+  card.dataset.mode=id;
+  const title=level.name||`关卡${String(n).padStart(2,'0')}`;
+  const summary=level.map?.summary||level.map?.notes?.[0]||level.summary||'固定关卡挑战。';
+  card.innerHTML=`<strong>${title}</strong><span class="modeDesc"></span><span class="modeMeta" data-level-state>未解锁</span>`;
+  card.querySelector('.modeDesc').textContent=summary;
+  return card;
+}
+
 function createTowerSelectCard(t,i){
   const card=document.createElement('div');
   card.className='twCard';
@@ -191,6 +224,7 @@ function initHomeUi(){
   bindHomePaneNavigation();
   bindViewSettingsUI();
   bindArchiveTabs();
+  renderLevelChapters();
   renderLoadoutGrids();
   bindModeCards();
 }

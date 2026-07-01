@@ -71,11 +71,12 @@ function addedImportedLevel(id,waveSeed=id){
 }
 
 const LEVELS={};
-const IMPORTED_LEVEL_WAVE_SEEDS={level6:'level5',level7:'level5',level8:'level5',level9:'level5'};
 
 for(const id of LEVEL_UI_ORDER){
-  const level=addedImportedLevel(id,IMPORTED_LEVEL_WAVE_SEEDS[id]||id);
-  if(level&&IMPORTED_LEVEL_WAVE_SEEDS[id])level.waves=normalizeLevelWaveLanes(addedLevelWaves(IMPORTED_LEVEL_WAVE_SEEDS[id]),level.map);
+  const n=Number(id.replace('level',''));
+  const added=n>5;
+  const level=addedImportedLevel(id,added?'level5':id);
+  if(level&&added)level.waves=normalizeLevelWaveLanes(addedLevelWaves('level5'),level.map);
   if(level)LEVELS[id]=level;
 }
 

@@ -189,6 +189,8 @@ function makeScene(ctx, options = {}) {
     droneHelpers: group(droneHelpers),
     reactors,
     enemies: group(enemies),
+    ship: options.ship || null,
+    shipDead: false,
     enemySeq: 100,
     rxHP: reactors.find(r => r._isMainReactor)?._hp || 0,
     completedWaves: 0,
@@ -239,6 +241,7 @@ function makeScene(ctx, options = {}) {
     updTwPanel() {},
     cancelChannel() {},
     gameOver() { this.ended = true; },
+    killShip() { this.shipDead = true; if (this.ship) this.ship.active = false; },
     destroyB1(target) { target.destroy(); },
     destroyReactor(target) { target.destroy(); },
     destroyDrone(target) { target.destroy(); },
@@ -386,15 +389,23 @@ function testE12RangedShell(ctx, issues) {
   const main = makeBlocker(ctx, 'B1', 300, 0);
   const nearby = makeBlocker(ctx, 'B3', 340, 0);
   const far = makeBlocker(ctx, 'B3', 520, 0);
+  const core = makeDroneCore(ctx, 'D1', 340, 20);
+  const helper = makeDroneHelper(core, 330, 0, 30);
+  const ship = makeSprite(345, 0);
   const enemy = makeEnemy(ctx, 'E12', 0, 0);
   enemy._b1tgt = main;
-  const scene = makeScene(ctx, { blockers: [main, nearby, far], enemies: [enemy] });
+  const scene = makeScene(ctx, { blockers: [main, nearby, far], drones: [core], droneHelpers: [helper], enemies: [enemy], ship });
   const mainBefore = main._hp;
   const nearbyBefore = nearby._hp;
+  const coreBefore = core._hp;
+  const helperBefore = helper._hp;
   const farBefore = far._hp;
   scene.handleEnemyBlockerCombat(enemy, ctx.EC.E12, 650);
   assert(main._hp < mainBefore, 'E12 shell should damage the primary target when it lands near the target', issues);
   assert(nearby._hp < nearbyBefore, 'E12 shell splash should damage nearby blockers', issues);
+  assert(core._hp < coreBefore, 'E12 shell splash should damage nearby drone cores', issues);
+  assert(helper._hp < helperBefore, 'E12 shell splash should damage nearby drone helpers', issues);
+  assert(scene.shipDead === true, 'E12 shell splash should kill the player ship when it is inside the blast radius', issues);
   assert(far._hp === farBefore, 'E12 shell splash should not damage out-of-range blockers', issues);
 }
 
@@ -467,6 +478,37 @@ function testFirstAttackDelay(ctx, issues) {
   assert(blocker._hp < before, 'enemy should attack exactly after reaching the unified 0.65s first-attack delay', issues);
 }
 
+function testCombatHoldDoesNotUseSeparationMove(issues) {
+  const source = read('src/game/enemy-navigation.js');
+  assert(/stopEnemyAndFace\(e,target\)\s*\{[\s\S]*?setVelocity\(0,0\)/.test(source), 'combat hold should directly zero enemy velocity', issues);
+  assert(!/stopEnemyAndFace\(e,target\)\s*\{[\s\S]*?moveEnemy\(e,0,0,55\)/.test(source), 'combat hold should not call moveEnemy because separation can push melee enemies out of attack range', issues);
+}
+
+function testFriendlyHitFeedback(ctx, issues) {
+  const blocker = makeBlocker(ctx, 'B1', 0, 0);
+  const enemy = makeEnemy(ctx, 'E1', 40, 0);
+  const scene = makeScene(ctx, { blockers: [blocker], enemies: [enemy] });
+  let fx = 0;
+  scene.playFriendlyHitEffect = () => { fx++; };
+  const before = blocker._hp;
+  scene.enemyHitBlocker(enemy, blocker);
+  assert(blocker._hp < before, 'normal enemy hit should still reduce blocker HP', issues);
+  assert(fx >= 1, 'normal enemy hit should trigger friendly hit feedback', issues);
+}
+
+function testShieldAbsorbFeedback(ctx, issues) {
+  const blocker = makeBlocker(ctx, 'B1', 0, 0, 0, { _overShield: 100 });
+  const enemy = makeEnemy(ctx, 'E1', 40, 0);
+  const scene = makeScene(ctx, { blockers: [blocker], enemies: [enemy] });
+  let fx = 0;
+  scene.playFriendlyHitEffect = () => { fx++; };
+  const beforeHp = blocker._hp;
+  const dealt = scene.applyFriendlyDamage({ source: enemy, target: blocker, amount: 10, kind: 'melee' });
+  assert(dealt === 0, 'full shield absorb should report zero HP damage', issues);
+  assert(blocker._hp === beforeHp, 'full shield absorb should not reduce blocker HP', issues);
+  assert(fx === 1, 'full shield absorb should still trigger friendly hit feedback', issues);
+}
+
 function main() {
   const issues = [];
   const ctx = loadContext();
@@ -484,13 +526,16 @@ function main() {
   testDroneMeleeAggroDamage(ctx, issues);
   testSpawnAndAuraSpecials(ctx, issues);
   testFirstAttackDelay(ctx, issues);
+  testCombatHoldDoesNotUseSeparationMove(issues);
+  testFriendlyHitFeedback(ctx, issues);
+  testShieldAbsorbFeedback(ctx, issues);
 
   if (issues.length) {
     console.error(`enemy combat verification failed (${issues.length} issues):`);
     for (const issue of issues) console.error(`- ${issue}`);
     process.exit(1);
   }
-  console.log('enemy combat ok: E1-E14 attacks, damage, ranged hits, self-destruct, split, summon, leech, aura and first-hit timing verified');
+  console.log('enemy combat ok: E1-E14 attacks, damage, ranged hits, combat hold, hit feedback, self-destruct, split, summon, leech, aura and first-hit timing verified');
 }
 
 main();

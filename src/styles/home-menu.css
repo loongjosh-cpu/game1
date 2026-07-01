@@ -66,3 +66,9 @@
 .homeStack{display:flex;flex-direction:column;gap:12px}
 .startDock{border-color:#315878;background:linear-gradient(180deg,#10243add,#081521dd)}
 .startDock .sub{margin:0 0 8px!important;line-height:1.5}
+.levelChapter{grid-column:1/-1;border:1px solid #1d3549;border-radius:10px;background:#0b1724aa;padding:10px}
+.levelChapterHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;border-bottom:1px solid #1d3549;padding-bottom:7px}
+.levelChapterHead span{color:#7ec8e3;font-size:12px}
+.levelChapterHead strong{color:#dff7ff;font-size:12px;font-weight:400}
+.levelChapterGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:9px}
+.modeCard .modeDesc{display:block;min-height:44px;color:#9aa8b4;font-size:10px;line-height:1.45;padding-right:4px}

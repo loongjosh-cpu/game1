@@ -189,7 +189,8 @@ function testEndlessWaveStress(data) {
 
 function testFixedWaves(data) {
   Object.entries(data.LEVELS).forEach(([id, level]) => {
-    const expected = ['level6', 'level7', 'level8', 'level9'].includes(id) ? 15 : 10;
+    const levelNo = Number(id.replace('level', ''));
+    const expected = levelNo > 5 ? 15 : 10;
     assert(level.waves.length === expected, `${id}: expected ${expected} fixed waves, got ${level.waves.length}`);
     const laneCount = level.map.spawns.length;
     level.waves.forEach((wave, index) => {
