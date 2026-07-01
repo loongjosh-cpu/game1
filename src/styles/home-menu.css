@@ -72,10 +72,6 @@
 .homeStagePanel::-webkit-scrollbar-thumb{background:#315878;border-radius:999px}
 .homeLoadoutPanel{display:flex;flex-direction:column}
 .homeLoadoutPanel .towerGrid{max-width:none;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));align-content:start;padding-right:4px}
-.modeFlowActions{position:sticky;bottom:0;margin-top:14px;padding-top:12px;border-top:1px solid #1d3549;background:linear-gradient(180deg,#10203300,#102033 24%)}
-.modeFlowActions{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.modeFlowHint{color:#8fa5b5;font-size:12px;line-height:1.5}
-.modeNextBtn{min-width:136px}
 .flowBackBtn{flex:0 0 auto}
 .selectedModeBanner{border:1px solid #315878;border-radius:10px;background:#0d1826;color:#8fa5b5;padding:10px 12px;margin-bottom:12px;font-size:12px}
 .selectedModeBanner strong{color:#dff7ff;font-weight:400}

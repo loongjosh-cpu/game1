@@ -419,9 +419,10 @@ function testStaticUiGuards() {
   const pageFlow = read('src/ui/page-flow.js');
   const homeUi = read('src/ui/home-ui.js');
   const homeMenuCss = read('src/styles/home-menu.css');
-  ['prepareModeFlowPanes', 'setHomeFlowStage', 'data-flow-next', '重新选择地图'].forEach(snippet => {
+  ['prepareModeFlowPanes', 'setHomeFlowStage', 'selectModeCard', '重新选择地图'].forEach(snippet => {
     assert(homeUi.includes(snippet), `home mode flow should keep separated map/loadout stage hook: ${snippet}`);
   });
+  assert(!homeUi.includes('data-flow-next'), 'mode selection should enter loadout by clicking a map card, without an extra choose-loadout button');
   ['[data-flow-step="loadout"]', '[data-flow-step="mode"]', '.homeStagePanel', '.homeLoadoutPanel'].forEach(snippet => {
     assert(homeMenuCss.includes(snippet), `home mode flow styles should keep separated and size-stable panels: ${snippet}`);
   });

@@ -57,11 +57,6 @@ function prepareModeFlowPane(paneId){
   if(modeSection){
     modeSection.dataset.flowStep='mode';
     modeSection.classList.add('homeStagePanel');
-    const actions=document.createElement('div');
-    actions.className='modeFlowActions';
-    actions.innerHTML='<span class="modeFlowHint">选择作战地图后进入塔组整备。</span><button type="button" class="menuBtn modeNextBtn" data-flow-next>选择塔组</button>';
-    modeSection.appendChild(actions);
-    actions.querySelector('[data-flow-next]')?.addEventListener('click',()=>setHomeFlowStage(paneId,'loadout'));
   }
   if(loadoutSection){
     loadoutSection.dataset.flowStep='loadout';
@@ -149,10 +144,6 @@ function refreshStartButton(){
   document.querySelectorAll('.btnStartMode').forEach(btn=>{
     btn.disabled=selectedTowers.length===0||locked;
     btn.textContent=locked?'关卡未解锁':startButtonText(label);
-  });
-  document.querySelectorAll('[data-flow-next]').forEach(btn=>{
-    btn.disabled=locked;
-    btn.textContent=locked?'关卡未解锁':'选择塔组';
   });
   document.querySelectorAll('[data-flow-selected-title]').forEach(el=>{el.textContent=label});
   setTextAll('.modeHint',locked?'该关卡尚未解锁，请先通关上一关。':'选择'+label+'出击塔（最多10个）');
