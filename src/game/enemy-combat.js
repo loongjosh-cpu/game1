@@ -16,7 +16,7 @@ const EnemyCombatMethods={
     const droneTarget=this.getEnemyDroneTarget(e);
     if(!droneTarget)return false;
     const dist=Phaser.Math.Distance.Between(e.x,e.y,droneTarget.x,droneTarget.y);
-    if(dist<=sd(CLOSE_ATTACK_RANGE)){
+    if(dist<=this.enemyMeleeRange(e,droneTarget)){
       this.stopEnemyAndFace(e,droneTarget);
       if(cfg.selfDestruct){
         this.enemySelfDestruct(e,droneTarget);
@@ -37,7 +37,7 @@ const EnemyCombatMethods={
     const target=e._b1tgt&&e._b1tgt.active&&e._b1tgt._hp>0?e._b1tgt:null;
     if(!target)return false;
 
-    const stop=Math.max(sd(CLOSE_ATTACK_RANGE),24+(target._type.tSize||45)/2);
+    const stop=this.enemyMeleeRange(e,target);
     const dist=Phaser.Math.Distance.Between(e.x,e.y,target.x,target.y);
     if(cfg.droneRange&&dist<=sd(cfg.droneRange)){
       this.stopEnemyAndFace(e,target);
@@ -87,7 +87,7 @@ const EnemyCombatMethods={
       return true
     }
     const dist=Phaser.Math.Distance.Between(e.x,e.y,reactor.x,reactor.y);
-    const stop=reactor._size/2+20;
+    const stop=this.enemyMeleeRange(e,reactor);
     if(dist<stop){
       this.stopEnemyAndFace(e,reactor);
       if(cfg.selfDestruct){

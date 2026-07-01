@@ -9,6 +9,16 @@ const CombatUtilMethods={
   flashPoisonAura(x,y,r,targets){const g=this.add.graphics().setPosition(x,y).setDepth(16).setScale(0.88);g.fillStyle(0x8c3ec4,0.1);g.fillCircle(0,0,r);g.lineStyle(5,0xc96cff,0.78);g.strokeCircle(0,0,r);g.lineStyle(2,0x83ff9b,0.42);g.strokeCircle(0,0,r*0.68);g.strokeCircle(0,0,r*0.35);for(let i=0;i<12;i++){const a=Math.PI*2*i/12+0.2,rr=r*(0.18+(i%4)*0.17);g.fillStyle(i%2?0xb45cff:0x63e88c,0.34);g.fillCircle(Math.cos(a)*rr,Math.sin(a)*rr,5+(i%3)*2)}targets.forEach(e=>{const dx=e.x-x,dy=e.y-y;g.lineStyle(2,0xa852d4,0.45);g.lineBetween(0,0,dx,dy);g.fillStyle(0x91ff9f,0.3);g.fillCircle(dx,dy,18);g.lineStyle(3,0xd57aff,0.85);g.strokeCircle(dx,dy,14)});this.tweens.add({targets:g,alpha:0,scaleX:1.04,scaleY:1.04,duration:420,ease:'Quad.easeOut',onComplete:()=>g.destroy()})},
   createResidual(x,y){const radius=sd(150),g=this.add.graphics().setDepth(5);g.fillStyle(0x66ccff,0.08);g.fillCircle(x,y,radius);g.lineStyle(2,0x88ddff,0.35);g.strokeCircle(x,y,radius);let ticks=0;this.time.addEvent({delay:300,repeat:4,callback:()=>{ticks++;this.findTargets(x,y,radius).forEach(e=>this.damageEnemy(e,1));g.setAlpha(0.5+0.15*(ticks%2));if(ticks>=5)g.destroy()}})},
   areaAttack(tw,up,color){const range=sd(up.r||tw._type.range),tgts=this.findTargets(tw.x,tw.y,range);this.flashArea(tw.x,tw.y,range,color);tgts.forEach(e=>this.damageEnemy(e,up.d||0))},
+  combatRadiusOf(target,fallback=32){
+    if(!target)return fallback;
+    const size=target._size||target.displayWidth||target.width||fallback*2;
+    return Math.max(fallback,Number(size)/2||fallback)
+  },
+  enemyMeleeRange(e,target,base=CLOSE_ATTACK_RANGE){
+    const enemyRadius=e?.body?.radius||16;
+    const targetRadius=this.combatRadiusOf(target,24);
+    return Math.max(sd(base),enemyRadius+targetRadius+sd(18))
+  },
   enemyAttackReady(e,dt){e._at=(e._at||0)+dt;const delay=e._firstAttack?650:e._atk;if(e._at<delay)return false;e._at=0;e._firstAttack=false;return true},
   enemyAttackEffect(e,mainTarget=null){const cfg=EC[e._type];if(cfg.leechPct)e._hp=Math.min(e._maxhp,e._hp+e._maxhp*cfg.leechPct);else if(cfg.leech)e._hp=Math.min(e._maxhp,e._hp+cfg.leech);if(cfg.summonEvery&&++e._hits%cfg.summonEvery===0)this.spawnAt('E4',e.x+30,e.y,e._si,true,e._waveNo);if(cfg.meleeSplash)this.enemySplash(e,mainTarget,e.x,e.y,e._dmg*cfg.meleeSplash,sd(cfg.meleeSplashRange||50),true,{kind:'aoe',aoe:true})},
   enemySelfDestruct(e,mainTarget=null){

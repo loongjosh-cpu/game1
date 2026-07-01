@@ -478,6 +478,28 @@ function testFirstAttackDelay(ctx, issues) {
   assert(blocker._hp < before, 'enemy should attack exactly after reaching the unified 0.65s first-attack delay', issues);
 }
 
+function testMeleeUsesCollisionAwareRange(ctx, issues) {
+  const largeBlocker = makeBlocker(ctx, 'B1', 0, 0, 0, { _size: 88 });
+  const enemy = makeEnemy(ctx, 'E1', 74, 0);
+  enemy.body.radius = 16;
+  enemy._b1tgt = largeBlocker;
+  const scene = makeScene(ctx, { blockers: [largeBlocker], enemies: [enemy] });
+  const before = largeBlocker._hp;
+  const handled = scene.handleEnemyBlockerCombat(enemy, ctx.EC.E1, 650);
+  assert(handled === true, 'melee combat should be handled when sprite edges are in contact even if center distance exceeds old 60px range', issues);
+  assert(largeBlocker._hp < before, 'collision-aware melee range should deal damage at visual contact distance', issues);
+
+  const reactor = makeReactor(0, 0, 120, { _isMainReactor: true, _size: 120 });
+  const reactorEnemy = makeEnemy(ctx, 'E1', 90, 0);
+  reactorEnemy.body.radius = 16;
+  reactorEnemy._reactorTarget = reactor;
+  const reactorScene = makeScene(ctx, { reactors: [reactor], enemies: [reactorEnemy] });
+  const reactorBefore = reactor._hp;
+  const reactorHandled = reactorScene.handleEnemyReactorCombat(reactorEnemy, ctx.EC.E1, 650);
+  assert(reactorHandled === true, 'reactor melee should also use collision-aware contact range', issues);
+  assert(reactor._hp < reactorBefore, 'reactor should take damage at visual contact distance', issues);
+}
+
 function testCombatHoldDoesNotUseSeparationMove(issues) {
   const source = read('src/game/enemy-navigation.js');
   assert(/stopEnemyAndFace\(e,target\)\s*\{[\s\S]*?setVelocity\(0,0\)/.test(source), 'combat hold should directly zero enemy velocity', issues);
@@ -526,6 +548,7 @@ function main() {
   testDroneMeleeAggroDamage(ctx, issues);
   testSpawnAndAuraSpecials(ctx, issues);
   testFirstAttackDelay(ctx, issues);
+  testMeleeUsesCollisionAwareRange(ctx, issues);
   testCombatHoldDoesNotUseSeparationMove(issues);
   testFriendlyHitFeedback(ctx, issues);
   testShieldAbsorbFeedback(ctx, issues);
